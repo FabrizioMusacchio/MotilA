@@ -490,6 +490,8 @@ If you use this software in your research, we kindly ask you to cite it using th
 }
 ```
 
+**Note**: We are currently in the process of retrieving a DOI for this project. As soon as the DOI becomes available, we will update the citation reference accordingly.  *(Status: March 21, 2025)*
+
 ## Acknowledgments
 We gratefully acknowledge the **Light Microscopy Facility (LMF)** and the **Animal Research Facility (ARF)** at the **German Center for Neurodegenerative Diseases (DZNE)** for their essential support in acquiring the in vivo imaging data upon which this pipeline is built.
 
@@ -503,5 +505,3 @@ Fabrizio Musacchio
 German Center for Neurodegenerative Diseases (DZNE)  
 Email: [fabrizio.musacchio@dzne.de](mailto:fabrizio.musacchio@dzne.de)
 GitHub: @[FabrizioMusacchio](https://github.com/FabrizioMusacchio)
-
-**Note**: We are currently in the process of retrieving a DOI for this project. As soon as the DOI becomes available, we will update the citation reference accordingly.  *(Status: March 21, 2025)*
