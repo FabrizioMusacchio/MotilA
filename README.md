@@ -80,8 +80,8 @@ sys.path.append('motila/')
 import motila as mt
 from pathlib import Path
 
-tif_file = Path("path/to/your/image_stack.tif")
-corrected_tif_file = mt.tiff_axes_check_and_correct(tif_file)
+tif_file_path = Path("path/to/your/image_stack.tif")
+corrected_tif_file_path = mt.tiff_axes_check_and_correct(tif_file)
 ```
 
 The output `corrected_tif_file` is the path to the corrected TIFF file, which is automatically saved in the same directory as the original file.
