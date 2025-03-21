@@ -478,7 +478,7 @@ If you use this software in your research, we kindly ask you to cite it using th
 
 ```
 @software{musacchio2025motila,
-  author       = {Fabrizio Musacchio and Sophie Crux and Felix Nebeling and Martin Fuhrmann},
+  author       = {Fabrizio Musacchio and Sophie Crux and Felix Nebeling and Nala Gockel and Martin Fuhrmann},
   title        = {MotilA: A pipeline for microglial fine process motility analysis},
   year         = {2025},
   url          = {https://github.com/FabrizioMusacchio/motila},
@@ -501,4 +501,5 @@ German Center for Neurodegenerative Diseases (DZNE)
 Email: [fabrizio.musacchio@dzne.de](mailto:fabrizio.musacchio@dzne.de)
 GitHub: @[FabrizioMusacchio](https://github.com/FabrizioMusacchio)
 
-
+**Note**: We are currently in the process of retrieving a DOI for this project. As soon as the DOI becomes available, we will update the citation reference accordingly.  
+*(Status: March 21, 2025)*
