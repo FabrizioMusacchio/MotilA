@@ -30,6 +30,36 @@ $$
 This turnover ratio represents the fraction of pixels undergoing change, providing a quantitative measure of microglial fine process motility.
 
 
+## Installation
+To use *MotilA*, first download the repository to your local machine. You can do this by cloning the repository using Git or simply downloading the ZIP file from the GitHub page. 
+
+Then, you need to install the required Python packages. To do so, create and activate a conda environment as follows:
+
+```sh
+conda create -n motila python=3.12 mamba -y
+conda activate motila
+mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffile zarr numcodecs openpyxl xlrd ipywidgets ipykernel ipympl
+```
+
+We have tested *MotilA* for Python 3.9 and higher. If you encounter any issues, please let us know.
+
+## Example data set and tutorials
+To help you get started with *MotilA*, we provide an example dataset and tutorials to guide you through the pipeline steps. The example dataset includes a sample image stack and metadata file for testing the pipeline. Please download the example dataset from [Zenodo](https://zenodo.org/records/15061566) (Gockel &  Nieves-Rivera, 2025, doi: 10.5281/zenodo.15061566) and place it in the `[example project](example project/)` directory.
+
+The tutorials cover the core pipeline steps, from loading and preprocessing image data to analyzing microglial motility and visualizing the results. A second tutorial demonstrates batch processing for analyzing multiple datasets in a structured project folder.
+
+Jupyter notebooks:
+
+* [single_file_run.ipynb](example notebooks/single_file_run.ipynb)
+* [batch_run.ipynb](example notebooks/batch_run.ipynb)
+
+Python scripts:
+
+* [single_file_run.py](example scripts/single_file_run.py)
+* [batch_run.py](example scripts/batch_run.py)
+
+
+
 ## Data prerequisites  
 Before using *MotilA*, ensure that your imaging data meets the following requirements:  
 
@@ -97,33 +127,6 @@ The three main processing functions in *MotilA* are:
 * **`process_stack`**: Processes a single image stack, performing all core pipeline steps from image loading to motility analysis.
 * **`batch_process_stacks`**: Automates the processing of multiple image stacks within a project folder, applying the core pipeline steps to each dataset.
 * **`batch_collect`**: Collects motility metrics from multiple datasets, aggregating the results for cohort-level analysis and visualization.
-
-
-## Installation
-To use *MotilA*, you need to install the required Python packages. To do so, create and activate a conda environment as follows:
-
-```sh
-conda create -n motila python=3.12 mamba -y
-conda activate motila
-mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffile zarr numcodecs openpyxl xlrd ipywidgets ipykernel ipympl
-```
-
-We have tested *MotilA* for Python 3.9 and higher. If you encounter any issues, please let us know.
-
-## Example data set and tutorials
-To help you get started with *MotilA*, we provide an example dataset and tutorials to guide you through the pipeline steps. The example dataset includes a sample image stack and metadata file for testing the pipeline. Please download the example dataset from [Zenodo](https://zenodo.org/records/15061566) (Gockel &  Nieves-Rivera, 2025, doi: 10.5281/zenodo.15061566) and place it in the `[example project](example project/)` directory.
-
-The tutorials cover the core pipeline steps, from loading and preprocessing image data to analyzing microglial motility and visualizing the results. A second tutorial demonstrates batch processing for analyzing multiple datasets in a structured project folder.
-
-Jupyter notebooks:
-
-* [single_file_run.ipynb](example notebooks/single_file_run.ipynb)
-* [batch_run.ipynb](example notebooks/batch_run.ipynb)
-
-Python scripts:
-
-* [single_file_run.py](example scripts/single_file_run.py)
-* [batch_run.py](example scripts/batch_run.py)
 
 
 ## Parameters overview
