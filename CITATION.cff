@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use MotilA in your research, please cite it as below."
+title: "MotilA: A pipeline for microglial fine process motility analysis"
+version: 1.0.0
+date-released: 2025-03-22
+authors:
+  - family-names: Musacchio
+    given-names: Fabrizio
+    orcid: https://orcid.org/0000-0002-9043-3349
+  - family-names: Crux
+    given-names: Sophie
+  - family-names: Nebeling
+    given-names: Felix
+  - family-names: Gockel
+    given-names: Nala
+  - family-names: Fuhrmann
+    given-names: Martin
+    orcid: https://orcid.org/0000-0001-7672-2913
+repository-code: https://github.com/FabrizioMusacchio/MotilA/tree/main
+license: GPL-3.0
+keywords:
+  - image analysis
+  - microglia
+  - motility
+  - two-photon imaging
+  - neuroscience
+  - Python
+  - Python pipeline
+  - image segmentation
+  - image processing
+  - image registration
+  - image analysis pipeline
