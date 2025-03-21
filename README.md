@@ -44,19 +44,19 @@ mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffil
 We have tested *MotilA* for Python 3.9 and higher. If you encounter any issues, please let us know.
 
 ## Example data set and tutorials
-To help you get started with *MotilA*, we provide an example dataset and tutorials to guide you through the pipeline steps. The example dataset includes a sample image stack and metadata file for testing the pipeline. Please download the example dataset from [Zenodo](https://zenodo.org/records/15061566) (Gockel &  Nieves-Rivera, 2025, doi: 10.5281/zenodo.15061566) and place it in the `[example project](example project/)` directory.
+To help you get started with *MotilA*, we provide an example dataset and tutorials to guide you through the pipeline steps. The example dataset includes a sample image stack and metadata file for testing the pipeline. Please download the example dataset from [Zenodo](https://zenodo.org/records/15061566) (Gockel &  Nieves-Rivera, 2025, doi: 10.5281/zenodo.15061566) and place it in the [`example project`](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20project) directory.
 
 The tutorials cover the core pipeline steps, from loading and preprocessing image data to analyzing microglial motility and visualizing the results. A second tutorial demonstrates batch processing for analyzing multiple datasets in a structured project folder.
 
-Jupyter notebooks:
+[Jupyter notebooks](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20notebooks):
 
-* [single_file_run.ipynb](example notebooks/single_file_run.ipynb)
-* [batch_run.ipynb](example notebooks/batch_run.ipynb)
+* [single_file_run.ipynb](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20notebooks/single_file_run.ipynb)
+* [batch_run.ipynb](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20notebooks/batch_run.ipynb)
 
-Python scripts:
+[Python scripts](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20scripts):
 
-* [single_file_run.py](example scripts/single_file_run.py)
-* [batch_run.py](example scripts/batch_run.py)
+* [single_file_run.py](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20scripts/single_file_run.py)
+* [batch_run.py](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20scripts/batch_run.py)
 
 
 
