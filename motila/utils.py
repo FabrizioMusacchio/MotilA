@@ -50,13 +50,23 @@ from pathlib import Path
 
 def check_folder_exist_create(path, verbose=True):
     """
-        @param path: file path to folder to check
-        @type path: string
-        @return: nothinh
-        @rtype:
-        Description: checks, if folder at @path exists; if not, create that folder
+    Check whether a folder exists at the specified path, and create it if it does not.
 
-        Usage: check_folder_exist_create(path)
+    Parameters:
+    -----------
+    path : str or Path
+        The directory path to check or create.
+    verbose : bool, optional (default=True)
+        If True, prints a message indicating whether the folder was created or already exists.
+
+    Returns:
+    --------
+    None
+
+    Notes:
+    ------
+    - Ensures the specified folder is available before performing file operations.
+    - Useful for logging, output saving, or checkpointing during pipeline execution.
     """
     if not os.path.exists(path):
         os.makedirs(path)
@@ -67,6 +77,22 @@ def check_folder_exist_create(path, verbose=True):
             print(f"    folder already exists: {path} ")
 
 def getfile():
+    """
+    Retrieve the name of the currently executing script or fallback to "console" if run interactively.
+
+    This function returns the filename of the main Python script. If executed in an interactive
+    environment (e.g., IPython or Jupyter Notebook), it returns the string "console".
+
+    Returns:
+    --------
+    str
+        The filename of the main executing script or "console" if run interactively.
+
+    Notes:
+    ------
+    - Useful for dynamically naming log files or output paths based on the script being executed.
+    - Handles edge cases where the script is executed from a shell, notebook, or other environments.
+    """
     try:
         sys.modules['__main__'].__file__
         if sys.modules['__main__'].__file__ == "<input>":
@@ -76,7 +102,6 @@ def getfile():
     except:
         file_name = "console"
 
-    #return os.path.basename(os.path.abspath(sys.modules['__main__'].__file__))
     return file_name
 
 def filterfolder_by_string(path_to_folder, search_string):
@@ -248,14 +273,56 @@ class logger_object:
 
 # %% RAM USAGE FUNCTIONS
 def print_ram_usage_in_loop(indent=0):
-    """ Print the current RAM usage in a loop. """
+    """
+    Print the current RAM usage continuously in a loop-friendly format.
+
+    This function is designed to be called repeatedly within a loop to monitor
+    real-time memory usage. It updates the same console line without adding newlines,
+    making it suitable for progress monitoring in iterative processes.
+
+    Parameters:
+    -----------
+    indent : int, optional (default=0)
+        Number of spaces to prepend to the output for indentation.
+
+    Returns:
+    --------
+    None
+        The function outputs the current RAM usage to the console and does not return any value.
+
+    Notes:
+    ------
+    - RAM usage is measured for the current process.
+    - Output is formatted in megabytes (MB) with two decimal places.
+    """
     process = psutil.Process(os.getpid())
     ram_usage_MB = process.memory_info().rss / 1024 ** 2
     sys.stdout.write(f"\r{' ' * indent}Current RAM usage: {ram_usage_MB:.2f} MB")
     sys.stdout.flush()  # Ensures the line is updated without newlines
 
 def print_ram_usage(indent=0):
-    """ Print the current RAM usage. """
+    """
+    Print the current RAM usage of the process.
+
+    This function prints the resident memory usage (RAM) of the current Python process,
+    formatted in megabytes (MB). It is useful for tracking memory consumption at 
+    specific checkpoints in a script.
+
+    Parameters:
+    -----------
+    indent : int, optional (default=0)
+        Number of spaces to prepend to the output line for indentation.
+
+    Returns:
+    --------
+    None
+        The function prints the RAM usage to the console and does not return any value.
+
+    Notes:
+    ------
+    - RAM usage is measured using the `psutil` library.
+    - Output is displayed in MB with two decimal places.
+    """
     process = psutil.Process(os.getpid())
     ram_usage_MB = process.memory_info().rss / 1024 ** 2
     print(f"{' ' * indent}Current RAM usage: {ram_usage_MB:.2f} MB")
@@ -263,15 +330,34 @@ def print_ram_usage(indent=0):
 # %% TIFF FILE FUNCTIONS
 def tiff_axes_check_and_correct(fname):
     """
-    Load a TIFF file, check its axis order, and rearrange it to match TZCYX or TZYX.
-    Only saves a corrected version if rearrangement was necessary.
-    
-    use it as:   fname = tiff_axes_check_and_correct(fname)
-    in the main script
-    
-    :param fname: Path to the TIFF file
-    :return: Corrected TIFF file path (or original if no correction needed)
-    :raises ValueError: If required axes (T, Z, X, Y) are missing
+    Check and correct the axis order of a TIFF file to match TZCYX or TZYX.
+
+    This function loads a TIFF file, checks its axis labels (as recorded in ImageJ metadata),
+    and reorders the array to conform to standard axis conventions (TZCYX for 5D, TZYX for 4D).
+    If the axes are already correct, the original file path is returned. If correction is needed,
+    a new TIFF file is saved with the corrected axis order and updated metadata.
+
+    Parameters:
+    -----------
+    fname : str or Path
+        Path to the input TIFF file.
+
+    Returns:
+    --------
+    Path
+        Path to the corrected TIFF file (or the original if no correction was necessary).
+
+    Raises:
+    -------
+    ValueError
+        If the TIFF file does not contain the required axes (T, Z, Y, X).
+
+    Notes:
+    ------
+    - Expected axis order is either TZYX (for single-channel) or TZCYX (for multi-channel).
+    - The corrected TIFF is saved in the same folder as the original, prefixed with "axes_corrected_".
+    - ImageJ metadata and spatial resolution information are preserved in the output file.
+    - This is especially useful when handling TIFFs generated by software that may reorder axes.
     """
     with tifffile.TiffFile(fname) as tif:
         volume = tif.asarray()
