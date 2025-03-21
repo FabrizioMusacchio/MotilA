@@ -44,7 +44,9 @@ mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffil
 We have tested *MotilA* for Python 3.9 and higher as well as on Windows, macOS, and Linux systems. The pipeline should work on all these platforms without any issues. If you encounter any issues, please let us know.
 
 ## Example data set and tutorials
-To help you get started with *MotilA*, we provide an example dataset and tutorials to guide you through the pipeline steps. The example dataset includes a sample image stack and metadata file for testing the pipeline. Please download the example dataset from [Zenodo](https://zenodo.org/records/15061566) (Gockel &  Nieves-Rivera, 2025, doi: 10.5281/zenodo.15061566) and place it in the [`example project`](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20project) directory.
+To help you get started with *MotilA*, we provide an example dataset and tutorials to guide you through the pipeline steps. 
+
+The example dataset includes a sample image stack and metadata file for testing the pipeline. Please download the example dataset from [Zenodo](https://zenodo.org/records/15061566) (Gockel &  Nieves-Rivera, 2025, doi: 10.5281/zenodo.15061566) and place it in the [`example project`](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20project) directory.
 
 The tutorials cover the core pipeline steps, from loading and preprocessing image data to analyzing microglial motility and visualizing the results. A second tutorial demonstrates batch processing for analyzing multiple datasets in a structured project folder.
 
