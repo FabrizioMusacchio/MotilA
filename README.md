@@ -41,7 +41,7 @@ conda activate motila
 mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffile zarr numcodecs openpyxl xlrd ipywidgets ipykernel ipympl
 ```
 
-We have tested *MotilA* for Python 3.9 and higher. If you encounter any issues, please let us know.
+We have tested *MotilA* for Python 3.9 and higher as well as on Windows, macOS, and Linux systems. The pipeline should work on all these platforms without any issues. If you encounter any issues, please let us know.
 
 ## Example data set and tutorials
 To help you get started with *MotilA*, we provide an example dataset and tutorials to guide you through the pipeline steps. The example dataset includes a sample image stack and metadata file for testing the pipeline. Please download the example dataset from [Zenodo](https://zenodo.org/records/15061566) (Gockel &  Nieves-Rivera, 2025, doi: 10.5281/zenodo.15061566) and place it in the [`example project`](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20project) directory.
