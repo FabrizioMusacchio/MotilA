@@ -329,7 +329,7 @@ import motila as mt
 from pathlib import Path
 ```
 
-**Note**: `sys.path.append('../motila')` is used to add the MotilA directory to the system path – relative to the current working directory. If you execute this notebook from a different location, you may need to adjust the path accordingly.
+**Note**: `sys.path.append('../motila')` is used to add the *MotilA* directory to the system path – relative to the current working directory. If you execute this notebook from a different location, you may need to adjust the path accordingly.
 
 You can verify the correct import by running the following cell:
 
@@ -430,7 +430,7 @@ mt.batch_collect(PROJECT_Path=PROJECT_Path,
 
 ## Assessing your results
 ### Single file processing
-After running the pipeline, you can assess the results in the specified output folder. The results of each processing step described above are saved in separate tif and PDF files. By carefully investigating these results, you can evaluate the quality of the processing and adjust the parameters if necessary. An example assessment is given in the tutorial notebook `single_file_run.ipynb` including visualizations of the results.
+After running the pipeline, you can assess the results in the specified output folder. The results of each processing step described above are saved in separate tif and PDF files. By carefully investigating these results, you can evaluate the quality of the processing and adjust the parameters if necessary. An example assessment is given in the tutorial notebook [`single_file_run.ipynb`](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20notebooks/single_file_run.ipynb) including visualizations of the results.
 
 Besides the intermediate results, the motility metrics are saved in an Excel file called `motility.xlsx` in the results folder. This file contains the 
 
