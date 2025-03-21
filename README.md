@@ -1,8 +1,8 @@
-# *MotilA*: Microglial Motility Analysis Pipeline
+# MotilA: Microglial Motility Analysis Pipeline
 
 *MotilA* is a Python-based image analysis pipeline designed to quantify microglial fine process motility from 4D and 5D time-lapse image stacks acquired through multi-photon in vivo imaging. While developed for microglial analysis, *MotilA* can be applied to other cell types and imaging studies as well. The pipeline supports both single-file and batch processing, making it adaptable for various experimental designs and high-throughput analyses. 
 
-## What does *MotilA* do?
+## What does MotilA do?
 *MotilA* automates the processing and analysis of fluorescence microscopy data, particularly for microglial process dynamics. It performs:
 
 - **Preprocessing**: Image registration, spectral unmixing, histogram equalization, bleach correction, and projection of z-layers to enhance signal quality.
@@ -33,7 +33,7 @@ This turnover ratio represents the fraction of pixels undergoing change, providi
 ## Data prerequisites  
 Before using *MotilA*, ensure that your imaging data meets the following requirements:  
 
-### 1. TIFF file format and ImageH axis order  
+### 1. TIFF file format and image axis order  
 *MotilA* expects input image stacks in TIFF format with axes structured as either **TZCYX** (for multi-channel data) or **TZYX** (for single-channel data). These axes correspond to:  
 
 - **T**: Time (imaging frames over time)  
@@ -102,7 +102,7 @@ The three main processing functions in *MotilA* are:
 ## Installation
 To use *MotilA*, you need to install the required Python packages. To do so, create and activate a conda environment as follows:
 
-```bash
+```sh
 conda create -n motila python=3.12 mamba -y
 conda activate motila
 mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffile zarr numcodecs openpyxl xlrd ipywidgets ipykernel ipympl
@@ -429,7 +429,7 @@ mt.batch_collect(PROJECT_Path=PROJECT_Path,
 ### Single file processing
 After running the pipeline, you can assess the results in the specified output folder. The results of each processing step described above are saved in separate tif and PDF files. By carefully investigating these results, you can evaluate the quality of the processing and adjust the parameters if necessary. An example assessment is given in the tutorial notebook `single_file_run.ipynb` including visualizations of the results.
 
-Besides the intermediate results, the motility metrics are saved in an Excel file in the results folder. This file contains the 
+Besides the intermediate results, the motility metrics are saved in an Excel file called `motility.xlsx` in the results folder. This file contains the 
 
 * gained pixels (G),
 * lost pixels (L),
@@ -501,5 +501,4 @@ German Center for Neurodegenerative Diseases (DZNE)
 Email: [fabrizio.musacchio@dzne.de](mailto:fabrizio.musacchio@dzne.de)
 GitHub: @[FabrizioMusacchio](https://github.com/FabrizioMusacchio)
 
-**Note**: We are currently in the process of retrieving a DOI for this project. As soon as the DOI becomes available, we will update the citation reference accordingly.  
-*(Status: March 21, 2025)*
+**Note**: We are currently in the process of retrieving a DOI for this project. As soon as the DOI becomes available, we will update the citation reference accordingly.  *(Status: March 21, 2025)*
