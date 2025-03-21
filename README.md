@@ -35,7 +35,7 @@ To use *MotilA*, first download the repository to your local machine. You can do
 
 Then, you need to install the required Python packages. To do so, create and activate a conda environment as follows:
 
-```sh
+```bash
 conda create -n motila python=3.12 mamba -y
 conda activate motila
 mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffile zarr numcodecs openpyxl xlrd ipywidgets ipykernel ipympl
