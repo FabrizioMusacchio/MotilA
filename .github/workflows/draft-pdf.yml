@@ -45,16 +45,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           TIMESTAMP=$(date +"%y%m%d_%H%M")
-          mv paper/paper.pdf paper/paper_draft_${TIMESTAMP}.pdf
-          git add paper/paper_draft_${TIMESTAMP}.pdf
-          git commit -m "Add draft PDF with timestamp: paper_draft_${TIMESTAMP}.pdf [skip ci]"
+          mv paper/paper.pdf paper/Musacchio_MotilA_paper_draft_${TIMESTAMP}.pdf
+          git add paper/Musacchio_MotilA_paper_draft_${TIMESTAMP}.pdf
+          git commit -m "Add draft PDF with timestamp: Musacchio_MotilA_paper_draft_${TIMESTAMP}.pdf [skip ci]"
           git push
 
-    #   - name: Upload
-    #     uses: actions/upload-artifact@v4
-    #     with:
-    #       name: paper
-    #       # This is the output path where Pandoc will write the compiled
-    #       # PDF. Note, this should be the same directory as the input
-    #       # paper.md
-    #       path: paper/paper.pdf
