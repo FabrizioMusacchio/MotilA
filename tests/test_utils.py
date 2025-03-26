@@ -2,9 +2,13 @@
 from motila.utils import (
     hello_world_utils,
     check_folder_exist_create,
-    getfile)
+    getfile,
+    filterfolder_by_string,
+    filterfiles_by_string)
 import sys
 from unittest import mock
+
+
 
 # test_hello_world:
 def test_hello_world(capsys):
@@ -43,3 +47,25 @@ def test_getfile_exception():
         del sys.modules['__main__'].__file__
         result = getfile()
         assert result == 'console'
+        
+# filterfolder_by_string:
+def test_filterfolder_by_string(tmp_path):
+    (tmp_path / "data_1").mkdir()
+    (tmp_path / "data_2").mkdir()
+    (tmp_path / "logs").mkdir()
+
+    indices, matching, all_folders = filterfolder_by_string(str(tmp_path) + '/', 'data')
+
+    assert sorted(matching) == ["data_1", "data_2"]
+    assert all(f in ["data_1", "data_2", "logs"] for f in all_folders)
+
+# filterfiles_by_string:
+def test_filterfiles_by_string(tmp_path):
+    (tmp_path / "report_data.txt").write_text("report")
+    (tmp_path / "summary_data.csv").write_text("summary")
+    (tmp_path / "ignore.me").write_text("meh")
+
+    indices, matching, all_files = filterfiles_by_string(str(tmp_path) + '/', 'data')
+
+    assert sorted(matching) == ["report_data.txt", "summary_data.csv"]
+    assert all(f in ["report_data.txt", "summary_data.csv", "ignore.me"] for f in all_files)
