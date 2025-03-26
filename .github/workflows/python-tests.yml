@@ -27,10 +27,14 @@ jobs:
             pandas tifffile zarr numcodecs openpyxl xlrd \
             ipywidgets ipykernel ipympl psutil
 
-    - name: Install pytest via pip
+    - name: Activate environment and install pytest
       run: |
+        source $(conda info --base)/etc/profile.d/conda.sh
+        conda activate motila
         pip install pytest
 
     - name: Run tests
       run: |
+        source $(conda info --base)/etc/profile.d/conda.sh
+        conda activate motila
         pytest
