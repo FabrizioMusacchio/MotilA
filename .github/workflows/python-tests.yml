@@ -15,17 +15,21 @@ jobs:
         auto-update-conda: true
         python-version: 3.12
         environment-name: motila
-        miniforge-variant: Miniforge3  # ✅ stable variant
+        miniforge-variant: Miniforge3
         activate-environment: motila
-        use-mamba: false  # disable broken auto-install
+        use-mamba: false
 
-    - name: Install mamba and dependencies
+    - name: Install mamba and main dependencies
       run: |
         conda install -y -n motila -c conda-forge mamba
         mamba install -y -n motila -c conda-forge \
             numpy scipy matplotlib scikit-image scikit-learn \
             pandas tifffile zarr numcodecs openpyxl xlrd \
-            ipywidgets ipykernel ipympl pytest psutil
+            ipywidgets ipykernel ipympl psutil
+
+    - name: Install pytest via pip
+      run: |
+        pip install pytest
 
     - name: Run tests
       run: |
