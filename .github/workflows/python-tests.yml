@@ -13,7 +13,6 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2
       with:
         auto-update-conda: true
-        miniforge-variant: Mambaforge  # ✅ to get mamba
         python-version: 3.12
         environment-name: motila
         use-mamba: true
