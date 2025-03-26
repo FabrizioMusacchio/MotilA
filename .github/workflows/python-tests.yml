@@ -1,4 +1,4 @@
-name: Run Python Tests (via conda)
+name: Run Python Tests (via conda + mamba)
 
 on: [push, pull_request]
 
@@ -15,13 +15,17 @@ jobs:
         auto-update-conda: true
         python-version: 3.12
         environment-name: motila
-        use-mamba: true
+        miniforge-variant: Miniforge3  # ✅ stable variant
+        activate-environment: motila
+        use-mamba: false  # disable broken auto-install
 
-    - name: Install dependencies
+    - name: Install mamba and dependencies
       run: |
-        mamba install -y numpy scipy matplotlib scikit-image scikit-learn \
-                        pandas tifffile zarr numcodecs openpyxl xlrd \
-                        ipywidgets ipykernel ipympl pytest psutil
+        conda install -y -n motila -c conda-forge mamba
+        mamba install -y -n motila -c conda-forge \
+            numpy scipy matplotlib scikit-image scikit-learn \
+            pandas tifffile zarr numcodecs openpyxl xlrd \
+            ipywidgets ipykernel ipympl pytest psutil
 
     - name: Run tests
       run: |
