@@ -1,4 +1,4 @@
-name: Run Python Tests
+name: Run Python Tests (via conda)
 
 on: [push, pull_request]
 
@@ -9,15 +9,20 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Set up Conda
+      uses: conda-incubator/setup-miniconda@v2
       with:
-        python-version: '3.10'  # or match your actual version
+        auto-update-conda: true
+        miniforge-variant: Mambaforge  # ✅ to get mamba
+        python-version: 3.12
+        environment-name: motila
+        use-mamba: true
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install pytest
+        mamba install -y numpy scipy matplotlib scikit-image scikit-learn \
+                        pandas tifffile zarr numcodecs openpyxl xlrd \
+                        ipywidgets ipykernel ipympl pytest psutil
 
     - name: Run tests
       run: |
