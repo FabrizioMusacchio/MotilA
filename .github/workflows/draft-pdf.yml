@@ -1,6 +1,17 @@
 name: Draft PDF
 on: [push]
 
+permissions:
+  contents: write  # Grant write access to repository contents
+
+# Verify Repository Settings
+# Ensure that the repository allows workflows to use the GITHUB_TOKEN with write permissions:
+
+# 1. Go to your repository on GitHub.
+# 2. Navigate to Settings > Actions > General.
+# 3. Under Workflow permissions, select Read and write permissions.
+# 4. Save the changes.
+
 jobs:
   paper:
     runs-on: ubuntu-latest
@@ -8,17 +19,40 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Check for paper folder and paper.md
+        id: check-paper
+        run: |
+          if [ -d "paper" ] && [ -f "paper/paper.md" ]; then
+            echo "Paper folder and paper.md exist."
+          else
+            echo "Paper folder or paper.md is missing."
+            exit 1
+          fi
+        continue-on-error: true
+
       - name: Build draft PDF
         uses: openjournals/openjournals-draft-action@master
         with:
           journal: joss
           # This should be the path to the paper within your repo.
           paper-path: paper/paper.md
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: paper
-          # This is the output path where Pandoc will write the compiled
-          # PDF. Note, this should be the same directory as the input
-          # paper.md
-          path: paper/paper.pdf
+
+      - name: Commit and push PDF to repository
+        run: |
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            TIMESTAMP=$(date +"%y%m%d_%H%M")
+            mv paper/paper.pdf paper/paper_draft_${TIMESTAMP}.pdf
+            git add paper/paper_draft_${TIMESTAMP}.pdf
+            git commit -m "Add draft PDF with timestamp: paper_draft_${TIMESTAMP}.pdf [skip ci]"
+            git push
+
+    #   - name: Upload
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: paper
+    #       # This is the output path where Pandoc will write the compiled
+    #       # PDF. Note, this should be the same directory as the input
+    #       # paper.md
+    #       path: paper/paper.pdf
