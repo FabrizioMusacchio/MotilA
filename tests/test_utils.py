@@ -1,23 +1,45 @@
 # tests/test_utils.py
 from motila.utils import (
     hello_world_utils,
-    check_folder_exist_create)
+    check_folder_exist_create,
+    getfile)
+import sys
+from unittest import mock
 
+# test_hello_world:
 def test_hello_world(capsys):
     hello_world_utils()
     captured = capsys.readouterr()
     assert captured.out.strip() == "Hello, World! Welcome to MotilA (from utils.py)!"
 
+# test_check_folder_exist_create
 def test_check_folder_exist_create(tmp_path):
     # tmp_path is a Path object pointing to a unique temp dir
     new_folder = tmp_path / "test_subdir"
 
-    # Make sure it doesn't exist yet
+    # make sure it doesn't exist yet:
     assert not new_folder.exists()
 
-    # Run the function
+    # run the function:
     check_folder_exist_create(new_folder, verbose=False)
 
-    # Now it should exist
+    # now it should exist:
     assert new_folder.exists()
     assert new_folder.is_dir()
+
+# getfile:
+def test_getfile_script():
+    with mock.patch.dict('sys.modules', {'__main__': mock.Mock(__file__='/some/script.py')}):
+        result = getfile()
+        assert result == 'script.py'
+
+def test_getfile_console():
+    with mock.patch.dict('sys.modules', {'__main__': mock.Mock(__file__='<input>')}):
+        result = getfile()
+        assert result == 'console'
+
+def test_getfile_exception():
+    with mock.patch.dict('sys.modules', {'__main__': mock.Mock()}):
+        del sys.modules['__main__'].__file__
+        result = getfile()
+        assert result == 'console'
