@@ -17,7 +17,7 @@ jobs:
         environment-name: motila
         miniforge-variant: Miniforge3
         activate-environment: motila
-        use-mamba: false
+        use-mamba: false # we'll install mamba manually
 
     - name: Install mamba and main dependencies
       run: |
@@ -25,7 +25,7 @@ jobs:
         mamba install -y -n motila -c conda-forge \
             numpy scipy matplotlib scikit-image scikit-learn \
             pandas tifffile zarr numcodecs openpyxl xlrd \
-            ipywidgets ipykernel ipympl psutil
+            ipywidgets ipykernel ipympl
 
     - name: Install pytest via pip
       run: |
