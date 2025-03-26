@@ -2915,6 +2915,7 @@ def batch_collect(PROJECT_Path, ID_list=[], project_tag="TP000", motility_folder
 # %% DEBUGGING/TESTING
 if __name__ == '__main__':
 
+    # EXAMPLE PARAMETERS FOR SINGLE FILE RUN:
 
     # define data input paths:
     Current_ID = "ID14201"
@@ -3015,6 +3016,9 @@ if __name__ == '__main__':
                   median_filter_window_projections=median_filter_window_projections,
                   clear_previous_results=clear_previous_results,
                   spectral_unmixing_median_filter_window=spectral_unmixing_median_filter_window)
+    
+    
+    
     
     """ DEBUGGING CONVENIENCE for single file run:
     fname=fname
