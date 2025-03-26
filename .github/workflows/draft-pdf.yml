@@ -28,25 +28,24 @@ jobs:
           else
             echo "Paper folder or paper.md is missing."
             exit 1
-          fi
-        continue-on-error: true
 
       - name: Build draft PDF
+        if: success()  # Only run if the previous step succeeded
         uses: openjournals/openjournals-draft-action@master
         with:
           journal: joss
-          # This should be the path to the paper within your repo.
           paper-path: paper/paper.md
 
       - name: Commit and push PDF to repository
+        if: success()  # Only run if the previous step succeeded
         run: |
-            git config --global user.name "github-actions[bot]"
-            git config --global user.email "github-actions[bot]@users.noreply.github.com"
-            TIMESTAMP=$(date +"%y%m%d_%H%M")
-            mv paper/paper.pdf paper/paper_draft_${TIMESTAMP}.pdf
-            git add paper/paper_draft_${TIMESTAMP}.pdf
-            git commit -m "Add draft PDF with timestamp: paper_draft_${TIMESTAMP}.pdf [skip ci]"
-            git push
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          TIMESTAMP=$(date +"%y%m%d_%H%M")
+          mv paper/paper.pdf paper/paper_draft_${TIMESTAMP}.pdf
+          git add paper/paper_draft_${TIMESTAMP}.pdf
+          git commit -m "Add draft PDF with timestamp: paper_draft_${TIMESTAMP}.pdf [skip ci]"
+          git push
 
     #   - name: Upload
     #     uses: actions/upload-artifact@v4
