@@ -28,6 +28,7 @@ jobs:
           else
             echo "Paper folder or paper.md is missing."
             exit 1
+          fi  # <-- Correctly close the if block
 
       - name: Build draft PDF
         if: success()  # Only run if the previous step succeeded
