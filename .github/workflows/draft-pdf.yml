@@ -23,23 +23,24 @@ jobs:
       - name: Check for paper folder and paper.md
         id: check-paper
         run: |
+          success=true
           if [ -d "paper" ] && [ -f "paper/paper.md" ]; then
             echo "Paper folder and paper.md exist."
           else
             echo "Paper folder or paper.md is missing."
-            exit 1
+            success=false
           fi
-        continue-on-error: true
+          echo "success=$success" >> $GITHUB_ENV  # Export the variable to the environment
 
       - name: Build draft PDF
-        if: success()  # Only run if the previous step succeeded
+        if: env.success == 'true'  # Check the success variable
         uses: openjournals/openjournals-draft-action@master
         with:
           journal: joss
           paper-path: paper/paper.md
 
       - name: Commit and push PDF to repository
-        if: success()  # Only run if the previous step succeeded
+        if: env.success == 'true'  # Check the success variable
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
