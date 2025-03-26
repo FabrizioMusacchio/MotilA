@@ -46,6 +46,12 @@ from datetime import datetime
 import tifffile
 import numpy as np
 from pathlib import Path
+# %% HELLO WORLD FUNCTION
+def hello_world_utils():
+    """
+    Prints a friendly message to the user.
+    """
+    print("Hello, World! Welcome to MotilA (from utils.py)!")
 # %% FOLDER OPERATION FUNCTIONS
 
 def check_folder_exist_create(path, verbose=True):
