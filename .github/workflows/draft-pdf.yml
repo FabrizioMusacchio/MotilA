@@ -44,9 +44,9 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          TIMESTAMP=$(date +"%y%m%d_%H%M")
-          mv paper/paper.pdf paper/Musacchio_MotilA_paper_draft_${TIMESTAMP}.pdf
-          git add paper/Musacchio_MotilA_paper_draft_${TIMESTAMP}.pdf
-          git commit -m "Add draft PDF with timestamp: Musacchio_MotilA_paper_draft_${TIMESTAMP}.pdf [skip ci]"
+          #TIMESTAMP=$(date +"%y%m%d_%H%M") # use is by adding ${TIMESTAMP} to the filename
+          mv paper/paper.pdf paper/Musacchio_MotilA_paper_draft.pdf
+          git add paper/Musacchio_MotilA_paper_draft.pdf
+          git commit -m "Add draft PDF with timestamp: Musacchio_MotilA_paper_draft.pdf [skip ci]"
           git push
 
