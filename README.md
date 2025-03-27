@@ -234,8 +234,14 @@ Avoid including blood vessels in the projection center. Blood vessels can lead t
 | Parameter | Values | Description |
 |------------|----------------------|----------------|
 | `hist_equalization`     | bool (`True` or `False`)  | enhance histograms WITHIN each 3D stack. |
+| `hist_equalization_clip_limit` | float | clip limit for the histogram equalization (default is 0.05); the higher the value, the more intense the contrast enhancement, but also the more noise is amplified |
+| `hist_equalization_kernel_size` | `None`/int tuple | kernel size for the histogram equalization; `None` (default) for automatic, or use a tuple (x,y) for a fixed size; when using a tuple, you can start increasing the values from multiples of 8, e.g., (8,8), (16,16), (24,24), (32,32), ... (128,128), ... |
 | `hist_match`            | bool (`True` or `False`)  | match histograms across 3D stacks |
 | `histogram_ref_stack`   | integer     | define the reference 3D stack for histogram matching. |
+
+Histogram equalization enhances the contrast of the image by stretching the intensity range. This can be particularly useful for images with low contrast or uneven illumination. The `hist_equalization_clip_limit` parameter controls the intensity clipping limit for the histogram equalization. A higher value increases the intensity range but may also amplify noise. The `hist_equalization_kernel_size` parameter defines the kernel size for the histogram equalization. The default is `None` which let's the function choose the kernel size automatically. In cases of occurring block artifacts, you can set a fixed kernel size (e.g., (8,8), (16,16), (24,24), ...).
+
+Histogram matching aligns the intensity distributions of different image stacks, ensuring consistent brightness and contrast across time points. The `histogram_ref_stack` parameter defines the reference stack for histogram matching. This reference stack serves as the basis for matching the intensity distributions of all other stacks. Both, the output plot `Normalized average brightness drop rel. to t0.pdf` and Excel file `Normalized average brightness of each stack.xlsx` show the average brightness of each stack relative to the reference stack. This can help to assess the quality of each time point stack and which time points might be excluded from further analysis.
 
 
 #### Filter settings
@@ -369,6 +375,8 @@ mt.process_stack(fname=fname,
                 template_mode=template_mode,
                 spectral_unmixing=spectral_unmixing,
                 hist_equalization=hist_equalization,
+                hist_equalization_clip_limit=hist_equalization_clip_limit,
+                hist_equalization_kernel_size=hist_equalization_kernel_size,
                 hist_match=hist_match,
                 RESULTS_Path=RESULTS_Path,
                 ID=Current_ID,
@@ -412,6 +420,8 @@ mt.batch_process_stacks(PROJECT_Path=PROJECT_Path,
                         template_mode=template_mode,
                         spectral_unmixing=spectral_unmixing, 
                         hist_equalization=hist_equalization, 
+                        hist_equalization_clip_limit=hist_equalization_clip_limit,
+                        hist_equalization_kernel_size=hist_equalization_kernel_size,
                         hist_match=hist_match,
                         max_xy_shift_correction=max_xy_shift_correction,
                         threshold_method=threshold_method, 
