@@ -74,7 +74,15 @@ blob_pixel_threshold = 100    # define the threshold for the minimal pixel area 
 compare_all_threshold_methods = True # if True, all threshold methods will be compared and saved in the plot folder
 
 # image enhancement settings:
-hist_equalization = True        # enhance the histograms WITHIN EACH projected stack: True or False
+hist_equalization = True              # enhance the histograms WITHIN EACH projected stack: True or False
+hist_equalization_clip_limit = 0.05   # clip limit for the histogram equalization (default is 0.05);
+                                      # the higher the value, the more intense the contrast enhancement, 
+                                      # but also the more noise is amplified  
+hist_equalization_kernel_size = None  # kernel size for the histogram equalization; 
+                                      # None (default) for automatic, or use a tuple (x,y) for a fixed size;
+                                      # when using a tuple, you can start increasing the values from multiples
+                                      # of 8, e.g., (8,8), (16,16), (24,24), (32,32), ... (128,128), ...
+                                      # start increasing the values if the images start to included block artifacts
 hist_match = True               # match the histograms   ACROSS the stacks          : True or False
 histogram_ref_stack = 0         # define the stack which should be used as reference for the histogram matching
 
@@ -138,6 +146,8 @@ mt.process_stack(fname=fname,
                 template_mode=template_mode,
                 spectral_unmixing=spectral_unmixing,
                 hist_equalization=hist_equalization,
+                hist_equalization_clip_limit=hist_equalization_clip_limit,
+                hist_equalization_kernel_size=hist_equalization_kernel_size,
                 hist_match=hist_match,
                 RESULTS_Path=RESULTS_Path,
                 ID=Current_ID,
