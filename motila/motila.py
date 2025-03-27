@@ -2820,7 +2820,6 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
     if debug_output: print_ram_usage()
 
 
-
 def batch_collect(PROJECT_Path, ID_list=[], project_tag="TP000", motility_folder="motility_analysis",
                   RESULTS_Path="batch_results", log=""):
     """
