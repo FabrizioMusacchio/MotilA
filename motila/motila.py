@@ -197,7 +197,8 @@ def calc_projection_range(projection_center, projection_layers, I_shape, log):
 
     return projection_range, projection_layers_correction
 
-def plot_2D_image(image, plot_path, plot_title, fignum=1,
+def plot_2D_image(image, plot_path, plot_title, fignum=1, figsize=(5,5.15),
+                  show_ticks=False, show_borders=False, cbar_show=False,
                   cmap=plt.cm.get_cmap('viridis'), cbar_label="",
                   cbar_ticks=[], cbar_ticks_labels="", title=""):
     """
@@ -236,14 +237,23 @@ def plot_2D_image(image, plot_path, plot_title, fignum=1,
     - The 
     """
     #plt.clf()
-    fig = plt.figure(fignum, figsize=(6,5))
+    fig = plt.figure(fignum, figsize=figsize)
     plt.clf()
     plt.imshow(image, cmap=cmap)
-    cbar = plt.colorbar(label=cbar_label)
-    if len(cbar_ticks)>0:
-        cbar.set_ticks(cbar_ticks)
-    if len(cbar_ticks_labels)>0:
-        cbar.set_ticklabels(cbar_ticks_labels)
+    if cbar_show:
+        cbar = plt.colorbar(label=cbar_label)
+        if len(cbar_ticks)>0:
+            cbar.set_ticks(cbar_ticks)
+        if len(cbar_ticks_labels)>0:
+            cbar.set_ticklabels(cbar_ticks_labels)
+    if not show_ticks:
+        plt.xticks([])
+        plt.yticks([])
+    if not show_borders:
+        plt.gca().spines['top'].set_visible(False)
+        plt.gca().spines['right'].set_visible(False)
+        plt.gca().spines['bottom'].set_visible(False)
+        plt.gca().spines['left'].set_visible(False)
     plt.title(title)
     plt.tight_layout()
     plt.savefig(Path(plot_path, plot_title + ".pdf"), dpi=500)
@@ -426,7 +436,7 @@ def plot_projected_stack(image_stack, I_shape, plot_path, log, plottitle="MG pro
     for stack in range(I_shape[0]):
         plot_2D_image(image_stack[stack], plot_path, plot_title=plottitle+", stack " + str(stack), 
                       fignum=9, cmap=plt.cm.get_cmap('gist_gray'), cbar_label="",
-                      title=f"{plottitle}, stack {stack}")
+                      title=f"{plottitle}, stack {stack}", cbar_show=False)
                       # cbar_ticks=np.arange(0,255,10), cbar_ticks_labels=np.arange(0,255,10),
     TIFF_path = os.path.join(plot_path, plottitle+".tif")
     tifffile.imwrite(TIFF_path, image_stack.astype("float32"), 
@@ -870,7 +880,7 @@ def spectral_unmix(MG_sub, N_sub, I_shape, zarr_group, projection_layers, log,
 
     return MG_sub_processed
 
-def histogram_equalization(MG_sub, I_shape, projection_layers, log, clip_limit=0.01):
+def histogram_equalization(MG_sub, I_shape, projection_layers, log, clip_limit=0.02):
     """
     Applies adaptive histogram equalization to enhance contrast in microglial image stacks.
 
@@ -899,7 +909,7 @@ def histogram_equalization(MG_sub, I_shape, projection_layers, log, clip_limit=0
     - The input image stack is expected to be of type `uint16` before applying equalization.
     """
     Process_t0 = time.time()
-    log.log(f"equilizing the histogram within each slice of all stacks ...")
+    log.log(f"equalizing the histogram within each slice of all stacks ...")
 
     MG_sub_histeq = np.zeros((I_shape[0], projection_layers, I_shape[-2], I_shape[-1]))
 
@@ -1449,7 +1459,7 @@ def plot_intensities(MG_pro, log, plot_path, I_shape):
 
     # plot normalized average brightness drop rel. to stack 0
     plt.close(1)
-    fig = plt.figure(2, figsize=(5, 3))
+    fig = plt.figure(2, figsize=(5, 3.5))
     plt.clf()
     plt.axhline(y=130, color="k", linestyle='--', lw=0.75, alpha=0.5)
     plt.axhline(y=120, color="k", linestyle='--', lw=0.75, alpha=0.5)
@@ -1465,13 +1475,24 @@ def plot_intensities(MG_pro, log, plot_path, I_shape):
     max_y_val = np.max(100 *intensity_means / intensity_means[0])
     plt.ylim(0, max_y_val+5)
     plt.xlim(-0.5, I_shape[0]-0.5)
-    plt.xticks(np.arange(I_shape[0]))
+    plt.xticks(np.arange(I_shape[0]), labels=[f"$t_{i}$" for i in range(I_shape[0])])
     plt.yticks(np.arange(0,max_y_val+5, 10))
-    plt.xlabel("stack #")
-    plt.ylabel("normalized average brightness [%]")
-    title = f"Normalized average brightness drop rel. to stack 0"
-    plot_title = title
+    plt.xlabel("stack")
+    plt.ylabel("normalized brightness [%]")
+    title = f"Average cell brightness relative to $t_0$"
+    plot_title = f"Normalized average brightness drop rel. to t0"
     plt.title(title)
+    # turn off right and top axis:
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['bottom'].set_visible(False)
+    plt.gca().spines['left'].set_visible(False)
+    # set fontsize to 14 for the current figure:
+    plt.setp(plt.gca().get_xticklabels(), fontsize=14)
+    plt.setp(plt.gca().get_yticklabels(), fontsize=14)
+    plt.gca().title.set_fontsize(14)
+    plt.gca().xaxis.label.set_fontsize(14)
+    plt.gca().yaxis.label.set_fontsize(14)
     plt.tight_layout()
     plt.savefig(Path(plot_path, plot_title + ".pdf"), dpi=120)
     plt.close(fig)
@@ -1776,6 +1797,7 @@ def binarize_2D_images(MG_pro, I_shape, log, plot_path, threshold_method="otsu",
 
         plot_2D_image(MG_pro_bin[stack], plot_path,
                       plot_title="Binarized projection, stack "+str(stack),
+                      show_borders=True,
                       fignum=1, cmap=mcol.ListedColormap(['white', 'black']), cbar_label="binary mask",
                       cbar_ticks=[0.25, 0.75], cbar_ticks_labels=[0, 1],
                       title=f"Binarized projection ({threshold_method_choose}), stack {stack}")
@@ -1895,6 +1917,7 @@ def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100):
         cbar_ticks_labels[1] = "reject"
         plot_2D_image(MG_pro_bin_area_thresholded_tmp, plot_path,
                       plot_title="Binarized segmented projection, labels, stack " + str(stack),fignum=1,
+                      figsize=(6, 5), show_borders=True, cbar_show=True,
                       cmap=plt.cm.get_cmap('nipy_spectral', new_label + 1), cbar_label="labels",
                       cbar_ticks=cbar_ticks,
                       cbar_ticks_labels=cbar_ticks_labels,
@@ -1903,9 +1926,9 @@ def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100):
         # re-binarize and plot the processed image:
         MG_pro_bin_area_thresholded[stack, ...] = MG_pro_bin_area_thresholded_tmp > reject_label
         plot_2D_image(MG_pro_bin_area_thresholded[stack], plot_path,
-                      plot_title=f"Binarized segmented projection, stack " + str(stack) + " mask",
-                      fignum=1,
-                      cmap=mcol.ListedColormap(['white','mediumseagreen']), cbar_label="binary mask",
+                      plot_title=f"Binarized final segmented projection, stack " + str(stack) + " mask",
+                      fignum=1, show_borders=True,
+                      cmap=mcol.ListedColormap(['white','black']), cbar_label="binary mask",
                       cbar_ticks=[0.25, 0.75], cbar_ticks_labels=[0, 1],
                       title=f"Binarized projection segmented, stack {stack}")
 
@@ -1978,8 +2001,12 @@ def plot_pixel_areas(MG_areas, log, plot_path, I_shape):
 
     # plot normalized area rel. to stack 0:
     plt.close(1)
-    fig = plt.figure(2, figsize=(5, 3))
+    fig = plt.figure(2, figsize=(5, 3.5))
     plt.clf()
+    plt.axhline(y=130, color="k", linestyle='--', lw=0.75, alpha=0.5)
+    plt.axhline(y=120, color="k", linestyle='--', lw=0.75, alpha=0.5)
+    plt.axhline(y=110, color="k", linestyle='--', lw=0.75, alpha=0.5)
+    plt.axhline(y=100, color="k", linestyle='--', lw=0.75, alpha=0.5)
     plt.axhline(y=90, color="k", linestyle='--', lw=0.75, alpha=0.5)
     plt.axhline(y=80, color="k", linestyle='--', lw=0.75, alpha=0.5)
     plt.axhline(y=66, color="k", linestyle='--', lw=0.75, alpha=0.5)
@@ -1987,15 +2014,28 @@ def plot_pixel_areas(MG_areas, log, plot_path, I_shape):
     plt.axhline(y=33, color="k", linestyle='--', lw=0.75, alpha=0.5)
     plt.axhline(y=25, color="k", linestyle='--', lw=0.75, alpha=0.5)
     plt.bar(np.arange(I_shape[0]), 100 * MG_areas / MG_areas[0], zorder=3)
-    plt.ylim(0, np.max(100 * MG_areas / MG_areas[0])+5)
+    ylim_max = np.max([105, np.max(100 * MG_areas / MG_areas[0])+5])
+    plt.ylim(0, ylim_max)
     plt.xlim(-0.5, I_shape[0]-0.5)
-    plt.xticks(np.arange(I_shape[0]))
+    #plt.xticks(np.arange(I_shape[0]))
+    plt.xticks(np.arange(I_shape[0]), labels=[f"$t_{i}$" for i in range(I_shape[0])])
     plt.yticks(np.arange(0,101, 10))
-    plt.xlabel("stack #")
-    plt.ylabel("relative total pixel cell area [%]")
-    title = f"Normalized cell area rel. to stack 0"
-    plot_title = title
+    plt.xlabel("stack")
+    plt.ylabel("relative total cell pixels [%]")
+    title = f"Cell areas relative to $t_0$"
+    plot_title = f"Normalized cell area rel. to t0"
     plt.title(title)
+    # turn off right and top axis:
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['bottom'].set_visible(False)
+    plt.gca().spines['left'].set_visible(False)
+    # set fontsize to 14 for the current figure:
+    plt.setp(plt.gca().get_xticklabels(), fontsize=14)
+    plt.setp(plt.gca().get_yticklabels(), fontsize=14)
+    plt.gca().title.set_fontsize(14)
+    plt.gca().xaxis.label.set_fontsize(14)
+    plt.gca().yaxis.label.set_fontsize(14)
     plt.tight_layout()
     plt.savefig(Path(plot_path, plot_title + ".pdf"), dpi=120)
     plt.close(fig)
@@ -2069,63 +2109,116 @@ def motility(MG_pro, I_shape, log, plot_path, ID="ID00000", group="blinded"):
     for stack in np.arange(1, I_shape[0]):
         MG_pro_delta_t[stack - 1] = MG_pro[stack - 1] * 2 - MG_pro[stack]
 
+    # find the maximum hist value for the ylim:
+    hist_0123_max = 0
+    hist_023_max  = 0
+    for stack in range(MG_pro_delta_t.shape[0]):
+        hist, _ = np.histogram(MG_pro_delta_t[stack].flatten(), bins=4)
+        hist_0123_max = np.max([hist_0123_max, hist[0], hist[1], hist[2], hist[3]])
+        hist_023_max  = np.max([hist_023_max, hist[0], hist[2], hist[3]])
+    hist_0123_max = hist_0123_max + 10
+    hist_023_max  = hist_023_max + 10
+
     # plot the delta t images and histograms of stable, gain, and loss pixels:
     for stack in range(MG_pro_delta_t.shape[0]):
         hist, bins = np.histogram(MG_pro_delta_t[stack].flatten(), bins=4)
         summe = hist[0] + hist[2] + hist[3]
 
-        plot_2D_image(MG_pro_delta_t[stack], plot_path,
+        plot_2D_image(MG_pro_delta_t[stack], plot_path, figsize=(6, 5),
                       plot_title=f"MG delta t_{stack} - t_{stack + 1}",
-                      fignum=1,
+                      fignum=1, cbar_show=True, show_borders=True,
                       cmap=mcol.ListedColormap(['lime', 'white', 'blue', 'red']), cbar_label="",
                       cbar_ticks=[-0.5, 0.10, 0.85, 1.6],
                       cbar_ticks_labels=["-1 (G)", "0", "1 (S)", " 2 (L)"],
                       title=f"t_{stack} - t_{stack + 1}")
 
-        fig = plt.figure(20, figsize=(3.5, 4))
+
+        fig = plt.figure(20, figsize=(3.5, 3.5))
         plt.clf()
-        plt.bar(bins[:-1] + 0.75 / 2, hist, width=0.65)
+        plt.bar(bins[0] + 0.75 / 2, hist[0], width=0.65, color="lime")
+        plt.bar(bins[1] + 0.75 / 2, hist[1], width=0.65, color="black")
+        plt.bar(bins[2] + 0.75 / 2, hist[2], width=0.65, color="blue")
+        plt.bar(bins[3] + 0.75 / 2, hist[3], width=0.65, color="red")
         plt.xticks(bins[:-1] + 0.75 / 2, labels=["-1 (G)", "0", "1 (S)", "2 (L)"])
-        plt.ylabel("number of pixels")
-        title = f"pixel counts absolute t_{stack}-t_{stack + 1} w bg"
+        plt.ylabel("absolute number of pixels w/ bg")
+        title = f"$t_{stack}-t_{stack + 1}$"
+        plot_title = f"pixel counts abs. w bg t_{stack}-t_{stack + 1}"
         plt.title(title)
+        # turn-off right and top border (only for this plot):
+        ax = plt.gca()
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        # set fontsize to 14 for the current figure:
+        plt.setp(ax.get_xticklabels(), fontsize=14)
+        plt.setp(ax.get_yticklabels(), fontsize=14)
+        ax.title.set_fontsize(14)
+        ax.xaxis.label.set_fontsize(14)
+        ax.yaxis.label.set_fontsize(14)
+        plt.ylim(0, hist_0123_max)
         plt.tight_layout()
-        plt.savefig(Path(plot_path, title + ".pdf"))
+        plt.savefig(Path(plot_path, plot_title.replace("$", "").replace("_", "").replace(".", "") + ".pdf"))
         plt.close(fig)
 
-        fig = plt.figure(22, figsize=(3.5, 4))
+        fig = plt.figure(22, figsize=(3.5, 3.5))
         plt.clf()
         plt.bar(bins[0] + 0.75 / 2, hist[0], width=0.65, color="lime")
         plt.bar(bins[1] + 0.75 / 2, hist[2], width=0.65, color="blue")
         plt.bar(bins[2] + 0.75 / 2, hist[3], width=0.65, color="red")
         plt.xticks(bins[:-2] + 0.75 / 2, labels=["-1 (G)", "1 (S)", "2 (L)"])
-        plt.ylabel("number of pixels")
-        plt.text(bins[0] , np.max([hist[0], hist[2], hist[3]])-10, 
+        plt.ylabel("absolute number of pixels")
+        """ plt.text(bins[0] , np.max([hist[0], hist[2], hist[3]])-10, 
                  r"tor=$\frac{G+L}{S+G+L}=$"+str(round((hist[0]+hist[3])/(hist[0]+hist[2]+hist[3]),2)), 
-                 ha="left", va="top", color="k")
-        title = f"absolute pixel counts t_{stack}-t_{stack + 1}"
-        plot_title = f"pixel counts absolute t_{stack}-t_{stack + 1}"
+                 ha="left", va="top", color="k") """
+        title = f"$t_{stack}-t_{stack + 1}$"
+        plot_title = f"pixel counts abs. t_{stack}-t_{stack + 1}"
         plt.title(title)
+        # turn-off right and top border (only for this plot):
+        ax = plt.gca()
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        # set fontsize to 14 for the current figure:
+        plt.setp(ax.get_xticklabels(), fontsize=14)
+        plt.setp(ax.get_yticklabels(), fontsize=14)
+        ax.title.set_fontsize(14)
+        ax.xaxis.label.set_fontsize(14)
+        ax.yaxis.label.set_fontsize(14)
+        plt.ylim(0, hist_023_max)
         plt.tight_layout()
-        plt.savefig(Path(plot_path, plot_title + ".pdf"))
+        plt.savefig(Path(plot_path, plot_title.replace("$", "").replace("_", "").replace(".", "") + ".pdf"))
         plt.close(fig)
 
-        fig = plt.figure(23, figsize=(3.5, 4))
+        fig = plt.figure(23, figsize=(3.1, 3.5))
         plt.clf()
         plt.bar(bins[0] + 0.75 / 2, hist[0] / summe, width=0.65, color="lime")
         plt.bar(bins[1] + 0.75 / 2, hist[2] / summe, width=0.65, color="blue")
         plt.bar(bins[2] + 0.75 / 2, hist[3] / summe, width=0.65, color="red")
-        plt.text(bins[0] , 0.95, 
+        plt.text(bins[1]+ 0.75 / 2 , 0.96, 
                  r"tor=$\frac{G+L}{S+G+L}=$"+str(round((hist[0]+hist[3])/(hist[0]+hist[2]+hist[3]),2)), 
-                 ha="left", va="top", color="k")
+                 ha="center", va="top", color="k")
         plt.xticks(bins[:-2] + 0.75 / 2, labels=["-1 (G)", "1 (S)", "2 (L)"])
         plt.ylabel("relative number of pixels")
         plt.ylim(0, 1.0)
-        title = f"relative pixel counts t_{stack}-t_{stack + 1}"
+        title = f"$t_{stack}-t_{stack + 1}$"
         plot_title = f"pixel counts relative t_{stack}-t_{stack + 1}"
         plt.title(title)
+        # turn-off right and top border (only for this plot):
+        ax = plt.gca()
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        # set fontsize to 14 for the current figure:
+        plt.setp(ax.get_xticklabels(), fontsize=14)
+        plt.setp(ax.get_yticklabels(), fontsize=14)
+        ax.title.set_fontsize(14)
+        ax.xaxis.label.set_fontsize(14)
+        ax.yaxis.label.set_fontsize(14)
         plt.tight_layout()
-        plt.savefig(Path(plot_path, plot_title + ".pdf"))
+        plt.savefig(Path(plot_path, plot_title.replace("$", "").replace("_", "") + ".pdf"))
         plt.close(fig)
 
         summary_df.loc[stack, "ID"] = ID
@@ -2420,7 +2513,7 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
         plot_projected_stack(MG_projection, I_shape=I_shape, plot_path=plot_path, log=log,
                          plottitle="MG projected, proc 2 histogram equalized")
 
-    # match the histograms ACCROSS the stacks:
+    # match the histograms ACROSS the stacks:
     if hist_match:
         MG_projection = histogram_matching_on_projections(MG_projection, I_shape, histogram_ref_stack, log)
         plot_projected_stack(MG_projection, I_shape=I_shape, plot_path=plot_path, log=log,
