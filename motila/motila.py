@@ -935,6 +935,8 @@ def histogram_equalization_on_projections(MG_sub, I_shape, log, clip_limit=0.01,
         Logging object for recording the process.
     clip_limit : float, optional
         Clipping limit for contrast limiting adaptive histogram equalization (default is 0.01).
+    kernel_size : tuple or None, optional
+        Size of the contextual region for adaptive histogram equalization. If None, the kernel size is automatically determined.
 
     Returns:
     --------
@@ -1825,6 +1827,8 @@ def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100, sta
         Path to save the plots and segmentation statistics.
     pixel_threshold : int, optional
         Minimum pixel area required to retain a connected region (default is 100).
+    stats_plots : bool, optional
+        Whether to generate and save additional statistics plots (default is False).
 
     Returns:
     --------
@@ -2286,48 +2290,56 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
         Stack index to use as reference for histogram matching.
     log : logger_object
         Logger for recording processing steps.
-    blob_pixel_threshold : int, optional
-        Minimum pixel area for segmented objects (default is 100).
-    regStack2d : bool, optional
-        Whether to perform 2D registration on z-projections (default is True).
-    regStack3d : bool, optional
-        Whether to perform 3D intra-stack registration (default is False).
-    template_mode : str, optional
-        Template calculation method for 3D registration (default is "mean").
-    spectral_unmixing : bool, optional
-        Whether to perform spectral unmixing (default is True).
-    hist_equalization : bool, optional
-        Whether to apply histogram equalization (default is False).
-    hist_match : bool, optional
-        Whether to perform histogram matching across stacks (default is True).
-    RESULTS_Path : str or Path, optional
-        Directory for saving results (default is "motility_analysis").
-    ID : str, optional
-        Identifier for the dataset (default is "ID00000").
-    group : str, optional
-        Experimental group label (default is "blinded").
-    max_xy_shift_correction : int, optional
-        Maximum allowed xy-shift in registration (default is 50).
-    threshold_method : str, optional
-        Method for binarization (default is "li").
-    compare_all_threshold_methods : bool, optional
-        Whether to compare multiple thresholding methods (default is True).
-    gaussian_sigma_proj : float, optional
-        Sigma value for Gaussian filtering before binarization (default is 1).
-    spectral_unmixing_amplifyer : int, optional
-        Amplification factor for spectral unmixing (default is 1).
-    median_filter_slices : str, optional
-        Type of median filtering applied to individual slices ("square" or "circular", default is "square").
-    median_filter_window_slices : int, optional
-        Size of the median filter applied to individual slices (default is 3).
-    median_filter_projections : str, optional
-        Type of median filtering applied to z-projections ("square" or "circular", default is "square").
-    median_filter_window_projections : int, optional
-        Size of the median filter applied to z-projections (default is 3).
-    clear_previous_results : bool, optional
-        Whether to clear the results directory before processing (default is False).
-    spectral_unmixing_median_filter_window : int, optional
-        Window size for median filtering in spectral unmixing (default is 3).
+    blob_pixel_threshold : int
+        Minimum pixel area for segmented objects.
+    regStack2d : bool
+        Whether to perform 2D registration on z-projections.
+    regStack3d : bool
+        Whether to perform 3D intra-stack registration.
+    template_mode : str
+        Template calculation method for 3D registration.
+    spectral_unmixing : bool
+        Whether to perform spectral unmixing.
+    hist_equalization : bool
+        Whether to apply histogram equalization.
+    hist_equalization_clip_limit : float
+        Clip limit for histogram equalization.
+    hist_equalization_kernel_size : None or tuple of int
+        Kernel size for histogram equalization.
+    hist_match : bool
+        Whether to perform histogram matching across stacks.
+    RESULTS_Path : str or Path
+        Directory for saving results.
+    ID : str
+        Identifier for the dataset.
+    group : str
+        Experimental group label.
+    max_xy_shift_correction : int
+        Maximum allowed xy-shift in registration.
+    threshold_method : str
+        Method for binarization.
+    compare_all_threshold_methods : bool
+        Whether to compare multiple thresholding methods.
+    gaussian_sigma_proj : float
+        Sigma value for Gaussian filtering before binarization.
+    spectral_unmixing_amplifyer : int
+        Amplification factor for spectral unmixing.
+    median_filter_slices : str
+        Type of median filtering applied to individual slices ("square" or "circular").
+    median_filter_window_slices : int
+        Size of the median filter applied to individual slices.
+    median_filter_projections : str
+        Type of median filtering applied to z-projections ("square" or "circular").
+    median_filter_window_projections : int
+        Size of the median filter applied to z-projections.
+    clear_previous_results : bool
+        Whether to clear the results directory before processing.
+    spectral_unmixing_median_filter_window : int
+        Window size for median filtering in spectral unmixing.
+    debug_output : bool
+        Whether to enable debug output for memory usage and processing steps.
+    stats_plots : bool
+        Whether to generate additional statistics plots.
 
     Returns:
     --------
@@ -2659,6 +2671,10 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
         Whether to perform spectral unmixing to separate signals (default is True).
     hist_equalization : bool, optional
         Whether to apply histogram equalization to enhance contrast (default is False).
+    hist_equalization_clip_limit : float
+        Clip limit for histogram equalization.
+    hist_equalization_kernel_size : None or tuple of int
+        Kernel size for histogram equalization.
     hist_match : bool, optional
         Whether to match histograms across image stacks (default is True).
     max_xy_shift_correction : int, optional
@@ -2685,6 +2701,8 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
         Window size for median filtering applied before spectral unmixing (default is 3).
     debug_output : bool, optional
         Whether to print debug information, including RAM usage (default is False).
+    stats_plots : bool, optional
+        Whether to generate additional statistics plots (default is False).
 
     Returns:
     --------
