@@ -21,13 +21,13 @@ where $B(t)$ represents the binarized image at time point $t$. From this, *Motil
 - **Gained pixels (G)**: Newly appearing microglial pixels $\Delta B = -1$.
 - **Lost pixels (L)**: Pixels that disappear $\Delta B = 2$.
 
-From these, MotilA derives the **turnover ratio (TOR)**, a key metric for motility:
+From these, MotilA derives the **turnover rate (TOR)**, a key metric for motility:
 
 $$
 TOR = \frac{G + L}{S + G + L}
 $$
 
-This turnover ratio represents the fraction of pixels undergoing change, providing a quantitative measure of microglial fine process motility.
+This turnover rate represents the fraction of pixels undergoing change, providing a quantitative measure of microglial fine process motility.
 
 
 ## Installation
@@ -458,7 +458,7 @@ Besides the intermediate results, the motility metrics are saved in an Excel fil
 * gained pixels (G),
 * lost pixels (L),
 * stable pixels (S), and
-* the turnover ratio (TOR) for each time point,
+* the turnover rate (TOR) for each time point,
 
 allowing you to analyze the motility dynamics of microglial processes over time.
 
