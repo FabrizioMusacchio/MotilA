@@ -1805,7 +1805,7 @@ def binarize_2D_images(MG_pro, I_shape, log, plot_path, threshold_method="otsu",
     _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="binarization ")
     return MG_pro_bin
 
-def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100):
+def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100, stats_plots=False):
     """
     Removes small microglial regions based on pixel connectivity and area threshold in segmented 2D images.
 
@@ -1854,42 +1854,43 @@ def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100):
             props_areas[label] = props[label]["area"]
 
         # plot found pixel areas:
-        fig = plt.figure(27, figsize=(6, 6))
-        plt.clf()
-        plt.bar(np.arange(label_nums), props_areas)
-        plt.hlines(pixel_threshold, 0, label_nums, ls='-', colors="r",
-                   label=f"pixel threshold=>{str(pixel_threshold)} pixels")
-        ax = plt.gca()
-        ax.set_yscale('log')
-        plt.xlim(-1, label_nums+1)
-        plt.legend()
-        plt.xlabel("found regions from the pixel connectivity analysis")
-        plt.ylabel("pixels within the region (log-scale)")
-        title = f"Binarized projection: regions of contiguous pixels, stack {stack}"
-        plot_title = f"Stats Binarized projection, regions of contiguous pixels, stack {stack}"
-        plt.title(title)
-        plt.tight_layout()
-        #plt.show()
-        plt.savefig(Path(plot_path, plot_title + ".pdf"), dpi=120)
-        plt.close(fig)
+        if stats_plots:
+            fig = plt.figure(27, figsize=(6, 6))
+            plt.clf()
+            plt.bar(np.arange(label_nums), props_areas)
+            plt.hlines(pixel_threshold, 0, label_nums, ls='-', colors="r",
+                    label=f"pixel threshold=>{str(pixel_threshold)} pixels")
+            ax = plt.gca()
+            ax.set_yscale('log')
+            plt.xlim(-1, label_nums+1)
+            plt.legend()
+            plt.xlabel("found regions from the pixel connectivity analysis")
+            plt.ylabel("pixels within the region (log-scale)")
+            title = f"Binarized projection: regions of contiguous pixels, stack {stack}"
+            plot_title = f"Stats Binarized projection, regions of contiguous pixels, stack {stack}"
+            plt.title(title)
+            plt.tight_layout()
+            #plt.show()
+            plt.savefig(Path(plot_path, plot_title + ".pdf"), dpi=120)
+            plt.close(fig)
 
-        fig = plt.figure(28, figsize=(7, 5))
-        plt.clf()
-        hist_vals, _, _ = plt.hist(props_areas, bins=200)
-        plt.vlines(pixel_threshold, 0, hist_vals.max(), ls='-', colors="r",
-                   label=f"pixel threshold=>{str(pixel_threshold)} pixels")
-        ax = plt.gca()
-        ax.set_yscale('log')
-        plt.legend()
-        plt.xlabel("pixels within the found regions from the pixel connectivity analysis")
-        plt.ylabel("number of regions (log-scale)")
-        title = f"Binarized projection: regions of contiguous pixels, stack {stack}"
-        plot_title = f"Stats Binarized projection, regions of contiguous pixels (histogram), stack {stack}"
-        plt.title(title)
-        plt.tight_layout()
-        #plt.show()
-        plt.savefig(Path(plot_path, plot_title + ".pdf"), dpi=120)
-        plt.close(fig)
+            fig = plt.figure(28, figsize=(7, 5))
+            plt.clf()
+            hist_vals, _, _ = plt.hist(props_areas, bins=200)
+            plt.vlines(pixel_threshold, 0, hist_vals.max(), ls='-', colors="r",
+                    label=f"pixel threshold=>{str(pixel_threshold)} pixels")
+            ax = plt.gca()
+            ax.set_yscale('log')
+            plt.legend()
+            plt.xlabel("pixels within the found regions from the pixel connectivity analysis")
+            plt.ylabel("number of regions (log-scale)")
+            title = f"Binarized projection: regions of contiguous pixels, stack {stack}"
+            plot_title = f"Stats Binarized projection, regions of contiguous pixels (histogram), stack {stack}"
+            plt.title(title)
+            plt.tight_layout()
+            #plt.show()
+            plt.savefig(Path(plot_path, plot_title + ".pdf"), dpi=120)
+            plt.close(fig)
 
         MG_pro_bin_area_thresholded_tmp = np.zeros((I_shape[-2], I_shape[-1]), dtype="uint16")
         new_label_start = 6 # this is just to increase the contrast in the later 2D color map segmentation image
@@ -1934,31 +1935,32 @@ def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100):
 
         # plot and save the segmented pixel areas above pixel_threshold:
         MG_pro_bin_area_sum[stack] = int(props_areas[props_areas > pixel_threshold].sum())
-        fig = plt.figure(29, figsize=(6, 4))
-        plt.clf()
-        final_labels = np.arange(props_areas[props_areas>pixel_threshold].shape[0])
-        final_label_nums = len(final_labels)
-        plt.bar(final_labels, props_areas[props_areas>pixel_threshold])
-        ax = plt.gca()
-        ax.set_yscale('log')
-        try:
-            annotation_y = props_areas[props_areas>pixel_threshold].max()
-        except:
-            annotation_y = 1
-        plt.text(0, annotation_y,
-                 f"segmented {int(props_areas[props_areas>pixel_threshold].sum())} pixels of total FOV "
-                 f"{int(MG_pro_bin_area_thresholded[stack].shape[0]*MG_pro_bin_area_thresholded[stack].shape[1])} pixels"
-                 f"={(100*props_areas[props_areas > pixel_threshold].sum()/(MG_pro_bin_area_thresholded[stack].shape[0]*MG_pro_bin_area_thresholded[stack].shape[1])).round(2)}%",
-                 verticalalignment='top')
-        plt.xlim(-1, final_label_nums + 1)
-        plt.xlabel(f"found regions with pixel-area>{pixel_threshold}")
-        plt.ylabel("pixels within the region (log-scale)")
-        title = f"Binarized projection: pixels within thresholded regions, stack {stack}"
-        plot_title = f"Stats Binarized segmented projection, pixels within thresholded regions, stack {stack}"
-        plt.title(title)
-        plt.tight_layout()
-        plt.savefig(Path(plot_path, plot_title + ".pdf"), dpi=120)
-        plt.close(fig)
+        if stats_plots:
+            fig = plt.figure(29, figsize=(6, 4))
+            plt.clf()
+            final_labels = np.arange(props_areas[props_areas>pixel_threshold].shape[0])
+            final_label_nums = len(final_labels)
+            plt.bar(final_labels, props_areas[props_areas>pixel_threshold])
+            ax = plt.gca()
+            ax.set_yscale('log')
+            try:
+                annotation_y = props_areas[props_areas>pixel_threshold].max()
+            except:
+                annotation_y = 1
+            plt.text(0, annotation_y,
+                    f"segmented {int(props_areas[props_areas>pixel_threshold].sum())} pixels of total FOV "
+                    f"{int(MG_pro_bin_area_thresholded[stack].shape[0]*MG_pro_bin_area_thresholded[stack].shape[1])} pixels"
+                    f"={(100*props_areas[props_areas > pixel_threshold].sum()/(MG_pro_bin_area_thresholded[stack].shape[0]*MG_pro_bin_area_thresholded[stack].shape[1])).round(2)}%",
+                    verticalalignment='top')
+            plt.xlim(-1, final_label_nums + 1)
+            plt.xlabel(f"found regions with pixel-area>{pixel_threshold}")
+            plt.ylabel("pixels within the region (log-scale)")
+            title = f"Binarized projection: pixels within thresholded regions, stack {stack}"
+            plot_title = f"Stats Binarized segmented projection, pixels within thresholded regions, stack {stack}"
+            plt.title(title)
+            plt.tight_layout()
+            plt.savefig(Path(plot_path, plot_title + ".pdf"), dpi=120)
+            plt.close(fig)
         
         # save thresholded pixel-areas:
         pixel_areas_df = pd.DataFrame(props_areas[props_areas > pixel_threshold], columns=["pixels per segment"])
@@ -2257,7 +2259,7 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
                   median_filter_slices = "square", median_filter_window_slices=3,
                   median_filter_projections = "square", median_filter_window_projections=3, 
                   clear_previous_results=False, spectral_unmixing_median_filter_window=3,
-                  debug_output=False):
+                  debug_output=False, stats_plots=False):
     """
     Processes a 4D/5D image stack to analyze microglial motility (MAIN MotiLA pipeline).
 
@@ -2399,7 +2401,8 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
         "hist_match": hist_match,
         "histogram_ref_stack": histogram_ref_stack,
         "spectral_unmixing_amplifyer": spectral_unmixing_amplifyer,
-        "blob_pixel_threshold": blob_pixel_threshold}
+        "blob_pixel_threshold": blob_pixel_threshold,
+        "stats_plots": stats_plots}
     parameters_list = [{"Parameter": key, "Value": value} for key, value in parameters.items()]
     processing_parameters_df = pd.DataFrame(data=parameters_list)
     processing_parameters_df.to_excel(excel_file_path, index=False)
@@ -2573,7 +2576,9 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
     if debug_output: print_ram_usage()
 
     MG_binarized_projection, MG_binarized_projection_areas = remove_small_blobs(MG_binarized_projection, 
-                                                I_shape=I_shape_reg, log=log, plot_path=plot_path, pixel_threshold=blob_pixel_threshold)
+                                                I_shape=I_shape_reg, log=log, plot_path=plot_path, 
+                                                pixel_threshold=blob_pixel_threshold,
+                                                stats_plots=stats_plots)
     plot_pixel_areas(MG_areas=MG_binarized_projection_areas, log=log, plot_path=plot_path, I_shape=I_shape_reg)
 
     if debug_output: print_ram_usage()
@@ -2596,7 +2601,7 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
                   median_filter_slices = "square", median_filter_window_slices=3,
                   median_filter_projections = "square", median_filter_window_projections=3, 
                   clear_previous_results=False, spectral_unmixing_median_filter_window=3,
-                  debug_output=False):
+                  debug_output=False, stats_plots=False):
     """
     Processes multiple image stacks in a batch, extracting sub-volumes, registering them
     (optional), performing image processing, and analyzing microglial motility.
@@ -2807,7 +2812,8 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
                               regStack2d=regStack2d, 
                               regStack3d=regStack3d,
                               template_mode=template_mode,
-                              debug_output=debug_output)
+                              debug_output=debug_output,
+                              stats_plots=stats_plots)
         log.log("\n============================================================\n")
             
     _ = log.logt(Total_batch_Process_t0, verbose=True, spaces=0, unit="sec", process="total batch ")
@@ -3074,6 +3080,10 @@ if __name__ == '__main__':
     spectral_unmixing_amplifyer_default    =1 # amplifies the MG channel (to save more from it)
     spectral_unmixing_median_filter_window =3 # must be integer; 1=off, 3=common, 5=strong, 7=very strong
     
+    # debugging and stats settings:
+    debug_output = False # set to True for debugging output
+    stats_plots = False  # set to True for plotting additional statistics
+    
     # init logger:
     log = logger_object()
     log.log("logger started for TEST/DEBUG RUN.")
@@ -3108,7 +3118,8 @@ if __name__ == '__main__':
                   median_filter_projections=median_filter_projections,
                   median_filter_window_projections=median_filter_window_projections,
                   clear_previous_results=clear_previous_results,
-                  spectral_unmixing_median_filter_window=spectral_unmixing_median_filter_window)
+                  spectral_unmixing_median_filter_window=spectral_unmixing_median_filter_window,
+                  stats_plots=stats_plots)
     
     
     

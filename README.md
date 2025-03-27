@@ -306,6 +306,12 @@ With `spectral_unmixing_amplifyer_default` you can define the amplification fact
 
 `spectral_unmixing_median_filter_window` defines the kernel size for median filtering of N-channel before subtraction. This can be useful to reduce noise in the N-channel and, thus, achieve a better unmixing result. Allowed are odd integer numbers (3, 5, 9, ...).
 
+#### Debug settings
+| Parameter | Values | Description |
+|------------|----------------------|----------------|
+| `debug_output` | bool (`True` or `False`) | enable debug output for intermediate results; at the moment, only memory outputs are given.|
+| `stats_plots` | bool (`True` or `False`) | enable additional statistics plots for the motility analysis (at the moment: histogram plots of the binarized pixels) |
+
 
 ### Input/output parameters for batch collection
 
@@ -376,7 +382,9 @@ mt.process_stack(fname=fname,
                 median_filter_projections=median_filter_projections,
                 median_filter_window_projections=median_filter_window_projections,
                 clear_previous_results=clear_previous_results,
-                spectral_unmixing_median_filter_window=spectral_unmixing_median_filter_window)
+                spectral_unmixing_median_filter_window=spectral_unmixing_median_filter_window,
+                debug_output=debug_output,
+                stats_plots=stats_plots)
 ```
 
 
@@ -416,7 +424,8 @@ mt.batch_process_stacks(PROJECT_Path=PROJECT_Path,
                         median_filter_window_projections=median_filter_window_projections,
                         clear_previous_results=clear_previous_results, 
                         spectral_unmixing_median_filter_window=spectral_unmixing_median_filter_window,
-                        debug_output=False)
+                        debug_output=debug_output,
+                        stats_plots=stats_plots)
 ```
 
 After processing all datasets, you can collect the results and save them to a central output folder. This allows you to perform cohort-level analyses and visualize the results across all datasets. To collect the results, use the following function:
