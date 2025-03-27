@@ -920,7 +920,8 @@ def histogram_equalization(MG_sub, I_shape, projection_layers, log, clip_limit=0
     _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="histogram equalization ")
     return MG_sub_histeq
 
-def histogram_equalization_on_projections(MG_sub, I_shape, log, clip_limit=0.01):
+def histogram_equalization_on_projections(MG_sub, I_shape, log, clip_limit=0.01,
+                                          kernel_size=None):
     """
     Applies adaptive histogram equalization to enhance contrast in projected microglial image stacks.
 
@@ -954,7 +955,8 @@ def histogram_equalization_on_projections(MG_sub, I_shape, log, clip_limit=0.01)
 
     for stack in range(I_shape[0]):
         MG_sub_histeq[stack, :, :] = exposure.equalize_adapthist(MG_sub[stack].astype("uint16"),
-                                                                    clip_limit=clip_limit)
+                                                                 clip_limit=clip_limit,
+                                                                 kernel_size=kernel_size)
 
     _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="histogram equalization ")
     return MG_sub_histeq
@@ -2254,6 +2256,7 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
                   histogram_ref_stack, log, blob_pixel_threshold=100, 
                   regStack2d=True, regStack3d=False, template_mode="mean",
                   spectral_unmixing=True, hist_equalization=False, hist_match=True, 
+                  hist_equalization_kernel_size=None, hist_equalization_clip_limit=0.05,
                   RESULTS_Path="motility_analysis",
                   ID="ID00000", group="blinded", max_xy_shift_correction=50,
                   threshold_method="li", compare_all_threshold_methods=True,
@@ -2400,6 +2403,8 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
         "regStack3d": regStack3d,
         "max_xy_shift_correction": max_xy_shift_correction,
         "histogram_equalization": hist_equalization,
+        "hist_equalization_clip_limit": hist_equalization_clip_limit,
+        "hist_equalization_kernel_size": hist_equalization_kernel_size,
         "hist_match": hist_match,
         "histogram_ref_stack": histogram_ref_stack,
         "spectral_unmixing_amplifyer": spectral_unmixing_amplifyer,
@@ -2514,7 +2519,8 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
     # enhance the histograms WITHIN each projected stack:
     if hist_equalization:
         MG_projection = histogram_equalization_on_projections(MG_projection, I_shape,
-                                                                   log, clip_limit=0.1)
+                                                                   log, clip_limit=hist_equalization_clip_limit,
+                                                                   kernel_size=hist_equalization_kernel_size)
         plot_projected_stack(MG_projection, I_shape=I_shape, plot_path=plot_path, log=log,
                          plottitle="MG projected, proc 2 histogram equalized")
 
@@ -2597,6 +2603,7 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
                   histogram_ref_stack=0, log="", blob_pixel_threshold=100, 
                   regStack2d=True, regStack3d=False, template_mode="mean",
                   spectral_unmixing=True, hist_equalization=False, hist_match=True, 
+                  hist_equalization_kernel_size=None, hist_equalization_clip_limit=0.05,
                   max_xy_shift_correction=50,
                   threshold_method="li", compare_all_threshold_methods=True,
                   gaussian_sigma_proj=1, spectral_unmixing_amplifyer=1,
@@ -2797,6 +2804,8 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
                               blob_pixel_threshold=blob_pixel_threshold,
                               spectral_unmixing=spectral_unmixing, hist_equalization=hist_equalization,
                               hist_match=hist_match, 
+                              hist_equalization_kernel_size=hist_equalization_kernel_size,
+                              hist_equalization_clip_limit=hist_equalization_clip_limit,
                               RESULTS_Path=output_foldername, 
                               ID=Current_ID, 
                               group=group,
@@ -3042,7 +3051,12 @@ if __name__ == '__main__':
     compare_all_threshold_methods = True # if True, all threshold methods will be compared and saved in the plot folder
 
     # image enhancement settings:
-    hist_equalization = True        # enhance the histograms WITHIN EACH projected stack: True or False
+    hist_equalization = True             # enhance the histograms WITHIN EACH projected stack: True or False
+    hist_equalization_clip_limit = 0.05  # clip limit for the histogram equalization (daufault is 0.05)
+    hist_equalization_kernel_size = None # kernel size for the histogram equalization; 
+                                         # None (default) for automatic, or use a tuple (x,y) for a fixed size;
+                                         # when using a tuple, you can start increaseing the values from multiples
+                                         # of 8, e.g., (8,8), (16,16), (24,24), (32,32), ... (128,128), ...
     hist_match = True               # match the histograms   ACROSS the stacks          : True or False
     histogram_ref_stack = 0         # define the stack which should be used as reference for the histogram matching
     
@@ -3106,6 +3120,8 @@ if __name__ == '__main__':
                   template_mode=template_mode,
                   spectral_unmixing=spectral_unmixing,
                   hist_equalization=hist_equalization,
+                  hist_equalization_clip_limit=hist_equalization_clip_limit,
+                  hist_equalization_kernel_size=hist_equalization_kernel_size,
                   hist_match=hist_match,
                   RESULTS_Path=RESULTS_Path,
                   ID=Current_ID,
