@@ -1473,6 +1473,8 @@ def plot_intensities(MG_pro, log, plot_path, I_shape):
     plt.axhline(y=25, color="k", linestyle='--', lw=0.75, alpha=0.5)
     plt.bar(np.arange(I_shape[0]), 100 * intensity_means / intensity_means[0], zorder=3)
     max_y_val = np.max(100 *intensity_means / intensity_means[0])
+    if np.isnan(max_y_val) or np.isinf(max_y_val):
+        max_y_val = 100
     plt.ylim(0, max_y_val+5)
     plt.xlim(-0.5, I_shape[0]-0.5)
     plt.xticks(np.arange(I_shape[0]), labels=[f"$t_{i}$" for i in range(I_shape[0])])
@@ -2512,7 +2514,7 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
     # enhance the histograms WITHIN each projected stack:
     if hist_equalization:
         MG_projection = histogram_equalization_on_projections(MG_projection, I_shape,
-                                                                   log, clip_limit=0.01)
+                                                                   log, clip_limit=0.1)
         plot_projected_stack(MG_projection, I_shape=I_shape, plot_path=plot_path, log=log,
                          plottitle="MG projected, proc 2 histogram equalized")
 
