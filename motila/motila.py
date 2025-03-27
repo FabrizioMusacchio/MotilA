@@ -32,7 +32,7 @@ Key features:
 - Implements spectral unmixing, histogram equalization and matching
 - Includes 2D and 3D motion correction
 - Offers multiple thresholding and filtering options
-- Computes gain, loss, stability, and turnover ratio (TOR) metrics
+- Computes gain, loss, stability, and turnover rate (TOR) metrics
 
 Dependencies:
 -------------
