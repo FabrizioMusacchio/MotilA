@@ -2509,7 +2509,7 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
     # enhance the histograms WITHIN each projected stack:
     if hist_equalization:
         MG_projection = histogram_equalization_on_projections(MG_projection, I_shape,
-                                                                   log, clip_limit=0.05)
+                                                                   log, clip_limit=0.01)
         plot_projected_stack(MG_projection, I_shape=I_shape, plot_path=plot_path, log=log,
                          plottitle="MG projected, proc 2 histogram equalized")
 
