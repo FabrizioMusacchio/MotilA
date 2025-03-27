@@ -3174,6 +3174,8 @@ if __name__ == '__main__':
     template_mode=template_mode
     spectral_unmixing=spectral_unmixing
     hist_equalization=hist_equalization
+    hist_equalization_clip_limit=hist_equalization_clip_limit,
+    hist_equalization_kernel_size=hist_equalization_kernel_size,
     hist_match=hist_match
     RESULTS_Path=RESULTS_Path
     ID=Current_ID
@@ -3226,6 +3228,8 @@ if __name__ == '__main__':
                          template_mode=template_mode,
                          spectral_unmixing=spectral_unmixing, 
                          hist_equalization=hist_equalization, 
+                         hist_equalization_clip_limit=hist_equalization_clip_limit,
+                         hist_equalization_kernel_size=hist_equalization_kernel_size,
                          hist_match=hist_match,
                          max_xy_shift_correction=max_xy_shift_correction,
                          threshold_method=threshold_method, 
