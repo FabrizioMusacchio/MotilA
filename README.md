@@ -1,3 +1,5 @@
+![GitHub Release](https://img.shields.io/github/v/Release/FabrizioMusacchio/Github-Release-Test) [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
+
 # MotilA: A pipeline for microglial fine process motility analysis
 
 *MotilA* is a Python-based image analysis pipeline designed to quantify microglial fine process motility from 4D and 5D time-lapse image stacks acquired through multi-photon in vivo imaging. While developed for microglial analysis, *MotilA* can be applied to other cell types and imaging studies as well. The pipeline supports both single-file and batch processing, making it adaptable for various experimental designs and high-throughput analyses. 
