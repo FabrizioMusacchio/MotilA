@@ -14,6 +14,8 @@ authors:
   - family-names: Gockel
     given-names: Nala
   - family-names: Fuhrmann
+    given-names: Falko
+  - family-names: Fuhrmann
     given-names: Martin
     orcid: https://orcid.org/0000-0001-7672-2913
 repository-code: https://github.com/FabrizioMusacchio/MotilA/tree/main
