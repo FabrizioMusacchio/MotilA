@@ -1,0 +1,64 @@
+{
+    "title": "MotilA: A pipeline for microglial fine process motility analysis",
+    "version": "1.0.0",
+    "creators": [
+      {
+        "name": "Musacchio, Fabrizio",
+        "orcid": "0000-0002-9043-3349",
+        "affiliation": "German Center for Neurodegenerative Diseases (DZNE)",
+        "type": "ProjectLeader"
+      },
+      {
+        "name": "Crux, Sophie",
+        "affiliation": "German Center for Neurodegenerative Diseases (DZNE)",
+        "type": "ProjectMember"
+      },
+      {
+        "name": "Nebeling, Felix",
+        "affiliation": "German Center for Neurodegenerative Diseases (DZNE)",
+        "type": "ProjectMember"
+      },
+      {
+        "name": "Gockel, Nala",
+        "affiliation": "German Center for Neurodegenerative Diseases (DZNE)",
+        "type": "ProjectMember"
+      },
+      {
+        "name": "Fuhrmann, Falko",
+        "affiliation": "German Center for Neurodegenerative Diseases (DZNE)",
+        "type": "ProjectMember"
+      },
+      {
+        "name": "Fuhrmann, Martin",
+        "orcid": "0000-0001-7672-2913",
+        "affiliation": "German Center for Neurodegenerative Diseases (DZNE)",
+        "type": "ProjectLeader"
+      }
+    ],
+    "access_right": "open",
+    "license": "GPL-3.0",
+    "upload_type": "software",
+    "language": "eng",
+    "repository": "https://github.com/FabrizioMusacchio/MotilA",
+    "related_identifiers": [
+      {
+        "identifier": "https://github.com/FabrizioMusacchio/MotilA/tree/main",
+        "relation": "isSupplementTo",
+        "resource_type": "software"
+      }
+    ],
+    "keywords": [
+      "image analysis",
+      "microglia",
+      "motility",
+      "two-photon imaging",
+      "neuroscience",
+      "Python",
+      "Python pipeline",
+      "image segmentation",
+      "image processing",
+      "image registration",
+      "image analysis pipeline"
+    ]
+  }
+  
