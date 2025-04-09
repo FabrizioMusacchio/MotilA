@@ -219,7 +219,7 @@ def calc_process_time_logger(t0, verbose=False, leadspaces="",  unit="min", proc
 class logger_object:
     """ Class, that creates a logger object with some base functions:
 
-        __init__            initiliazes the logger object
+        __init__            initializes the logger object
         type                tells user type of this class object
         log(input, space)   logs input wiht optional preceeding spaces
         logc(input)         logs input with chapter-seperator
