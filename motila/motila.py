@@ -3032,7 +3032,7 @@ if __name__ == '__main__':
 
     # image enhancement settings:
     hist_equalization = True             # enhance the histograms WITHIN EACH projected stack: True or False
-    hist_equalization_clip_limit = 0.05  # clip limit for the histogram equalization (daufault is 0.05)
+    hist_equalization_clip_limit = 0.05  # clip limit for the histogram equalization (default is 0.05)
     hist_equalization_kernel_size = None # kernel size for the histogram equalization; 
                                          # None (default) for automatic, or use a tuple (x,y) for a fixed size;
                                          # when using a tuple, you can start increaseing the values from multiples
