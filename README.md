@@ -280,7 +280,7 @@ Gaussian smoothing further  enhances the contrast and reduces noise. Set
 
 If your stack contains only one channel, set `two_channel_default = False`; any value set in `N_channel_default` will be ignored.
 
-If `metadata.xls` is present in `project_tag` folder, the above defined values (`two_channel_default`, `MG_channel_defaulta`, `N_channel_default`) are ignored and values from the metadata.xls are used instead  (**in batch processing only!**)
+If `metadata.xls` is present in `project_tag` folder, the above defined values (`two_channel_default`, `MG_channel_default`, `N_channel_default`) are ignored and values from the metadata.xls are used instead  (**in batch processing only!**)
 
 
 #### Registration settings
