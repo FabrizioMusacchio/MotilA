@@ -769,7 +769,7 @@ def spectral_unmix(MG_sub, N_sub, I_shape, zarr_group, projection_layers, log,
                    median_filter_window=3, amplifyer=2):
     """
     Performs spectral unmixing to reduce channel bleed-through in microglial image stacks.
-    It reuqires a microglial and a neuronal channel and spectral unmixing is performed by 
+    It requires a microglial and a neuronal channel and spectral unmixing is performed by 
     simple subtraction of the neuronal signal from the microglial signal.
 
     Parameters:
@@ -913,7 +913,7 @@ def histogram_equalization_on_projections(MG_sub, I_shape, log, clip_limit=0.01,
     - Each stack is processed independently to maintain consistency across slices.
     """
     Process_t0 = time.time()
-    log.log(f"equilizing the histogram for each projected stack ...")
+    log.log(f"equalizing the histogram for each projected stack ...")
 
     MG_sub_histeq = np.zeros((I_shape[0], I_shape[-2], I_shape[-1]))
 
@@ -1733,7 +1733,7 @@ def binarize_2D_images(MG_pro, I_shape, log, plot_path, threshold_method="otsu",
                 threshold_method_choose = "mean"
                 thresh = thresh_mean
             elif thresh_min_R == R_max:
-                threshold_method_choose = "mininum"
+                threshold_method_choose = "minium"
                 thresh = thresh_min
             elif thresh_tri_R == R_max:
                 threshold_method_choose = "triangle"
@@ -1754,7 +1754,7 @@ def binarize_2D_images(MG_pro, I_shape, log, plot_path, threshold_method="otsu",
             elif threshold_method.lower() == "mean":
                 thresh = filter.threshold_mean(MG_pro_curr)
             elif threshold_method.lower() == "min" or threshold_method == "minimum":
-                threshold_method_choose = "mininum"
+                threshold_method_choose = "minium"
                 thresh = filter.threshold_minimum(MG_pro[stack])
             elif threshold_method.lower() == "triangle":
                 thresh = filter.threshold_triangle(MG_pro_curr)
@@ -1808,7 +1808,7 @@ def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100, sta
     - Logs the process and reports the number of retained segments.
     """
     Process_t0 = time.time()
-    log.log(f"apply connectivity-measurments to exclude too small microglia parts...")
+    log.log(f"apply connectivity-measurements to exclude too small microglia parts...")
 
     MG_pro_bin_area_thresholded = np.zeros((I_shape[0], I_shape[-2], I_shape[-1]), dtype="uint16")
     MG_pro_bin_area_sum = np.zeros((I_shape[0]))
@@ -1938,7 +1938,7 @@ def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100, sta
         pixel_areas_df["sum of all FOV pixels"] = MG_pro_bin_area_thresholded[stack].shape[0]*MG_pro_bin_area_thresholded[stack].shape[1]
         pixel_areas_df.to_excel(os.path.join(plot_path, f"pixel areas of segmented projection, stack {stack}.xlsx"))
 
-    _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="connectivity measurment ")
+    _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="connectivity measurement ")
     return MG_pro_bin_area_thresholded, MG_pro_bin_area_sum
 
 def plot_pixel_areas(MG_areas, log, plot_path, I_shape):
@@ -3035,7 +3035,7 @@ if __name__ == '__main__':
     hist_equalization_clip_limit = 0.05  # clip limit for the histogram equalization (default is 0.05)
     hist_equalization_kernel_size = None # kernel size for the histogram equalization; 
                                          # None (default) for automatic, or use a tuple (x,y) for a fixed size;
-                                         # when using a tuple, you can start increaseing the values from multiples
+                                         # when using a tuple, you can start increasing the values from multiples
                                          # of 8, e.g., (8,8), (16,16), (24,24), (32,32), ... (128,128), ...
     hist_match = True               # match the histograms   ACROSS the stacks          : True or False
     histogram_ref_stack = 0         # define the stack which should be used as reference for the histogram matching
