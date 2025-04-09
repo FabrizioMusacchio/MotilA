@@ -687,6 +687,9 @@ def extract_and_register_subvolume(fname, I_shape, projection_layers, projection
         if two_channel:
             # calculate the template:
             template_I = template_func(N_sub[stack, :, :, :], axis=0)
+        else:
+            # calculate the template:
+            template_I = template_func(MG_sub[stack, :, :, :], axis=0)
         
         # use phase-correlation to register the current sub-volume:
         shifts = np.zeros((projection_layers, 2))
@@ -753,8 +756,9 @@ def extract_and_register_subvolume(fname, I_shape, projection_layers, projection
     del subvol_group["MG_sub_tmp"]
     if two_channel:
         del subvol_group["N_sub_tmp"]
+        del N_sub
     
-    del MG_sub, N_sub
+    del MG_sub
     gc.collect()
     
     _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="sub-volume extracting + 3D registration")
