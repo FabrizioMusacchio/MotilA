@@ -59,7 +59,7 @@ Usage:
 Author
 -------------
 Fabrizio Musacchio (lead developer)
-Contributors: Sophie Crux, Felix Nebeling, Nala Gockel, Martin Fuhrmann
+Contributors: Sophie Crux, Felix Nebeling, Nala Gockel, Falko Fuhrmann, Martin Fuhrmann
 First created: September 2023
 
 License: GPL-3.0 License
