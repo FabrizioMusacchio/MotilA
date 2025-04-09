@@ -1,4 +1,5 @@
-![GitHub Release](https://img.shields.io/github/v/release/FabrizioMusacchio/motila) [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
+![GitHub Release](https://img.shields.io/github/v/release/FabrizioMusacchio/motila) [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/) ![Tests](https://github.com/FabrizioMusacchio/motila/actions/workflows/python-tests.yml/badge.svg)
+
 
 # MotilA: A pipeline for microglial fine process motility analysis
 
