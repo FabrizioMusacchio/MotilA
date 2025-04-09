@@ -274,8 +274,11 @@ class logger_object:
 
     def stop(self, printconsole=True):
         self.log("logging stopped.", printconsole=printconsole)
-        self.logger.handlers[0].stream.close()
-        self.logger.removeHandler(self.logger.handlers[0])
+        #self.logger.handlers[0].stream.close()
+        #self.logger.removeHandler(self.logger.handlers[0])
+        if hasattr(self.file_handler, "stream"):
+            self.file_handler.stream.close()
+        self.logger.removeHandler(self.file_handler)
 
 # %% RAM USAGE FUNCTIONS
 def print_ram_usage_in_loop(indent=0):
