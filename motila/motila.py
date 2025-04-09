@@ -364,44 +364,6 @@ def plot_histogram_of_projections(image_stack, I_shape, plot_path, log, fignum=1
 
     _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="histogram plotting ")
 
-def plot_projected_stack_as_tif(image_stacks, I_shape, plot_path, log, plottitle="MG unmixed"):
-    """
-    Saves each projected stack as an uncompressed TIFF file.
-
-    Parameters:
-    -----------
-    image_stacks : array-like
-        The stack of 2D projected images to be saved.
-    I_shape : tuple
-        The shape of the image stack, used to determine the number of stacks.
-    plot_path : str or Path
-        The directory where the TIFF files will be saved.
-    log : logger_object
-        A logging object to record processing steps and timing.
-    plottitle : str, optional
-        The base title for the saved TIFF files (default is "MG unmixed").
-
-    Returns:
-    --------
-    None
-        The function saves each projected stack as a separate TIFF file.
-
-    Notes:
-    ------
-    - The saved files are named `<plottitle>, stack <index>.tif`.
-    - The function logs the saving process and execution time.
-    - No compression is applied to the saved TIFF files.
-    """
-    Process_t0 = time.time()
-
-    log.log(f"saving stack as tif files...")
-    for stack in range(I_shape[0]):
-        image_stacks.shape
-        TIFF_path = os.path.join(plot_path, plottitle+", stack " + str(stack) + ".tif")
-        tifffile.imwrite(TIFF_path, image_stacks[stack], compression=0)
-     
-    _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="z-projection tif saving ")
-
 def plot_projected_stack(image_stack, I_shape, plot_path, log, plottitle="MG projected"):
     """
     Plots and saves z-projected image stacks as grayscale images and a TIFF file.
