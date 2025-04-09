@@ -435,7 +435,7 @@ def plot_projected_stack(image_stack, I_shape, plot_path, log, plottitle="MG pro
     log.log(f"plotting z-projections...")
     for stack in range(I_shape[0]):
         plot_2D_image(image_stack[stack], plot_path, plot_title=plottitle+", stack " + str(stack), 
-                      fignum=9, cmap=plt.cm.get_cmap('gist_gray'), cbar_label="",
+                      fignum=9, cmap=plt.get_cmap('gist_gray'), cbar_label="",
                       title=f"{plottitle}, stack {stack}", cbar_show=False)
                       # cbar_ticks=np.arange(0,255,10), cbar_ticks_labels=np.arange(0,255,10),
     TIFF_path = os.path.join(plot_path, plottitle+".tif")
@@ -1710,7 +1710,7 @@ def binarize_2D_images(MG_pro, I_shape, log, plot_path, threshold_method="otsu",
             plt.close()
             fig, ax = plt.subplots(4, 2, num=3, clear=True, figsize=(6, 9))
 
-            ax[0,0].imshow(MG_pro[stack], cmap=plt.cm.get_cmap('gist_gray'))
+            ax[0,0].imshow(MG_pro[stack], cmap=plt.get_cmap('gist_gray'))
             ax[0,0].set_title("original")
             ax[0,0].xaxis.set_visible(False)
             ax[0,0].yaxis.set_visible(False)
