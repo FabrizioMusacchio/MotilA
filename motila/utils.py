@@ -221,8 +221,8 @@ class logger_object:
 
         __init__            initializes the logger object
         type                tells user type of this class object
-        log(input, space)   logs input wiht optional preceeding spaces
-        logc(input)         logs input with chapter-seperator
+        log(input, space)   logs input with optional preceding spaces
+        logc(input)         logs input with chapter-separator
         stop                stops the logger object and the logging
         __del__             stops the logger object and the logging before deleting the object
     """
