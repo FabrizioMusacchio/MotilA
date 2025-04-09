@@ -103,7 +103,7 @@ from pathlib import Path
 import glob
 import gc
 
-from utils import (
+from motila.utils import (
     check_folder_exist_create, 
     filterfolder_by_string,
     filterfiles_by_string,
