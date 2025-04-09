@@ -40,9 +40,9 @@ Fabrizio Musacchio,  March 20, 2025
 """
 # %% IMPORTS
 import sys
-sys.path.append('../motila') # adjust the path to the location of the motila package
-import motila as mt
 from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from motila import motila as mt
 # %% VERIFY IMPORT
 mt.hello_world()
 # %% DEFINE MOTILA PARAMETERS

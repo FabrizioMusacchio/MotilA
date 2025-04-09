@@ -4,8 +4,7 @@ pip install pytest
 In a terminal, run:
 pytest
 """
-
-# tests/test_utils.py
+import sys
 from motila.utils import (
     hello_world_utils,
     check_folder_exist_create,
@@ -17,7 +16,6 @@ from motila.utils import (
     print_ram_usage, 
     print_ram_usage_in_loop,
     tiff_axes_check_and_correct)
-import sys
 from unittest import mock
 from datetime import datetime
 import re
