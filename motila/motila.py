@@ -1317,6 +1317,11 @@ def z_max_project(MG_sub, I_shape, log):
     Process_t0 = time.time()
     print(f"z-projecting...", end="")
 
+    # First, verify that the input is a 3D array, otherwise return the input and a warning:
+    if I_shape[1] == 1:
+        log.log(f"WARNING: z_max_project: input is not a 3D array, returning input without projection.")
+        return MG_sub
+
     MG_pro = np.zeros((I_shape[0], I_shape[-2], I_shape[-1]))
 
     for stack in range(I_shape[0]):
