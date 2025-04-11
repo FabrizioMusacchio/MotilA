@@ -2354,6 +2354,8 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
             #os.remove(os.path.join(plot_path, file))
     
     # if fname is a zarr file, the I_shape is not known yet:
+    if isinstance(fname, str):
+        fname = Path(fname)  # convert string to Path if it's a string
     if fname.suffix == ".tif":
         I_shape = get_stack_dimensions(fname)
     else:
