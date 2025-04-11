@@ -1997,7 +1997,14 @@ def plot_pixel_areas(MG_areas, log, plot_path, I_shape):
     plt.axhline(y=33, color="k", linestyle='--', lw=0.75, alpha=0.5)
     plt.axhline(y=25, color="k", linestyle='--', lw=0.75, alpha=0.5)
     plt.bar(np.arange(I_shape[0]), 100 * MG_areas / MG_areas[0], zorder=3)
-    ylim_max = np.max([105, np.max(100 * MG_areas / MG_areas[0])+5])
+    # check if there are any values to calculate max for ylim:
+    try:
+        ylim_max = np.max([105, np.max(100 * MG_areas / MG_areas[0]) + 5]) 
+    except ValueError:
+        ylim_max = 100  # set a default value if the max calculation fails (e.g., NaN or Inf)
+    # ensure ylim_max is finite (not NaN or Inf):
+    if not np.isfinite(ylim_max):
+        ylim_max = 100  # set a default value if ylim_max is NaN or Inf
     plt.ylim(0, ylim_max)
     plt.xlim(-0.5, I_shape[0]-0.5)
     #plt.xticks(np.arange(I_shape[0]))
@@ -2023,6 +2030,7 @@ def plot_pixel_areas(MG_areas, log, plot_path, I_shape):
     plt.savefig(Path(plot_path, plot_title + ".pdf"), dpi=120)
     plt.close(fig)
 
+    # save the data for later use:
     data_out = np.array([100 * MG_areas / MG_areas[0], MG_areas])
     df_out = pd.DataFrame(data=data_out.T,
                  columns=["cell area in pixel rel to stack 0", "cell area in pixel total"])
