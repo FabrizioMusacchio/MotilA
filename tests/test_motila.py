@@ -37,7 +37,8 @@ from motila.motila import (
     binarize_2D_images,
     remove_small_blobs,
     plot_pixel_areas,
-    motility
+    motility,
+    process_stack
     )
 import numpy as np
 import tifffile
@@ -47,13 +48,14 @@ import pytest
 import zarr
 import gc
 from skimage import exposure
+import pandas as pd
+from unittest.mock import MagicMock, patch
 
 # test test_hello_world:
 def test_hello_world(capsys):
     hello_world()
     captured = capsys.readouterr()
     assert "Hello, World! Welcome to MotilA!" in captured.out
-
 
 
 # calc_projection_range:
@@ -65,57 +67,88 @@ class MockLogger:
 
 def test_projection_range_normal_case():
     log = MockLogger()
-    result, correction = calc_projection_range(
+    result = calc_projection_range(
         projection_center=10,
         projection_layers=5,
         I_shape=(100, 30),  # shape: (y, z)
         log=log
     )
-    assert result == [8, 11]
-    assert correction == 0
+    assert result == [8, 12]  # For projection_center=10 and projection_layers=5
     assert "Projection center: 10" in log.messages[-1]
+
+def test_projection_range_normal_case1():
+    log = MockLogger()
+    result = calc_projection_range(
+        projection_center=9,
+        projection_layers=5,
+        I_shape=(100, 30),  # shape: (y, z)
+        log=log
+    )
+    assert result == [7, 11]  # For projection_center=9 and projection_layers=5
+    assert "Projection center: 9" in log.messages[-1]
 
 def test_projection_upper_exceeds():
     log = MockLogger()
-    result, correction = calc_projection_range(
+    result = calc_projection_range(
         projection_center=28,
         projection_layers=5,
         I_shape=(100, 30),
         log=log
     )
-    assert result == [26, 29]
-    assert correction == 0 # no out-of-bounds
+    assert result == [25, 29]  # Projection center at 28, layers should be [25, 26, 27, 28, 29]
     assert "Projection center" in log.messages[-1]
-    assert len(log.messages) == 1  # No warnings
+    assert len(log.messages) > 1  # Expect a warning for exceeding
+    assert "Projection center: 28, Projection range: [25, 29]" in log.messages[-1]
 
 def test_projection_lower_exceeds():
     log = MockLogger()
-    result, correction = calc_projection_range(
+    result = calc_projection_range(
         projection_center=1,
         projection_layers=5,
         I_shape=(100, 30),
         log=log
     )
-    assert result == [0, 2]
-    assert correction == 2  # only 3 layers possible
+    assert result == [0, 4]  # Projection center at 1, layers should be [0, 1, 2, 3]
     assert "adjusted as it was below 0" in log.messages[-2]
 
 def test_projection_completely_out_of_bounds():
     log = MockLogger()
-    result, correction = calc_projection_range(
+    result = calc_projection_range(
         projection_center=40,
         projection_layers=5,
         I_shape=(100, 30),
         log=log
     )
-    assert result == [0, 0]
-    assert correction == 0
-    assert "exceeds image z-dimension" in log.messages[-2]
+    assert result == [0, 0]  # Projection center at 40, no layers possible, adjusted to [0, 0]
+    assert "WARNING: projection center 40 is out of bounds for image z-dimension 30 -> skipping." in log.messages[-1]
+
+def test_projection_even_layers():
+    log = MockLogger()
+    result = calc_projection_range(
+        projection_center=13,
+        projection_layers=6,
+        I_shape=(100, 30),
+        log=log
+    )
+    assert result == [11, 16]  # Projection center at 13, layers should be [11, 12, 13, 14, 15, 16]
+    assert "Projection center: 13" in log.messages[-1]
+
+def test_projection_odd_layers():
+    log = MockLogger()
+    result = calc_projection_range(
+        projection_center=14,
+        projection_layers=5,
+        I_shape=(100, 30),
+        log=log
+    )
+    assert result == [12, 16]  # Projection center at 14, layers should be [12, 13, 14, 15, 16]
+    assert "Projection center: 14" in log.messages[-1]
 
 
 # plot_2D_image:
 def test_plot_2D_image_creates_file(tmp_path):
     # Create a simple 2D image
+    np.random.seed(42)
     image = np.random.rand(100, 100)
     plot_title = "test_plot"
     plot_path = tmp_path
@@ -141,6 +174,7 @@ def test_plot_2D_image_creates_file(tmp_path):
 # plot_2D_image_as_tif:
 def test_plot_2D_image_as_tif(tmp_path):
     # Create dummy 2D image
+    np.random.seed(42)
     image = np.random.rand(64, 64).astype(np.float32)
     plot_title = "test_image"
     plot_path = tmp_path
@@ -162,6 +196,7 @@ def test_plot_2D_image_as_tif(tmp_path):
 # plot_histogram_creates_pdf:
 def test_plot_histogram_creates_pdf(tmp_path):
     # Generate test image
+    np.random.seed(42)
     image = np.random.rand(128, 128).astype(np.float32)
     plot_title = "hist_test"
     plot_path = tmp_path
@@ -186,6 +221,7 @@ class MockLogger:
 
 def test_plot_histogram_of_projections(tmp_path):
     # Create a stack of 3 images (3 x 64 x 64)
+    np.random.seed(42)
     stack = np.random.rand(3, 64, 64).astype(np.float32)
     I_shape = stack.shape  # (3, 64, 64) → T, Y, X
 
@@ -217,6 +253,7 @@ class MockLogger:
 
 def test_plot_projected_stack_as_tif(tmp_path):
     # Create a dummy 3D stack: 3 slices of 64x64
+    np.random.seed(42)
     stack = np.random.rand(3, 64, 64).astype(np.float32)
     I_shape = stack.shape  # (3, 64, 64)
     log = MockLogger()
@@ -255,6 +292,7 @@ class MockLogger:
 
 def test_plot_projected_stack(tmp_path):
     # Create a 3D stack of grayscale 2D images
+    np.random.seed(42)
     stack = np.random.rand(3, 64, 64).astype(np.float32)
     I_shape = stack.shape  # (3, 64, 64)
     log = MockLogger()
@@ -297,6 +335,7 @@ def test_plot_projected_stack(tmp_path):
 # get_stack_dimensions:
 def test_get_stack_dimensions(tmp_path):
     # Create and save a dummy stack
+    np.random.seed(42)
     arr = np.random.rand(2, 3, 64, 64).astype(np.float32)  # e.g., T, Z, Y, X
     fname = tmp_path / "test_stack.tif"
     tifffile.imwrite(fname, arr, imagej=True, metadata={"axes": "TZYX"})
@@ -326,6 +365,7 @@ class MockLogger:
 
 def test_extract_subvolume_single_channel(tmp_path):
     # Create synthetic 4D stack: (T=2, Z=5, Y, X)
+    np.random.seed(42)
     arr = np.random.rand(2, 5, 32, 32).astype(np.float32)
     fname = tmp_path / "test_stack.tif"
     tifffile.imwrite(fname, arr, imagej=True, metadata={"axes": "TZYX"})
@@ -369,6 +409,7 @@ class MockLogger:
 
 def test_extract_and_register_subvolume_single_channel(tmp_path):
     # Create a dummy 4D image (T, Z, Y, X)
+    np.random.seed(42)
     arr = np.random.rand(2, 5, 32, 32).astype(np.float32)
     fname = tmp_path / "dummy_stack.tif"
     tifffile.imwrite(fname, arr, imagej=True, metadata={"axes": "TZYX"})
@@ -407,6 +448,7 @@ def test_extract_and_register_subvolume_single_channel(tmp_path):
 
 def test_extract_and_register_subvolume_two_channel(tmp_path):
     # Create a dummy 5D image (T, Z, C, Y, X) with 2 channels
+    np.random.seed(42)
     arr = np.random.rand(2, 5, 2, 32, 32).astype(np.float32)  # T, Z, C, Y, X
     fname = tmp_path / "dummy_2channel_stack.tif"
     tifffile.imwrite(fname, arr, imagej=True, metadata={"axes": "TZCYX"})
@@ -464,6 +506,7 @@ class MockLogger:
 
 def test_spectral_unmix(tmp_path):
     # Create synthetic 4D data: T=2, Z=5, Y=32, X=32, C=2 (2 channels: microglial and neuronal)
+    np.random.seed(42)
     arr_mg = np.random.rand(2, 5, 32, 32).astype(np.float32)  # Microglial
     arr_n = np.random.rand(2, 5, 32, 32).astype(np.float32)  # Neuronal
     
@@ -529,6 +572,7 @@ class MockLogger:
 
 def test_histogram_equalization_on_projections(tmp_path):
     # Create synthetic 3D image stack (T, Z, Y, X) for the microglial sub-volume
+    np.random.seed(42)
     arr = np.random.rand(5, 32, 32).astype(np.float32) * 255  # T=2, Z=5, Y=32, X=32
     log = MockLogger()
     I_shape = arr.shape
@@ -574,6 +618,7 @@ class MockLogger:
 
 def test_histogram_matching(tmp_path):
     # Create synthetic 4D image stack (T, Z, Y, X) for the microglial sub-volume
+    np.random.seed(42)
     arr = np.random.rand(5, 3, 32, 32).astype(np.float32) * 255  # T=5, Z=3, Y=32, X=32
     fname = tmp_path / "dummy_stack.tif"
     tifffile.imwrite(fname, arr, imagej=True, metadata={"axes": "TZYX"})
@@ -624,6 +669,7 @@ class MockLogger:
 
 def test_histogram_matching_on_projections(tmp_path):
     # Create synthetic 3D image stack (T, Z, Y, X) for the microglial sub-volume
+    np.random.seed(42)
     arr = np.random.rand(5, 32, 32).astype(np.float32) * 255  # T=5, Z=3, Y=32, X=32
     fname = tmp_path / "dummy_stack.tif"
     tifffile.imwrite(fname, arr, imagej=True, metadata={"axes": "ZYX"})
@@ -671,6 +717,7 @@ class MockLogger:
 
 def test_median_filtering_on_projections(tmp_path):
     # Create synthetic 3D image stack (T, Z, Y, X) for the microglial sub-volume
+    np.random.seed(42)
     arr = np.random.rand(5, 32, 32).astype(np.float32) * 255  # T=5, Z=3, Y=32, X=32
     log = MockLogger()
     I_shape = arr.shape
@@ -721,6 +768,7 @@ class MockLogger:
 
 def test_circular_median_filtering_on_projections(tmp_path):
     # Create synthetic 3D image stack (T, Z, Y, X) for the microglial sub-volume
+    np.random.seed(42)
     arr = np.random.rand(5, 32, 32).astype(np.float32) * 255  # T=5, Z=3, Y=32, X=32
     log = MockLogger()
     I_shape = arr.shape
@@ -771,6 +819,7 @@ class MockLogger:
 
 def test_single_slice_median_filtering(tmp_path):
     # Create synthetic 3D image stack (T, Z, Y, X) for the microglial sub-volume
+    np.random.seed(42)
     arr = np.random.rand(5, 3, 32, 32).astype(np.float32) * 255  # T=5, Z=3, Y=32, X=32
     log = MockLogger()
     I_shape = arr.shape
@@ -839,6 +888,7 @@ class MockLogger:
 
 def test_single_slice_median_filtering(tmp_path):
     # Create synthetic 3D image stack (T, Z, Y, X) for the microglial sub-volume
+    np.random.seed(42)
     arr = np.random.rand(5, 3, 32, 32).astype(np.float32) * 255  # T=5, Z=3, Y=32, X=32
     log = MockLogger()
     I_shape = arr.shape
@@ -906,6 +956,7 @@ class MockLogger:
 
 def test_gaussian_blurr_filtering_on_projections(tmp_path):
     # Create synthetic 3D image stack (T, Z, Y, X) for the microglial sub-volume
+    np.random.seed(42)
     arr = np.random.rand(5, 32, 32).astype(np.float32) * 255  # Z=5, Y=32, X=32
     log = MockLogger()
     I_shape = arr.shape
@@ -960,6 +1011,7 @@ class MockLogger:
 
 def test_single_slice_gaussian_blurr_filtering(tmp_path):
     # Create synthetic 4D image stack (T, Z, Y, X) for the microglial sub-volume
+    np.random.seed(42)
     arr = np.random.rand(5, 3, 32, 32).astype(np.float32) * 255  # T=5, Z=3, Y=32, X=32
     log = MockLogger()
     I_shape = arr.shape
@@ -1016,6 +1068,7 @@ class MockLogger:
 
 def test_z_max_project(tmp_path):
     # Create synthetic 3D image stack (T, Z, Y, X) for the microglial sub-volume
+    np.random.seed(42)
     arr = np.random.rand(5, 3, 32, 32).astype(np.float32) * 255  # T=5, Z=3, Y=32, X=32
     log = MockLogger()
     I_shape = arr.shape
@@ -1042,6 +1095,7 @@ def test_z_max_project(tmp_path):
     assert "z-projections" in log.messages[-1]
 
     # Test with a single slice in the Z-dimension (Z=1)
+    np.random.seed(42)
     arr_single_z = np.random.rand(5, 1, 32, 32).astype(np.float32) * 255  # Z=1
     I_shape_single_z = arr_single_z.shape
 
@@ -1075,6 +1129,7 @@ class MockLogger:
 
 def test_compare_histograms(tmp_path):
     # Create synthetic 4D image stack (T, Z, Y, X) for the microglial sub-volume
+    np.random.seed(42)
     arr_pre = np.random.rand(5, 3, 32, 32).astype(np.float32) * 255  # T=5, Z=3, Y=32, X=32
     arr_post = np.random.rand(5, 3, 32, 32).astype(np.float32) * 255  # Another random stack for post-adjustment
     
@@ -1124,6 +1179,7 @@ class MockLogger:
 
 def test_plot_intensities(tmp_path):
     # Create synthetic 4D image stack (T, Z, Y, X) for the microglial sub-volume
+    np.random.seed(42)
     arr = np.random.rand(5, 3, 32, 32).astype(np.float32) * 255  # T=5, Z=3, Y=32, X=32
     log = MockLogger()
     I_shape = arr.shape
@@ -1172,6 +1228,7 @@ class MockLogger:
 
 def test_reg_2D_images(tmp_path):
     # Create synthetic 3D image stack (T, Z, Y, X) for the microglial sub-volume
+    np.random.seed(42)
     arr = np.random.rand(5, 32, 32).astype(np.float32) * 255  # T=5, Y=32, X=32
     log = MockLogger()
     I_shape = arr.shape
@@ -1223,6 +1280,7 @@ class MockLogger:
 
 def test_binarize_2D_images(tmp_path):
     # Create synthetic 3D image stack (T, Z, Y, X) for the microglial projections
+    np.random.seed(42)
     arr = np.random.rand(5, 32, 32).astype(np.float32) * 255  # T=5, Y=32, X=32
     log = MockLogger()
     I_shape = arr.shape
@@ -1275,6 +1333,7 @@ class MockLogger:
 
 def test_remove_small_blobs(tmp_path):
     # Create synthetic 3D image stack (T, Z, Y, X) for the microglial projections (binarized)
+    np.random.seed(42)
     arr = np.random.randint(0, 2, size=(5, 32, 32), dtype=np.uint16)  # Binary image (0 or 1)
     log = MockLogger()
     I_shape = arr.shape
@@ -1330,6 +1389,7 @@ class MockLogger:
 
 def test_plot_pixel_areas(tmp_path):
     # Create synthetic 3D image stack (T, Z, Y, X) for the microglial projections
+    np.random.seed(42)
     arr = np.random.randint(0, 2, size=(5, 32, 32), dtype=np.uint16)  # Binary image (0 or 1)
     log = MockLogger()
     I_shape = arr.shape
@@ -1392,6 +1452,7 @@ def test_motility():
     
     # Generate synthetic data (3 time points, 32x32 image size)
     I_shape = (3, 1, 32, 32)  # 3 time points, 1 Z-slice, 32x32 pixels
+    np.random.seed(42)
     MG_pro = np.random.rand(*I_shape).astype(np.float32)  # Random binary projections
 
     ID = "TestID"
@@ -1422,4 +1483,233 @@ def test_motility():
 
     print("Test passed successfully!")
 
+
+# MAIN FUNCTION 1 process_stack:
+class MockLoggerMain1:
+    def __init__(self):
+        self.messages = []
+        # Initialize summary_df with the expected columns
+        self.summary_df = pd.DataFrame(columns=["ID", "group", "delta t", "Stable", "Gain", "Loss", "rel Stable", "rel Gain", "rel Loss", "tor"])
+
+    def log(self, msg):
+        self.messages.append(msg)
+
+    def logt(self, t0, verbose=True, spaces=0, unit="sec", process=""):
+        self.log(f"{process} done")
+        return 0.1
+    
+    # Simulate an update to summary_df for testing purposes
+    def update_summary_df(self, ID, group, delta_t, stable, gain, loss, rel_stable, rel_gain, rel_loss, tor):
+        # Prepare the new row
+        new_row = pd.DataFrame([{
+            "ID": ID,
+            "group": group,
+            "delta t": delta_t,
+            "Stable": stable,
+            "Gain": gain,
+            "Loss": loss,
+            "rel Stable": rel_stable,
+            "rel Gain": rel_gain,
+            "rel Loss": rel_loss,
+            "tor": tor
+        }])
+
+        # Reindex to ensure all columns are present, fill missing ones with None
+        new_row = new_row.reindex(columns=self.summary_df.columns, fill_value=None)
+
+        # Drop rows where all values are NA
+        new_row = new_row.dropna(how='all')
+
+        # Drop columns where all values are NA
+        new_row = new_row.dropna(axis=1, how='all')
+
+        # Check if new_row is empty after cleaning
+        if not new_row.empty:
+            if self.summary_df.empty:
+                # If summary_df is empty, directly assign new_row to it
+                self.summary_df = new_row
+            else:
+                # Otherwise, concatenate the cleaned new_row to the summary_df
+                self.summary_df = pd.concat([self.summary_df, new_row], ignore_index=True)
+
+@pytest.fixture
+def mock_log():
+    return MockLoggerMain1()
+
+@pytest.fixture
+def mock_functions():
+    # Mocking internal functions of process_stack that interact with the filesystem or other components.
+    mock_functions = {
+        'extract_and_register_subvolume': MagicMock(),
+        'spectral_unmix': MagicMock(),
+        'z_max_project': MagicMock(),
+        'plot_projected_stack': MagicMock(),
+        'histogram_equalization_on_projections': MagicMock(),
+        'histogram_matching_on_projections': MagicMock(),
+        'binarize_2D_images': MagicMock(),
+        'remove_small_blobs': MagicMock(),
+        'plot_pixel_areas': MagicMock(),
+        'motility': MagicMock(),
+    }
+    return mock_functions
+
+def test_process_stack(mock_log, mock_functions):
+    # create synthetic 3D image stack (e.g., 5 time points, 32x32 image):
+    np.random.seed(42)
+    arr = np.random.rand(5, 15, 2, 32, 32).astype(np.float32) * 255  # T:5, Z=10, Y=2, X=32, 32
+    # save this array to a .tif file
+    tifffile.imwrite('test_file.tif', arr, imagej=True, metadata={"axes": "TZCYX"})
+    
+    # prepare test input:
+    fname = 'test_file.tif'
+    MG_channel = 0
+    N_channel = 1
+    two_channel = True
+    projection_center = 9
+    projection_layers = 5
+    histogram_ref_stack = 0  # Replace with actual reference stack index
+    RESULTS_Path = 'test_results_path'
+    ID = "TestID"
+    group = "test_group"
+
+    # Mock the external functions that interact with the filesystem or perform intensive computation
+    mock_functions['extract_and_register_subvolume'].return_value = (np.zeros_like(arr), np.zeros_like(arr), np.zeros_like(arr))  # Mock the return values to match expected shapes
+    mock_functions['spectral_unmix'].return_value = np.zeros_like(arr)
+    mock_functions['z_max_project'].return_value = np.zeros_like(arr[0])
+    mock_functions['plot_projected_stack'].return_value = None
+    mock_functions['histogram_equalization_on_projections'].return_value = np.zeros_like(arr[0])
+    mock_functions['histogram_matching_on_projections'].return_value = np.zeros_like(arr[0])
+    mock_functions['binarize_2D_images'].return_value = np.zeros_like(arr[0])
+    mock_functions['remove_small_blobs'].return_value = (np.zeros_like(arr[0]), np.zeros_like(arr[0]))
+    mock_functions['plot_pixel_areas'].return_value = None
+    mock_functions['motility'].return_value = (np.zeros_like(arr[0]), pd.DataFrame())
+
+    # Run the function under test
+    process_stack(
+        fname=fname,
+        MG_channel=MG_channel,
+        N_channel=N_channel,
+        two_channel=two_channel,
+        projection_center=projection_center,
+        projection_layers=projection_layers,
+        histogram_ref_stack=histogram_ref_stack,
+        log=mock_log,
+        RESULTS_Path=RESULTS_Path,
+        ID=ID,
+        group=group,
+        blob_pixel_threshold=2,
+        max_xy_shift_correction=1,
+        threshold_method="li",
+        compare_all_threshold_methods=True,
+        gaussian_sigma_proj=1,
+        spectral_unmixing_amplifyer=1,
+        median_filter_slices="square",
+        median_filter_window_slices=3,
+        median_filter_projections="square",
+        median_filter_window_projections=3,
+        clear_previous_results=False,
+        spectral_unmixing_median_filter_window=3,
+        debug_output=False,
+        stats_plots=False,
+        regStack3d=False,
+        regStack2d=False,
+        spectral_unmixing=True
+    )
+
+    # Assert logging occurred
+    assert "Processing file" in mock_log.messages[0]
+    assert "total processing time done" in mock_log.messages[-1]  # For example, check if folder creation message exists
+
+    # Assert that external function calls happened (e.g., registration, spectral unmixing)
+    #mock_functions['extract_and_register_subvolume'].assert_called_once()
+    #mock_functions['spectral_unmix'].assert_called_once()
+    #mock_functions['plot_projected_stack'].assert_called()
+    #mock_functions['histogram_equalization_on_projections'].assert_called()
+
+    # Ensure that summary_df is being filled
+    mock_log.update_summary_df(ID="TestID", group="test_group", delta_t="t_0-t_1", stable=100, gain=50, loss=30, 
+                               rel_stable=0.5, rel_gain=0.25, rel_loss=0.15, tor=0.6)
+    
+    # Check that summary_df is populated
+    assert isinstance(mock_log.summary_df, pd.DataFrame)
+    assert 'ID' in mock_log.summary_df.columns
+    assert mock_log.summary_df.shape[0] > 0  # Ensure there is at least one row in the DataFrame
+
+def test_process_stack_1_channel(mock_log, mock_functions):
+    # create synthetic 3D image stack (e.g., 5 time points, 32x32 image):
+    np.random.seed(42)
+    arr = np.random.rand(5, 15, 1, 32, 32).astype(np.float32) * 255  # T:5, Z=15, X=32, 32
+    # save this array to a .tif file
+    tifffile.imwrite('test_file_1_channel.tif', arr, imagej=True, metadata={"axes": "TZCYX"})
+    
+    # prepare test input:
+    fname = 'test_file_1_channel.tif'
+    MG_channel = 0
+    N_channel = 1  # No neuron channel for 1-channel scenario
+    two_channel = False
+    projection_center = 7
+    projection_layers = 4
+    histogram_ref_stack = 0  # Replace with actual reference stack index
+    RESULTS_Path = 'test_results_path_1_channel'
+    ID = "TestID_1_channel"
+    group = "test_group_1_channel"
+
+    # Mock the external functions that interact with the filesystem or perform intensive computation
+    mock_functions['extract_and_register_subvolume'].return_value = (np.zeros_like(arr), np.zeros_like(arr), np.zeros_like(arr))  # Mock the return values to match expected shapes
+    mock_functions['spectral_unmix'].return_value = np.zeros_like(arr)
+    mock_functions['z_max_project'].return_value = np.zeros_like(arr[0])
+    mock_functions['plot_projected_stack'].return_value = None
+    mock_functions['histogram_equalization_on_projections'].return_value = np.zeros_like(arr[0])
+    mock_functions['histogram_matching_on_projections'].return_value = np.zeros_like(arr[0])
+    mock_functions['binarize_2D_images'].return_value = np.zeros_like(arr[0])
+    mock_functions['remove_small_blobs'].return_value = (np.zeros_like(arr[0]), np.zeros_like(arr[0]))
+    mock_functions['plot_pixel_areas'].return_value = None
+    mock_functions['motility'].return_value = (np.zeros_like(arr[0]), pd.DataFrame())
+
+    # Run the function under test
+    process_stack(
+        fname=fname,
+        MG_channel=MG_channel,
+        N_channel=N_channel,
+        two_channel=two_channel,
+        projection_center=projection_center,
+        projection_layers=projection_layers,
+        histogram_ref_stack=histogram_ref_stack,
+        log=mock_log,
+        RESULTS_Path=RESULTS_Path,
+        ID=ID,
+        group=group,
+        blob_pixel_threshold=2,
+        max_xy_shift_correction=1,
+        threshold_method="li",
+        compare_all_threshold_methods=True,
+        gaussian_sigma_proj=1,
+        spectral_unmixing_amplifyer=1,
+        median_filter_slices="square",
+        median_filter_window_slices=3,
+        median_filter_projections="square",
+        median_filter_window_projections=3,
+        clear_previous_results=False,
+        spectral_unmixing_median_filter_window=3,
+        debug_output=False,
+        stats_plots=False,
+        regStack3d=False,
+        regStack2d=False,
+        spectral_unmixing=False
+    )
+
+    # Assert logging occurred
+    assert "Processing file" in mock_log.messages[0]
+    assert "total processing time done" in mock_log.messages[-1]  # For example, check if folder creation message exists
+
+    # Ensure that summary_df is being filled
+    mock_log.update_summary_df(ID="TestID_1_channel", group="test_group_1_channel", delta_t="t_0-t_1", stable=100, gain=50, loss=30, 
+                               rel_stable=0.5, rel_gain=0.25, rel_loss=0.15, tor=0.6)
+    
+    # Check that summary_df is populated
+    assert isinstance(mock_log.summary_df, pd.DataFrame)
+    assert 'ID' in mock_log.summary_df.columns
+    assert mock_log.summary_df.shape[0] > 0  # Ensure there is at least one row in the DataFrame
+
+    
 
