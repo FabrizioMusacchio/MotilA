@@ -168,34 +168,78 @@ def calc_projection_range(projection_center, projection_layers, I_shape, log):
         - projection_layers_correction : int
             The number of layers that could not be included due to boundary adjustments.
     """
-    projection_half = projection_layers // 2  # Integer division for symmetry
+    
+    """ 
+    projection_center = 4
+    projection_layers=4 
+    """
+    
+    # check if projection_center is out of bounds:
+    if projection_center < 0 or projection_center >= I_shape[1]:
+        log.log(f"WARNING: projection center {projection_center} is out of bounds for image z-dimension {I_shape[1]} -> skipping.")
+        return [0, 0]
+    
+    projection_half = projection_layers // 2  # integer division for symmetry
 
-    # ensure that the projection includes exactly `projection_layers`:
-    projection_range = [projection_center - projection_half,
-                        projection_center + projection_half]
+    # calculate the projection range:
+    if projection_layers % 2 == 1:
+        # odd number of layers: symmetric range around projection center
+        projection_range = [projection_center - projection_half, projection_center + projection_half]
+    else:
+        # even number of layers: two possible valid projections
+        projection_range = [projection_center - projection_half + 1, projection_center + projection_half]
 
     # convert to integer:
-    projection_range = [int(projection_range[0]), int(projection_range[1] - 1)]  # Adjust upper bound
-
+    projection_range = [int(projection_range[0]), int(projection_range[1])]
+    
+    """ print(f"projection_center: {projection_center}, projection_layers: {projection_layers}")
+    print(projection_range)
+    print(f"Projection range: {len(np.arange(projection_range[0], projection_range[1]+1))} layers: {np.arange(projection_range[0], projection_range[1]+1)}")
+    print(f"projection_layers: {projection_layers}") """
+    
     # validate against stack dimensions:
     projection_layers_correction = 0
     z_layers = I_shape[1]
 
-    if projection_range[0] >= z_layers:
-        log.log(f"WARNING: projection range {projection_range} exceeds image z-dimension {z_layers} -> skipping.")
-        projection_range = [0, 0]
-    elif projection_range[1] >= z_layers:
-        projection_range[1] = z_layers - 1
-        projection_layers_correction = projection_layers - (projection_range[1] - projection_range[0] + 1)
-        log.log(f"WARNING: projection range {projection_range} adjusted to fit z-dimension {z_layers}.")
-    elif projection_range[0] < 0:
+    # if the projection range exceeds the image boundaries, adjust accordingly:
+    if projection_range[0] < 0:
         projection_range[0] = 0
-        projection_layers_correction = projection_layers - (projection_range[1] - projection_range[0] + 1)
         log.log(f"WARNING: projection range {projection_range} adjusted as it was below 0.")
+    if projection_range[1] >= z_layers:
+        projection_range[1] = z_layers - 1
+        log.log(f"WARNING: projection range {projection_range} exceeds image z-dimension {z_layers} -> adjusted.")
+
+    # calculate the number of layers currently in the range:
+    current_layers = projection_range[1] - projection_range[0] + 1
+
+    # adjust the range if there are not enough layers:
+    if current_layers < projection_layers:
+        # expand the range symmetrically, if possible, starting from the center:
+        left_side = projection_range[0]
+        right_side = projection_range[1]
+
+        # first try expanding to the left:
+        if left_side > 0:
+            projection_range[0] -= 1
+        # then try expanding to the right if we still have fewer layers:
+        if right_side < z_layers - 1:
+            projection_range[1] += 1
+
+        # if necessary, shift the range to fit the exact number of layers:
+        current_layers = projection_range[1] - projection_range[0] + 1
+        if current_layers < projection_layers:
+            if projection_range[0] > 0:
+                projection_range[0] -= 1
+            if projection_range[1] < z_layers - 1:
+                projection_range[1] += 1
+    
+    """ print(projection_range)
+    print(f"Projection range: {len(np.arange(projection_range[0], projection_range[1]+1))} layers: {np.arange(projection_range[0], projection_range[1]+1)}")
+    print(f"projection_layers: {projection_layers}") """
 
     log.log(f"Projection center: {projection_center}, Projection range: {projection_range}")
 
-    return projection_range, projection_layers_correction
+    return projection_range
 
 def plot_2D_image(image, plot_path, plot_title, fignum=1, figsize=(5,5.15),
                   show_ticks=False, show_borders=False, cbar_show=False,
@@ -560,10 +604,19 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
         I = zarr_group["image"]
         #I.info
 
+    """ # DEBUG:
+    projection_center = 1
+    projection_layers = 4
+    projection_range = calc_projection_range(projection_center=projection_center, 
+                                             projection_layers=projection_layers, I_shape=I_shape, log=log)
+    print(f"projection_center: {projection_center}, projection_layers: {projection_layers}")
+    print(f"Projection range: {len(np.arange(projection_range[0], projection_range[1]+1))} layers: {np.arange(projection_range[0], projection_range[1]+1)}") """
+
     subvol_shape = (I_shape[0], projection_layers, I_shape[-2], I_shape[-1])
     subvol_chunks = (1, 1, I_shape[-2], I_shape[-1])  # Efficient chunking for Zarr
     subvol_group = zarr_group.require_group("subvolumes")
-    MG_sub = subvol_group.create_dataset("MG_sub", shape=subvol_shape, chunks=subvol_chunks, dtype=I.dtype)
+    MG_sub = subvol_group.create_dataset("MG_sub", shape=subvol_shape, chunks=subvol_chunks, dtype=I.dtype,
+                                         overwrite=True)
     if two_channel:
         N_sub = subvol_group.create_dataset("N_sub", shape=subvol_shape, chunks=subvol_chunks, dtype=I.dtype)
         if channel==0:
@@ -576,7 +629,7 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
             N_sub[stack] = I[stack, projection_range[0]:projection_range[1]+1, channel_N, :, :]
         else:
             MG_sub[stack] = I[stack, projection_range[0]:projection_range[1]+1, :, :]
-    
+    ## %%
     del I
     gc.collect()
     
@@ -2371,11 +2424,7 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
         raise ValueError(f"Error: File {fname} is not a .tif file!")
  
     # calculate and verify projection layers:
-    projection_range, projection_layers_correction = calc_projection_range(projection_center, 
-                                                                           projection_layers, I_shape, log)
-    if projection_layers_correction:
-        projection_layers-projection_layers_correction
-        log.log(f"Info: projection layers corrected to {projection_layers}.")
+    projection_range = calc_projection_range(projection_center, projection_layers, I_shape, log)
 
     # save all parameters used in this analysis into an excel file:
     excel_file_name = '_processing_parameters.xlsx'
