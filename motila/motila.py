@@ -2203,6 +2203,11 @@ def motility(MG_pro, I_shape, log, plot_path, ID="ID00000", group="blinded"):
         plt.tight_layout()
         plt.savefig(Path(plot_path, plot_title.replace("$", "").replace("_", "") + ".pdf"))
         plt.close(fig)
+        
+        # before assigning values, explicitly cast the columns to string dtype to account pandas future behavior:
+        summary_df['ID'] = summary_df['ID'].astype(str)
+        summary_df['group'] = summary_df['group'].astype(str)
+        summary_df['delta t'] = summary_df['delta t'].astype(str)
 
         summary_df.loc[stack, "ID"] = ID
         summary_df.loc[stack, "group"] = group
