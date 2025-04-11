@@ -199,7 +199,7 @@ def calc_projection_range(projection_center, projection_layers, I_shape, log):
 
 def plot_2D_image(image, plot_path, plot_title, fignum=1, figsize=(5,5.15),
                   show_ticks=False, show_borders=False, cbar_show=False,
-                  cmap=plt.cm.get_cmap('viridis'), cbar_label="",
+                  cmap=plt.get_cmap('viridis'), cbar_label="",
                   cbar_ticks=[], cbar_ticks_labels="", title=""):
     """
     Plots a 2D image and saves it as a PDF file.
@@ -1686,7 +1686,7 @@ def binarize_2D_images(MG_pro, I_shape, log, plot_path, threshold_method="otsu",
             ax[0,0].xaxis.set_visible(False)
             ax[0,0].yaxis.set_visible(False)
 
-            cmap_binary = plt.cm.get_cmap('Greys') # bone Greys gist_gray
+            cmap_binary = plt.get_cmap('Greys') # bone Greys gist_gray
 
             ax[0,1].imshow(MG_pro_curr > thresh_li, cmap=cmap_binary)
             ax[0,1].set_title(f"li, $r$={thresh_li_R.round(2)}")
@@ -1896,12 +1896,14 @@ def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100, sta
         cbar_ticks_labels[0] = "bg"
         cbar_ticks_labels[1] = "reject"
         plot_2D_image(MG_pro_bin_area_thresholded_tmp, plot_path,
-                      plot_title="Binarized segmented projection, labels, stack " + str(stack),fignum=1,
-                      figsize=(6, 5), show_borders=True, cbar_show=True,
-                      cmap=plt.cm.get_cmap('nipy_spectral', new_label + 1), cbar_label="labels",
-                      cbar_ticks=cbar_ticks,
-                      cbar_ticks_labels=cbar_ticks_labels,
-                      title=f"Binarized projection segmented, labels, stack {stack}")
+                  plot_title="Binarized segmented projection, labels, stack " + str(stack), fignum=1,
+                  figsize=(6, 5), show_borders=True, cbar_show=True,
+                  #cmap=plt.cm.get_cmap('nipy_spectral', new_label + 1), 
+                  cmap = plt.get_cmap('nipy_spectral', lut=new_label + 1),
+                  cbar_label="labels",
+                  cbar_ticks=cbar_ticks,
+                  cbar_ticks_labels=cbar_ticks_labels,
+                  title=f"Binarized projection segmented, labels, stack {stack}")
 
         # re-binarize and plot the processed image:
         MG_pro_bin_area_thresholded[stack, ...] = MG_pro_bin_area_thresholded_tmp > reject_label
