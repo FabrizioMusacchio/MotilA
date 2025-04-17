@@ -21,6 +21,7 @@ from motila.motila import (
     extract_subvolume,
     extract_and_register_subvolume,
     spectral_unmix,
+    histogram_equalization,
     histogram_equalization_on_projections,
     histogram_matching,
     histogram_matching_on_projections,
@@ -38,7 +39,9 @@ from motila.motila import (
     remove_small_blobs,
     plot_pixel_areas,
     motility,
-    process_stack
+    process_stack,
+    batch_process_stacks,
+    batch_collect
     )
 import numpy as np
 import tifffile
@@ -50,6 +53,7 @@ import gc
 from skimage import exposure
 import pandas as pd
 from unittest.mock import MagicMock, patch
+import shutil
 
 # test test_hello_world:
 def test_hello_world(capsys):
@@ -558,6 +562,37 @@ def test_spectral_unmix(tmp_path):
     
     # Check the log to ensure logging occurred during the unmixing
     assert "spectral unmixing" in log.messages[-1]
+
+
+# histogram_equalization:
+class MockLogger_histeq:
+    def __init__(self):
+        self.messages = []
+    def log(self, msg):
+        self.messages.append(msg)
+    def logt(self, t0, verbose=True, spaces=0, unit="sec", process=""):
+        self.log(f"{process} done")
+        return 0.1
+
+@pytest.fixture
+def mock_log():
+    return MockLogger_histeq()
+
+def test_histogram_equalization_basic(mock_log):
+    # Generate a small synthetic grayscale image (noisy)
+    np.random.seed(42)
+    test_image = (np.random.rand(5, 10, 32, 32) * 255).astype(np.uint8) # 4D image (T, Z, Y, X)
+    I_shape = test_image.shape
+    projection_layers= 10
+    log = mock_log
+
+    # Apply histogram equalization
+    equalized = histogram_equalization(test_image, I_shape, projection_layers, log, clip_limit=0.02)
+
+    # Assertions
+    assert equalized.shape == test_image.shape
+    assert equalized.min() >= 0.0 and equalized.max() <= 1.0  # skimage returns float in [0, 1]
+    assert not np.allclose(test_image, equalized)  # Check that the image changed
 
 
 # histogram_equalization_on_projections:
@@ -1441,12 +1476,20 @@ class MockLogger:
         self.log(f"{process} done")
         return 0.1
 
-def test_motility():
+@pytest.fixture
+def setup_plot_path():
+    path = "test_plot_path"
+    os.makedirs(path, exist_ok=True)
+    yield path
+    shutil.rmtree(path)
+
+def test_motility(setup_plot_path):
     # Mock logger
     log = MockLogger()
 
     # Create the plot_path directory if it doesn't exist
-    plot_path = "test_plot_path"
+    #plot_path = "test_plot_path"
+    plot_path = setup_plot_path
     if not os.path.exists(plot_path):
         os.makedirs(plot_path)
     
@@ -1553,22 +1596,40 @@ def mock_functions():
     }
     return mock_functions
 
-def test_process_stack(mock_log, mock_functions):
+@pytest.fixture
+def setup_test_tif():
+    test_dir = 'test_process_stack'
+    os.makedirs(test_dir, exist_ok=True)
+
+    test_file = os.path.join(test_dir, 'test_file.tif')
+    np.random.seed(42)
+    arr = np.random.rand(5, 15, 2, 32, 32).astype(np.float32) * 255
+    tifffile.imwrite(test_file, arr, imagej=True, metadata={"axes": "TZCYX"})
+
+    yield test_file, arr  # Provide file path and array to the test
+
+    # Cleanup after test
+    shutil.rmtree(test_dir)
+
+def test_process_stack(mock_log, mock_functions, setup_test_tif):
     # create synthetic 3D image stack (e.g., 5 time points, 32x32 image):
     np.random.seed(42)
-    arr = np.random.rand(5, 15, 2, 32, 32).astype(np.float32) * 255  # T:5, Z=10, Y=2, X=32, 32
+    #arr = np.random.rand(5, 15, 2, 32, 32).astype(np.float32) * 255  # T:5, Z=10, Y=2, X=32, 32
     # save this array to a .tif file
-    tifffile.imwrite('test_file.tif', arr, imagej=True, metadata={"axes": "TZCYX"})
+    #tifffile.imwrite('test_file.tif', arr, imagej=True, metadata={"axes": "TZCYX"})
+    
+    # use the fixture to create a test file:
+    fname, arr = setup_test_tif  # Unpack the fixture
     
     # prepare test input:
-    fname = 'test_file.tif'
+    #fname = 'test_file.tif'
     MG_channel = 0
     N_channel = 1
     two_channel = True
     projection_center = 9
     projection_layers = 5
     histogram_ref_stack = 0  # Replace with actual reference stack index
-    RESULTS_Path = 'test_results_path'
+    RESULTS_Path = os.path.join(os.path.dirname(fname), "motility")
     ID = "TestID"
     group = "test_group"
 
@@ -1635,22 +1696,40 @@ def test_process_stack(mock_log, mock_functions):
     assert 'ID' in mock_log.summary_df.columns
     assert mock_log.summary_df.shape[0] > 0  # Ensure there is at least one row in the DataFrame
 
-def test_process_stack_1_channel(mock_log, mock_functions):
+@pytest.fixture
+def setup_test_tif_1_channel():
+    test_dir = 'test_process_stack_1ch'
+    os.makedirs(test_dir, exist_ok=True)
+
+    test_file = os.path.join(test_dir, 'test_file_1_channel.tif')
+    np.random.seed(42)
+    arr = np.random.rand(5, 15, 1, 32, 32).astype(np.float32) * 255
+    tifffile.imwrite(test_file, arr, imagej=True, metadata={"axes": "TZCYX"})
+
+    yield test_file, arr  # Provide path and array to the test
+
+    # Cleanup the entire directory after the test
+    shutil.rmtree(test_dir)
+
+def test_process_stack_1_channel(mock_log, mock_functions, setup_test_tif_1_channel):
     # create synthetic 3D image stack (e.g., 5 time points, 32x32 image):
     np.random.seed(42)
-    arr = np.random.rand(5, 15, 1, 32, 32).astype(np.float32) * 255  # T:5, Z=15, X=32, 32
+    #arr = np.random.rand(5, 15, 1, 32, 32).astype(np.float32) * 255  # T:5, Z=15, X=32, 32
     # save this array to a .tif file
-    tifffile.imwrite('test_file_1_channel.tif', arr, imagej=True, metadata={"axes": "TZCYX"})
+    #tifffile.imwrite('test_file_1_channel.tif', arr, imagej=True, metadata={"axes": "TZCYX"})
+    
+    # use the fixture to create a test file:
+    fname, arr = setup_test_tif_1_channel
     
     # prepare test input:
-    fname = 'test_file_1_channel.tif'
+    #fname = 'test_file_1_channel.tif'
     MG_channel = 0
     N_channel = 1  # No neuron channel for 1-channel scenario
     two_channel = False
     projection_center = 7
     projection_layers = 4
     histogram_ref_stack = 0  # Replace with actual reference stack index
-    RESULTS_Path = 'test_results_path_1_channel'
+    RESULTS_Path = os.path.join(os.path.dirname(fname), "motility")
     ID = "TestID_1_channel"
     group = "test_group_1_channel"
 
@@ -1711,5 +1790,223 @@ def test_process_stack_1_channel(mock_log, mock_functions):
     assert 'ID' in mock_log.summary_df.columns
     assert mock_log.summary_df.shape[0] > 0  # Ensure there is at least one row in the DataFrame
 
+
+# MAIN FUNCTION 2 batch_process_stacks:
+class MockLogger_batch:
+    def __init__(self):
+        self.messages = []
+
+    def log(self, msg):
+        self.messages.append(msg)
+
+    def logt(self, t0, verbose=True, spaces=0, unit="sec", process=""):
+        self.log(f"{process} done")
+        return 0.1
+
+@pytest.fixture
+def mock_log_batch():
+    return MockLogger_batch()
+
+@pytest.fixture
+def setup_test_data():
+    # Create the main test directory
+    test_dir = 'test_batch_process_stacks'
+
+    # Define the file paths and mock data
+    id1_path = os.path.join(test_dir, 'ID1', 'project_tag', 'registered')
+    id2_path = os.path.join(test_dir, 'ID2', 'project_tag', 'registered')
+    metadata_file = 'metadata.xls'
+    reg_tif_file_tag = 'reg_tif_file_tag_1'
+    reg_tif_file_tag2 = 'reg_tif_file_tag_2'
     
+    # Create directories for ID1 and ID2
+    os.makedirs(id1_path, exist_ok=True)
+    os.makedirs(id2_path, exist_ok=True)
+    os.makedirs(os.path.join(test_dir, 'ID1', 'project_tag', 'RESULTS_foldername'), exist_ok=True)
+    os.makedirs(os.path.join(test_dir, 'ID2', 'project_tag', 'RESULTS_foldername'), exist_ok=True)
+
+    # Write mock .tif files
+    arr = np.random.rand(5, 15, 2, 32, 32).astype(np.float32) * 255
+    tifffile.imwrite(os.path.join(id1_path, reg_tif_file_tag + ".tif"), arr, imagej=True, metadata={"axes": "TZCYX"})
+    tifffile.imwrite(os.path.join(id2_path, reg_tif_file_tag2 + ".tif"), arr, imagej=True, metadata={"axes": "TZCYX"})
+    
+    # Write mock metadata files
+    metadata = pd.DataFrame({
+        'Two Channel': [True],
+        'Neuron Channel': [1],
+        'Microglia Channel': [0],
+        'Spectral Unmixing': [True],
+        'Projection Center': [10],
+        'N Projection Layers': [5],
+        'Spectral Unmixing Amplifyer': [1]
+    })
+    try:
+        metadata.to_excel(os.path.join(test_dir, 'ID1', 'project_tag', metadata_file), index=False, engine='xlrd')
+        metadata.to_excel(os.path.join(test_dir, 'ID2', 'project_tag', metadata_file), index=False, engine='xlrd')
+    except ValueError as e:
+        print(f"Error: {e}")
+        # try using openpyxl for .xlsx files if xlrd fails:
+        metadata.to_excel(os.path.join(test_dir, 'ID1', 'project_tag', metadata_file), index=False, engine='openpyxl')
+        metadata.to_excel(os.path.join(test_dir, 'ID2', 'project_tag', metadata_file), index=False, engine='openpyxl')
+
+    yield test_dir  # Yield the test directory path for use in the test
+
+    # Cleanup: remove test data after test is complete
+    import shutil
+    shutil.rmtree(test_dir)
+
+def test_batch_process_stacks_no_error(mock_log_batch, setup_test_data):
+    # Use the setup_test_data fixture to create test directories and files
+    test_dir = setup_test_data
+
+    # Define parameters for the batch_process_stacks function
+    PROJECT_Path = test_dir + "/"
+    ID_list = ["ID1", "ID2"]
+    project_tag = "project_tag"
+    reg_tif_file_folder = "registered"
+    reg_tif_file_tag = "reg_tif_file_tag"
+    metadata_file = "metadata.xls"
+    RESULTS_foldername = "../motility"
+    group = "test_group"
+    MG_channel = 0
+    N_channel = 1
+    two_channel = True
+    projection_center = 10
+    projection_layers = 5
+    histogram_ref_stack = 0
+    blob_pixel_threshold = 100
+    regStack2d = True
+    regStack3d = False
+    template_mode = "mean"
+    spectral_unmixing = True
+    hist_equalization = False
+    hist_match = True
+    hist_equalization_kernel_size = None
+    hist_equalization_clip_limit = 0.05
+    max_xy_shift_correction = 50
+    threshold_method = "li"
+    compare_all_threshold_methods = True
+    gaussian_sigma_proj = 1
+    spectral_unmixing_amplifyer = 1
+    median_filter_slices = "square"
+    median_filter_window_slices = 3
+    median_filter_projections = "square"
+    median_filter_window_projections = 3
+    clear_previous_results = False
+    spectral_unmixing_median_filter_window = 3
+    debug_output = False
+    stats_plots = False
+
+    # call the function and ensure no errors are raised:
+    batch_process_stacks(
+        PROJECT_Path=PROJECT_Path,
+        ID_list=ID_list,
+        project_tag=project_tag,
+        reg_tif_file_folder=reg_tif_file_folder,
+        reg_tif_file_tag=reg_tif_file_tag,
+        metadata_file=metadata_file,
+        RESULTS_foldername=RESULTS_foldername,
+        group=group,
+        MG_channel=MG_channel,
+        N_channel=N_channel,
+        two_channel=two_channel,
+        projection_center=projection_center,
+        projection_layers=projection_layers,
+        histogram_ref_stack=histogram_ref_stack,
+        log=mock_log_batch,
+        blob_pixel_threshold=blob_pixel_threshold,
+        regStack2d=regStack2d,
+        regStack3d=regStack3d,
+        template_mode=template_mode,
+        spectral_unmixing=spectral_unmixing,
+        hist_equalization=hist_equalization,
+        hist_match=hist_match,
+        hist_equalization_kernel_size=hist_equalization_kernel_size,
+        hist_equalization_clip_limit=hist_equalization_clip_limit,
+        max_xy_shift_correction=max_xy_shift_correction,
+        threshold_method=threshold_method,
+        compare_all_threshold_methods=compare_all_threshold_methods,
+        gaussian_sigma_proj=gaussian_sigma_proj,
+        spectral_unmixing_amplifyer=spectral_unmixing_amplifyer,
+        median_filter_slices=median_filter_slices,
+        median_filter_window_slices=median_filter_window_slices,
+        median_filter_projections=median_filter_projections,
+        median_filter_window_projections=median_filter_window_projections,
+        clear_previous_results=clear_previous_results,
+        spectral_unmixing_median_filter_window=spectral_unmixing_median_filter_window,
+        debug_output=debug_output,
+        stats_plots=stats_plots,
+    )
+
+    # assert that the logger contains expected messages:
+    assert "Batch processing of stacks..." in mock_log_batch.messages[0]
+    assert "total batch" in mock_log_batch.messages[-1]
+
+
+# MAIN FUNCTION 3 batch_collect
+class MockLogger_batch_collect:
+    def __init__(self):
+        self.messages = []
+
+    def log(self, msg):
+        self.messages.append(msg)
+
+# Fixture to generate test folders and fake Excel files
+@pytest.fixture
+def setup_batch_collect_test_data():
+    base_path = "test_batch_results"
+    id_list = ["ID1", "ID2"]
+    project_tag = "TP000"
+    motility_folder = "motility_analysis"
+    projection_center = "projection_center_10"
+    result_file = "motility_analysis.xlsx"
+
+    for ID in id_list:
+        folder = Path(base_path) / ID / f"{project_tag}_01" / motility_folder / projection_center
+        folder.mkdir(parents=True, exist_ok=True)
+
+        # Create minimal Excel file
+        df = pd.DataFrame({
+            "delta t": ["t0-t1"],
+            "Stable": [100],
+            "Gain": [50],
+            "Loss": [20],
+            "rel Stable": [0.5],
+            "rel Gain": [0.25],
+            "rel Loss": [0.1],
+            "tor": [0.7]
+        })
+        df.to_excel(folder / result_file)
+
+    yield base_path, id_list  # Provide to the test function
+
+    # Cleanup after test
+    shutil.rmtree(base_path, ignore_errors=True)
+    shutil.rmtree("test_batch_results", ignore_errors=True)
+
+# Actual test
+def test_batch_collect(setup_batch_collect_test_data):
+    base_path, id_list = setup_batch_collect_test_data
+    log = MockLogger_batch_collect()
+
+    batch_collect(
+        PROJECT_Path=base_path,
+        ID_list=id_list,
+        project_tag="TP000",
+        motility_folder="motility_analysis",
+        RESULTS_Path="test_batch_results",
+        log=log
+    )
+
+    # Check if summary file was created
+    assert os.path.exists("test_batch_results/all_motility.xlsx")
+    assert os.path.exists("test_batch_results/average_motility.xlsx")
+
+    df = pd.read_excel("test_batch_results/all_motility.xlsx")
+    assert df.shape[0] == 2  # One row per ID
+
+    # Optional: check logger messages
+    assert "Collected data saved in test_batch_results" in log.messages[-1]
+
+
 
