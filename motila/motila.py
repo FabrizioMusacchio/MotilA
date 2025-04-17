@@ -2036,64 +2036,68 @@ def plot_pixel_areas(MG_areas, log, plot_path, I_shape):
     log.log(f"plotting detected pixel areas per projected stack...")
 
     # plot normalized area rel. to stack 0:
-    plt.close(1)
-    fig = plt.figure(2, figsize=(5, 3.5))
-    plt.clf()
-    plt.axhline(y=130, color="k", linestyle='--', lw=0.75, alpha=0.5)
-    plt.axhline(y=120, color="k", linestyle='--', lw=0.75, alpha=0.5)
-    plt.axhline(y=110, color="k", linestyle='--', lw=0.75, alpha=0.5)
-    plt.axhline(y=100, color="k", linestyle='--', lw=0.75, alpha=0.5)
-    plt.axhline(y=90, color="k", linestyle='--', lw=0.75, alpha=0.5)
-    plt.axhline(y=80, color="k", linestyle='--', lw=0.75, alpha=0.5)
-    plt.axhline(y=66, color="k", linestyle='--', lw=0.75, alpha=0.5)
-    plt.axhline(y=50, color="k", linestyle='--', lw=0.75, alpha=0.5)
-    plt.axhline(y=33, color="k", linestyle='--', lw=0.75, alpha=0.5)
-    plt.axhline(y=25, color="k", linestyle='--', lw=0.75, alpha=0.5)
-    plt.bar(np.arange(I_shape[0]), 100 * MG_areas / MG_areas[0], zorder=3)
-    # check if there are any values to calculate max for ylim:
-    try:
-        ylim_max = np.max([105, np.max(100 * MG_areas / MG_areas[0]) + 5]) 
-    except ValueError:
-        ylim_max = 100  # set a default value if the max calculation fails (e.g., NaN or Inf)
-    # ensure ylim_max is finite (not NaN or Inf):
-    if not np.isfinite(ylim_max):
-        ylim_max = 100  # set a default value if ylim_max is NaN or Inf
-    plt.ylim(0, ylim_max)
-    plt.xlim(-0.5, I_shape[0]-0.5)
-    #plt.xticks(np.arange(I_shape[0]))
-    plt.xticks(np.arange(I_shape[0]), labels=[f"$t_{i}$" for i in range(I_shape[0])])
-    plt.yticks(np.arange(0,101, 10))
-    plt.xlabel("stack")
-    plt.ylabel("relative total cell pixels [%]")
-    title = f"Cell areas relative to $t_0$"
-    plot_title = f"Normalized cell area rel. to t0"
-    plt.title(title)
-    # turn off right and top axis:
-    plt.gca().spines['right'].set_visible(False)
-    plt.gca().spines['top'].set_visible(False)
-    plt.gca().spines['bottom'].set_visible(False)
-    plt.gca().spines['left'].set_visible(False)
-    # set fontsize to 14 for the current figure:
-    plt.setp(plt.gca().get_xticklabels(), fontsize=14)
-    plt.setp(plt.gca().get_yticklabels(), fontsize=14)
-    plt.gca().title.set_fontsize(14)
-    plt.gca().xaxis.label.set_fontsize(14)
-    plt.gca().yaxis.label.set_fontsize(14)
-    plt.tight_layout()
-    plt.savefig(Path(plot_path, plot_title + ".pdf"), dpi=120)
-    plt.close(fig)
-
-    # save the data for later use:
-    data_out = np.array([100 * MG_areas / MG_areas[0], MG_areas])
-    df_out = pd.DataFrame(data=data_out.T,
-                 columns=["cell area in pixel rel to stack 0", "cell area in pixel total"])
-    df_out["total fov area in pixel"] = I_shape[-2]*I_shape[-1]
-    df_out["t_i"] = np.arange(I_shape[0])
-    # move ["t_i"] to the first column:
-    cols = df_out.columns.tolist()
-    cols = cols[-1:] + cols[:-1]
-    df_out = df_out[cols]
-    df_out.to_excel(os.path.join(plot_path,"pixel area sums.xlsx"))
+    if MG_areas[0] != 0:
+        plt.close(1)
+        fig = plt.figure(2, figsize=(5, 3.5))
+        plt.clf()
+        plt.axhline(y=130, color="k", linestyle='--', lw=0.75, alpha=0.5)
+        plt.axhline(y=120, color="k", linestyle='--', lw=0.75, alpha=0.5)
+        plt.axhline(y=110, color="k", linestyle='--', lw=0.75, alpha=0.5)
+        plt.axhline(y=100, color="k", linestyle='--', lw=0.75, alpha=0.5)
+        plt.axhline(y=90, color="k", linestyle='--', lw=0.75, alpha=0.5)
+        plt.axhline(y=80, color="k", linestyle='--', lw=0.75, alpha=0.5)
+        plt.axhline(y=66, color="k", linestyle='--', lw=0.75, alpha=0.5)
+        plt.axhline(y=50, color="k", linestyle='--', lw=0.75, alpha=0.5)
+        plt.axhline(y=33, color="k", linestyle='--', lw=0.75, alpha=0.5)
+        plt.axhline(y=25, color="k", linestyle='--', lw=0.75, alpha=0.5)
+        plt.bar(np.arange(I_shape[0]), 100 * MG_areas / MG_areas[0], zorder=3)
+        # check if there are any values to calculate max for ylim:
+        try:
+            ylim_max = np.max([105, np.max(100 * MG_areas / MG_areas[0]) + 5]) 
+        except ValueError:
+            ylim_max = 100  # set a default value if the max calculation fails (e.g., NaN or Inf)
+        # ensure ylim_max is finite (not NaN or Inf):
+        if not np.isfinite(ylim_max):
+            ylim_max = 100  # set a default value if ylim_max is NaN or Inf
+        plt.ylim(0, ylim_max)
+        plt.xlim(-0.5, I_shape[0]-0.5)
+        #plt.xticks(np.arange(I_shape[0]))
+        plt.xticks(np.arange(I_shape[0]), labels=[f"$t_{i}$" for i in range(I_shape[0])])
+        plt.yticks(np.arange(0,101, 10))
+        plt.xlabel("stack")
+        plt.ylabel("relative total cell pixels [%]")
+        title = f"Cell areas relative to $t_0$"
+        plot_title = f"Normalized cell area rel. to t0"
+        plt.title(title)
+        # turn off right and top axis:
+        plt.gca().spines['right'].set_visible(False)
+        plt.gca().spines['top'].set_visible(False)
+        plt.gca().spines['bottom'].set_visible(False)
+        plt.gca().spines['left'].set_visible(False)
+        # set fontsize to 14 for the current figure:
+        plt.setp(plt.gca().get_xticklabels(), fontsize=14)
+        plt.setp(plt.gca().get_yticklabels(), fontsize=14)
+        plt.gca().title.set_fontsize(14)
+        plt.gca().xaxis.label.set_fontsize(14)
+        plt.gca().yaxis.label.set_fontsize(14)
+        plt.tight_layout()
+        plt.savefig(Path(plot_path, plot_title + ".pdf"), dpi=120)
+        plt.close(fig)
+    
+        # save the data for later use:
+        data_out = np.array([100 * MG_areas / MG_areas[0], MG_areas])
+        df_out = pd.DataFrame(data=data_out.T,
+                    columns=["cell area in pixel rel to stack 0", "cell area in pixel total"])
+        df_out["total fov area in pixel"] = I_shape[-2]*I_shape[-1]
+        df_out["t_i"] = np.arange(I_shape[0])
+        # move ["t_i"] to the first column:
+        cols = df_out.columns.tolist()
+        cols = cols[-1:] + cols[:-1]
+        df_out = df_out[cols]
+        df_out.to_excel(os.path.join(plot_path,"pixel area sums.xlsx"))
+        
+    else:
+        log.log("Warning: MG_areas[0] is zero, skipping relative area plot to avoid division by zero.")
 
     _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="pixel cell area plotting ")
 
