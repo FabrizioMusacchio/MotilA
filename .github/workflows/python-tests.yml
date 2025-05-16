@@ -24,7 +24,7 @@ jobs:
         conda install -y -n motila -c conda-forge mamba
         mamba install -y -n motila -c conda-forge \
             numpy scipy matplotlib scikit-image scikit-learn \
-            pandas tifffile zarr numcodecs openpyxl xlrd \
+            pandas tifffile zarr==2.18.4 numcodecs openpyxl xlrd \
             ipywidgets ipykernel ipympl psutil
 
     - name: Activate environment and install pytest
