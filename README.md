@@ -41,10 +41,12 @@ Then, you need to install the required Python packages. To do so, create and act
 ```bash
 conda create -n motila python=3.12 mamba -y
 conda activate motila
-mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffile zarr numcodecs openpyxl xlrd ipywidgets ipykernel ipympl
+mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffile zarr=2.18.4 numcodecs openpyxl xlrd ipywidgets ipykernel ipympl
 ```
 
 We have tested *MotilA* for Python 3.9 and higher as well as on Windows, macOS, and Linux systems. The pipeline should work on all these platforms without any issues. If you encounter any issues, please let us know.
+
+**Note:** We encountered a problem with the latest ZARR version (>3.0.0). We are currently investigating this issue and will update the package as soon as possible. For now, please use ZARR version 2.18.4.
 
 ## Example data set and tutorials
 To help you get started with *MotilA*, we provide an example dataset and tutorials to guide you through the pipeline steps. 
