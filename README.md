@@ -66,6 +66,12 @@ The tutorials cover the core pipeline steps, from loading and preprocessing imag
 * [batch_run.py](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20scripts/batch_run.py)
 
 
+We used the following Python script to generate the figures presented in our submitted manuscript:
+
+* [single_file_run_paper.py](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20scripts/single_file_run_paper.py)
+
+This script includes all parameter settings used during analysis and can be employed to reproduce the figures. It was applied to a subset of the example dataset described above. This specific subset is available in the repository under [`example project/Data/ID240103_P17_1_cutout/`](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20project/Data/ID240103_P17_1_cutout/TP000).
+
 
 ## Data prerequisites  
 Before using *MotilA*, ensure that your imaging data meets the following requirements:  
