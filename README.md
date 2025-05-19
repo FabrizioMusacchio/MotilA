@@ -34,7 +34,7 @@ This turnover rate represents the fraction of pixels undergoing change, providin
 
 
 ![MotilA pipeline overview](figures/motila_figure_1_demo.png)
-Core pipeline steps of *MotilA* illustrated using a representative microglial cell from the included example dataset.** a)** The pipeline begins with loading and z-projecting 3D image stacks, followed by optional preprocessing steps such as spectral unmixing, registration, and histogram equalization (upper panel). The resulting projections are filtered and binarized for segmentation of microglial fine processes (lower panel). **b)** Motility analysis compares consecutive time points by classifying stable (S), gained (G), and lost (L) pixels, from which the turnover rate (TOR) is computed. **c)** The TOR is plotted across time points, quantifying microglial fine process motility over time.
+**Core pipeline steps of *MotilA* illustrated using a representative microglial cell from the included example dataset**. **a)** The pipeline begins with loading and z-projecting 3D image stacks, followed by optional preprocessing steps such as spectral unmixing, registration, and histogram equalization (upper panel). The resulting projections are filtered and binarized for segmentation of microglial fine processes (lower panel). **b)** Motility analysis compares consecutive time points by classifying stable (S), gained (G), and lost (L) pixels, from which the turnover rate (TOR) is computed. **c)** The TOR is plotted across time points, quantifying microglial fine process motility over time.
 
 
 ## Installation
