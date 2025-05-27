@@ -593,8 +593,12 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
         #compressor = Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE, blocksize=0)
         # info: we do not compress for speed reasons
         zarr_group = zarr.group(zarr_path, overwrite=True)
-        zarr_group.create_dataset("image", shape=I.shape, chunks=chunks, 
-                                  dtype=I.dtype)
+        if zarr.__version__ >= "3":
+            zarr_group.create_array("image", shape=I.shape, chunks=chunks, 
+                                    dtype=I.dtype)
+        else:    
+            zarr_group.create_dataset("image", shape=I.shape, chunks=chunks, 
+                                    dtype=I.dtype)
         zarr_group["image"][:] = I
         zarr_group.attrs["original_file"] = str(fname)
         zarr_group.attrs["ZARR file path"] = str(zarr_path)
