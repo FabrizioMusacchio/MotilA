@@ -579,50 +579,83 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
         raise ValueError("Currently, only TIFF files are supported.")
     else:
         # open the tif file as zarr store:
-        store = tifffile.imread(fname, aszarr=True)
-        I = zarr.open(store, mode='r')
-        
-        # ensure that the zarr store is indeed memory-mapped and not in-memory loaded (which is the default in tifffile):
-        if two_channel:
-            chunks = (1, 1, 1, I_shape[-2], I_shape[-1])
-        else:
-            chunks = (1, 1, I_shape[-2], I_shape[-1])
-        zarr_path = Path(fname).parent.joinpath(Path(fname).stem + ".zarr")
-        #compressor = Blosc(cname='lz4', clevel=5, shuffle=Blosc.SHUFFLE, blocksize=0)
-        #compressor = Blosc(cname='zlib', clevel=9, shuffle=Blosc.SHUFFLE, blocksize=0)
-        #compressor = Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE, blocksize=0)
-        # info: we do not compress for speed reasons
-        zarr_group = zarr.group(zarr_path, overwrite=True)
-        if zarr.__version__ >= "3":
-            zarr_group.create_array("image", shape=I.shape, chunks=chunks, 
-                                    dtype=I.dtype)
-        else:    
-            zarr_group.create_dataset("image", shape=I.shape, chunks=chunks, 
-                                    dtype=I.dtype)
-        zarr_group["image"][:] = I
-        zarr_group.attrs["original_file"] = str(fname)
-        zarr_group.attrs["ZARR file path"] = str(zarr_path)
-        zarr_group.attrs["shape"] = I.shape
-        zarr_group.attrs["dtype"] = str(I.dtype)
-        store.close()
+        # tifffile's zarr support works a) for ZARR >= 3.0 and b) not within a Jupyter notebook due to
+        # ZARR asynchronous loading of the data, which is not supported in Jupyter notebooks. Thus, we
+        # use the following try-except block to handle this:
+        try:
+            store = tifffile.imread(fname, aszarr=True)
+            I = zarr.open(store, mode='r')
+            
+            # ensure that the zarr store is indeed memory-mapped and not in-memory loaded (which is the default in tifffile):
+            if two_channel:
+                chunks = (1, 1, 1, I_shape[-2], I_shape[-1])
+            else:
+                chunks = (1, 1, I_shape[-2], I_shape[-1])
+            zarr_path = Path(fname).parent.joinpath(Path(fname).stem + ".zarr")
+            #compressor = Blosc(cname='lz4', clevel=5, shuffle=Blosc.SHUFFLE, blocksize=0)
+            #compressor = Blosc(cname='zlib', clevel=9, shuffle=Blosc.SHUFFLE, blocksize=0)
+            #compressor = Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE, blocksize=0)
+            # info: we do not compress for speed reasons
+            zarr_group = zarr.group(zarr_path, overwrite=True)
+            if zarr.__version__ >= "3":
+                zarr_group.create_array("image", shape=I.shape, chunks=chunks, 
+                                        dtype=I.dtype, overwrite=True)
+            else:
+                zarr_group.create_dataset("image", shape=I.shape, chunks=chunks, 
+                                        dtype=I.dtype)
+            zarr_group["image"][:] = I
+            zarr_group.attrs["original_file"] = str(fname)
+            zarr_group.attrs["ZARR file path"] = str(zarr_path)
+            zarr_group.attrs["shape"] = I.shape
+            zarr_group.attrs["dtype"] = str(I.dtype)
+            store.close()
+            
+        except:
+            # otherwise, we read the tif file using tifffile and convert it to a zarr store:
+            I = tifffile.imread(fname)
+            
+            # ensure that the zarr store is indeed memory-mapped and not in-memory loaded (which is the default in tifffile):
+            if two_channel:
+                chunks = (1, 1, 1, I_shape[-2], I_shape[-1])
+            else:
+                chunks = (1, 1, I_shape[-2], I_shape[-1])
+            zarr_path = Path(fname).parent.joinpath(Path(fname).stem + ".zarr")
+            #compressor = Blosc(cname='lz4', clevel=5, shuffle=Blosc.SHUFFLE, blocksize=0)
+            #compressor = Blosc(cname='zlib', clevel=9, shuffle=Blosc.SHUFFLE, blocksize=0)
+            #compressor = Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE, blocksize=0)
+            # info: we do not compress for speed reasons
+            zarr_group = zarr.group(zarr_path, overwrite=True)
+            if zarr.__version__ >= "3":
+                zarr_group.create_array("image", shape=I.shape, chunks=chunks, 
+                                        dtype=I.dtype, overwrite=True)
+            else:
+                zarr_group.create_dataset("image", shape=I.shape, chunks=chunks, 
+                                        dtype=I.dtype)
+            zarr_group["image"][:] = I
+            zarr_group.attrs["original_file"] = str(fname)
+            zarr_group.attrs["ZARR file path"] = str(zarr_path)
+            zarr_group.attrs["shape"] = I.shape
+            zarr_group.attrs["dtype"] = str(I.dtype)
+
         I = zarr_group["image"]
         #I.info
-
-    """ # DEBUG:
-    projection_center = 1
-    projection_layers = 4
-    projection_range = calc_projection_range(projection_center=projection_center, 
-                                             projection_layers=projection_layers, I_shape=I_shape, log=log)
-    print(f"projection_center: {projection_center}, projection_layers: {projection_layers}")
-    print(f"Projection range: {len(np.arange(projection_range[0], projection_range[1]+1))} layers: {np.arange(projection_range[0], projection_range[1]+1)}") """
 
     subvol_shape = (I_shape[0], projection_layers, I_shape[-2], I_shape[-1])
     subvol_chunks = (1, 1, I_shape[-2], I_shape[-1])  # Efficient chunking for Zarr
     subvol_group = zarr_group.require_group("subvolumes")
-    MG_sub = subvol_group.create_dataset("MG_sub", shape=subvol_shape, chunks=subvol_chunks, dtype=I.dtype,
-                                         overwrite=True)
+    if zarr.__version__ >= "3":
+        MG_sub = subvol_group.create_array("MG_sub", shape=subvol_shape, chunks=subvol_chunks, dtype=I.dtype,
+                                           overwrite=True)
+    else:
+        MG_sub = subvol_group.create_dataset("MG_sub", shape=subvol_shape, chunks=subvol_chunks, dtype=I.dtype,
+                                            overwrite=True)
     if two_channel:
-        N_sub = subvol_group.create_dataset("N_sub", shape=subvol_shape, chunks=subvol_chunks, dtype=I.dtype)
+        if zarr.__version__ >= "3":
+            N_sub = subvol_group.create_array("N_sub", shape=subvol_shape, chunks=subvol_chunks, dtype=I.dtype,
+                                              overwrite=True)
+        else:
+            N_sub = subvol_group.create_dataset("N_sub", shape=subvol_shape, chunks=subvol_chunks, dtype=I.dtype,
+                                                overwrite=True)
         if channel==0:
             channel_N = 1
         else:
@@ -633,7 +666,7 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
             N_sub[stack] = I[stack, projection_range[0]:projection_range[1]+1, channel_N, :, :]
         else:
             MG_sub[stack] = I[stack, projection_range[0]:projection_range[1]+1, :, :]
-    ## %%
+    
     del I
     gc.collect()
     
