@@ -747,12 +747,20 @@ def extract_and_register_subvolume(fname, I_shape, projection_layers, projection
     subvol_chunks = (1, 1, I_shape[-2], I_shape[-1])  # Efficient chunking for Zarr
     subvol_group = zarr_group["subvolumes"]
     #compressor = Blosc(cname='lz4', clevel=5, shuffle=Blosc.SHUFFLE, blocksize=0)
-    MG_sub_reg = subvol_group.create_dataset("MG_sub_tmp", shape=subvol_shape, chunks=subvol_chunks, 
-                                             dtype=zarr_group.attrs["dtype"])
-    if two_channel:
-        N_sub_reg = subvol_group.create_dataset("N_sub_tmp", shape=subvol_shape, chunks=subvol_chunks, 
+    if zarr.__version__ >= "3":
+        MG_sub_reg = subvol_group.create_array("MG_sub_tmp", shape=subvol_shape, chunks=subvol_chunks, 
+                                               dtype=zarr_group.attrs["dtype"], overwrite=True)
+    else:
+        MG_sub_reg = subvol_group.create_dataset("MG_sub_tmp", shape=subvol_shape, chunks=subvol_chunks, 
                                                 dtype=zarr_group.attrs["dtype"])
-    
+    if two_channel:
+        if zarr.__version__ >= "3":
+            N_sub_reg = subvol_group.create_array("N_sub_tmp", shape=subvol_shape, chunks=subvol_chunks, 
+                                                  dtype=zarr_group.attrs["dtype"], overwrite=True)
+        else:
+            N_sub_reg = subvol_group.create_dataset("N_sub_tmp", shape=subvol_shape, chunks=subvol_chunks, 
+                                                    dtype=zarr_group.attrs["dtype"])
+
     # determine template mode:
     if template_mode == "mean":
         template_func = np.mean
@@ -825,16 +833,29 @@ def extract_and_register_subvolume(fname, I_shape, projection_layers, projection
                 MG_sub_reg.shape[3] - 2*max_shift[1])
     # create a new Zarr array for MG_sub_reg:
     subregvol_chunks = (1, 1, new_shape[-2], new_shape[-1])
-    MG_sub_reg_cropped = subvol_group.create_dataset("MG_sub", shape=new_shape, 
-                                                     chunks=subregvol_chunks, dtype=zarr_group.attrs["dtype"],
-                                                     overwrite=True)
+    # Ensure shape is a tuple of Python ints
+    new_shape = tuple(int(x) for x in new_shape)
+    subregvol_chunks = tuple(int(x) for x in subregvol_chunks)
+    if zarr.__version__ >= "3":
+        MG_sub_reg_cropped = subvol_group.create_array("MG_sub", shape=new_shape, 
+                                                       chunks=subregvol_chunks, dtype=zarr_group.attrs["dtype"],
+                                                       overwrite=True)
+    else:
+        MG_sub_reg_cropped = subvol_group.create_dataset("MG_sub", shape=new_shape, 
+                                                        chunks=subregvol_chunks, dtype=zarr_group.attrs["dtype"],
+                                                        overwrite=True)
     MG_sub_reg_cropped[:] = MG_sub_reg[:, :, max_shift[0]:int(MG_sub_reg.shape[-2])-max_shift[0],
                                   max_shift[1]:int(MG_sub_reg.shape[-1])-max_shift[1]]
     
     if two_channel:
-        N_sub_reg_cropped = subvol_group.create_dataset("N_sub", shape=new_shape, 
-                                                        chunks=subregvol_chunks, dtype=zarr_group.attrs["dtype"],
-                                                        overwrite=True)
+        if zarr.__version__ >= "3":
+            N_sub_reg_cropped = subvol_group.create_array("N_sub", shape=new_shape, 
+                                                          chunks=subregvol_chunks, dtype=zarr_group.attrs["dtype"],
+                                                          overwrite=True)
+        else:
+            N_sub_reg_cropped = subvol_group.create_dataset("N_sub", shape=new_shape, 
+                                                            chunks=subregvol_chunks, dtype=zarr_group.attrs["dtype"],
+                                                            overwrite=True)
         N_sub_reg_cropped[:] = N_sub_reg[:, :, max_shift[0]:int(N_sub_reg.shape[-2])-max_shift[0],
                                         max_shift[1]:int(N_sub_reg.shape[-1])-max_shift[1]]
     
