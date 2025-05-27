@@ -925,12 +925,20 @@ def spectral_unmix(MG_sub, N_sub, I_shape, zarr_group, projection_layers, log,
     subvol_group = zarr_group["subvolumes"]
     subvol_shape = (I_shape[0], projection_layers, I_shape[-2], I_shape[-1])
     subvol_chunks = (1, 1, I_shape[-2], I_shape[-1])
-    MG_sub_noblead = subvol_group.create_dataset("MG_sub_noblead_tmp", shape=subvol_shape, chunks=subvol_chunks,
+    if zarr.__version__ >= "3":
+        MG_sub_noblead = subvol_group.create_array("MG_sub_noblead_tmp", shape=subvol_shape, chunks=subvol_chunks,
                                                     dtype=zarr_group.attrs["dtype"])
-    N_sub_median = subvol_group.create_dataset("N_sub_noblead_tmp", shape=subvol_shape, chunks=subvol_chunks,
-                                                dtype=zarr_group.attrs["dtype"])
-    MG_sub_processed = subvol_group.create_dataset("MG_sub_processed", shape=subvol_shape, chunks=subvol_chunks,
-                                                   dtype=zarr_group.attrs["dtype"], overwrite=True)
+        N_sub_median = subvol_group.create_array("N_sub_noblead_tmp", shape=subvol_shape, chunks=subvol_chunks,
+                                                    dtype=zarr_group.attrs["dtype"])
+        MG_sub_processed = subvol_group.create_array("MG_sub_processed", shape=subvol_shape, chunks=subvol_chunks,
+                                                    dtype=zarr_group.attrs["dtype"], overwrite=True)
+    else:
+        MG_sub_noblead = subvol_group.create_dataset("MG_sub_noblead_tmp", shape=subvol_shape, chunks=subvol_chunks,
+                                                        dtype=zarr_group.attrs["dtype"])
+        N_sub_median = subvol_group.create_dataset("N_sub_noblead_tmp", shape=subvol_shape, chunks=subvol_chunks,
+                                                    dtype=zarr_group.attrs["dtype"])
+        MG_sub_processed = subvol_group.create_dataset("MG_sub_processed", shape=subvol_shape, chunks=subvol_chunks,
+                                                    dtype=zarr_group.attrs["dtype"], overwrite=True)
     
     # spectral unmixing:
     for stack in range(I_shape[0]):
