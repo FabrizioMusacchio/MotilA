@@ -1258,8 +1258,12 @@ def single_slice_median_filtering(MG_sub, I_shape, zarr_group, median_filter_win
     subvol_group = zarr_group["subvolumes"]
     subvol_shape = (I_shape[0], projection_layers, I_shape[-2], I_shape[-1])
     subvol_chunks = (1, 1, I_shape[-2], I_shape[-1])
-    MG_sub_median = subvol_group.create_dataset("MG_sub_median", shape=subvol_shape, chunks=subvol_chunks,
-                                                dtype=zarr_group.attrs["dtype"], overwrite=True)
+    if zarr.__version__ >= "3":
+        MG_sub_median = subvol_group.create_array("MG_sub_median", shape=subvol_shape, chunks=subvol_chunks,
+                                                  dtype=zarr_group.attrs["dtype"], overwrite=True)
+    else:
+        MG_sub_median = subvol_group.create_dataset("MG_sub_median", shape=subvol_shape, chunks=subvol_chunks,
+                                                    dtype=zarr_group.attrs["dtype"], overwrite=True)
 
     # if median_filter_window<=1, the footprint is a single pixel and thus the median filter
     # has no effect and will be is skipped:
