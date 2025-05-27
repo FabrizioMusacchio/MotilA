@@ -2581,7 +2581,17 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
                     f"but the Neuron channel is the same as the Microglia channel --> skipped.")
             # create a dataset with the same shape as MG_sub and copy MG_sub into it:
             subvol_group = Z["subvolumes"]
-            subvol_group.create_dataset("MG_sub_processed", data=MG_sub)
+            if zarr.__version__ >= "3.0.0":
+                subvol_group.create_array("MG_sub_processed", shape=MG_sub.shape, dtype=MG_sub.dtype,
+                                         chunks=MG_sub.chunks, overwrite=True)
+                # ZARR>=3.0 + Jupyter notebook have a compatibility issue regarding async operations, thus
+                # we need to use try-except to avoid errors when copying data:
+                try:
+                    subvol_group["MG_sub_processed"][:] = MG_sub  # copy data into the array
+                except:
+                    subvol_group["MG_sub_processed"][:] = np.array(MG_sub)
+            else:
+                subvol_group.create_dataset("MG_sub_processed", data=MG_sub)
             MG_sub_processed = subvol_group["MG_sub_processed"]
         elif np.all(((N_sub[0]) == 0)):
             log.log(f"spectral_unmixing is set to {spectral_unmixing}, "
@@ -2589,7 +2599,17 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
             MG_sub_processed = MG_sub.copy()
             # create a dataset with the same shape as MG_sub and copy MG_sub into it:
             subvol_group = Z["subvolumes"]
-            subvol_group.create_dataset("MG_sub_processed", data=MG_sub)
+            if zarr.__version__ >= "3.0.0":
+                subvol_group.create_array("MG_sub_processed", shape=MG_sub.shape, dtype=MG_sub.dtype,
+                                         chunks=MG_sub.chunks, overwrite=True)
+                # ZARR>=3.0 + Jupyter notebook have a compatibility issue regarding async operations, thus
+                # we need to use try-except to avoid errors when copying data:
+                try:
+                    subvol_group["MG_sub_processed"][:] = MG_sub  # copy data into the array
+                except:
+                    subvol_group["MG_sub_processed"][:] = np.array(MG_sub)
+            else:
+                subvol_group.create_dataset("MG_sub_processed", data=MG_sub)
             MG_sub_processed = subvol_group["MG_sub_processed"]
         else:
             MG_sub_processed = spectral_unmix(MG_sub, N_sub, I_shape, Z, projection_layers, log,
@@ -2598,7 +2618,17 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
     else:
         # create a dataset with the same shape as MG_sub and copy MG_sub into it:
         subvol_group = Z["subvolumes"]
-        subvol_group.create_dataset("MG_sub_processed", data=MG_sub)
+        if zarr.__version__ >= "3.0":
+            subvol_group.create_array("MG_sub_processed", shape=MG_sub.shape, dtype=MG_sub.dtype,
+                                     chunks=MG_sub.chunks, overwrite=True)
+            # ZARR>=3.0 + Jupyter notebook have a compatibility issue regarding async operations, thus
+            # we need to use try-except to avoid errors when copying data:
+            try:
+                subvol_group["MG_sub_processed"][:] = MG_sub  # copy data into the array
+            except:
+                subvol_group["MG_sub_processed"][:] = np.array(MG_sub)
+        else:
+            subvol_group.create_dataset("MG_sub_processed", data=MG_sub, overwrite=True)
         MG_sub_processed = subvol_group["MG_sub_processed"]
 
 
