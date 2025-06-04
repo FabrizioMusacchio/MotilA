@@ -954,7 +954,10 @@ def spectral_unmix(MG_sub, N_sub, I_shape, zarr_group, projection_layers, log,
             MG_sub_noblead[stack, slice] = np.clip(MG_sub_noblead[stack, slice], 0,
                                                          MG_sub_noblead[stack, slice].max())
     
-    MG_sub_processed[:] = MG_sub_noblead
+    if zarr.__version__ >= "3":
+        MG_sub_processed[:] = np.array(MG_sub_noblead)
+    else:
+        MG_sub_processed[:] = MG_sub_noblead
     
     del MG_sub, N_sub, MG_sub_noblead, N_sub_median
     del subvol_group["MG_sub_noblead_tmp"]
