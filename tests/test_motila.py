@@ -438,7 +438,10 @@ def test_extract_and_register_subvolume_single_channel(tmp_path):
     )
 
     # Assertions
-    assert isinstance(MG_sub_reg, zarr.core.Array)
+    if zarr.__version__ >= "3":
+        assert isinstance(MG_sub_reg, zarr.Array)
+    else:
+        assert isinstance(MG_sub_reg, zarr.core.Array)
     assert MG_sub_reg.shape[0] == I_shape[0]          # T
     assert MG_sub_reg.shape[1] == projection_layers   # Z
     assert MG_sub_reg.shape[2] <= I_shape[2]           # Y (cropped)
@@ -477,14 +480,20 @@ def test_extract_and_register_subvolume_two_channel(tmp_path):
     )
 
     # Assertions for MG_sub_reg (microglial)
-    assert isinstance(MG_sub_reg, zarr.core.Array)
+    if zarr.__version__ >= "3":
+        assert isinstance(MG_sub_reg, zarr.Array)
+    else:
+        assert isinstance(MG_sub_reg, zarr.core.Array)
     assert MG_sub_reg.shape[0] == I_shape[0]          # T
     assert MG_sub_reg.shape[1] == projection_layers   # Z
     assert MG_sub_reg.shape[2] <= I_shape[-2]          # Y (cropped)
     assert MG_sub_reg.shape[3] <= I_shape[-1]          # X (cropped)
 
     # Assertions for N_sub_reg (neuronal)
-    assert isinstance(N_sub_reg, zarr.core.Array)
+    if zarr.__version__ >= "3":
+        assert isinstance(N_sub_reg, zarr.Array)
+    else:
+        assert isinstance(N_sub_reg, zarr.core.Array)
     assert N_sub_reg.shape[0] == I_shape[0]          # T
     assert N_sub_reg.shape[1] == projection_layers   # Z
     assert N_sub_reg.shape[2] <= I_shape[-2]          # Y (cropped)
@@ -550,7 +559,10 @@ def test_spectral_unmix(tmp_path):
     )
 
     # Assertions
-    assert isinstance(MG_sub_processed, zarr.core.Array)
+    if zarr.__version__ >= "3":
+        assert isinstance(MG_sub_processed, zarr.Array)
+    else:
+        assert isinstance(MG_sub_processed, zarr.core.Array)
     assert MG_sub_processed.shape[0] == I_shape[0]          # T (unchanged)
     assert MG_sub_processed.shape[1] == projection_layers   # Z (cropped to projection_layers)
     assert MG_sub_processed.shape[2] == I_shape[2]          # Y (unchanged)
@@ -887,7 +899,10 @@ def test_single_slice_median_filtering(tmp_path):
     )
 
     # Assertions for the case where median_filter_window > 1
-    assert isinstance(MG_sub_median, zarr.core.Array)
+    if zarr.__version__ >= "3":
+        assert isinstance(MG_sub_median, zarr.Array)
+    else:
+        assert isinstance(MG_sub_median, zarr.core.Array)
     assert MG_sub_median.shape == (I_shape[0], projection_layers, I_shape[-2], I_shape[-1])  # T, Z, Y, X
 
     # Check that the filtered result is within expected range
@@ -959,7 +974,10 @@ def test_single_slice_median_filtering(tmp_path):
     )
 
     # Assertions for the case where median_filter_window > 1
-    assert isinstance(MG_sub_median, zarr.core.Array)
+    if zarr.__version__ >= "3":
+        assert isinstance(MG_sub_median, zarr.Array)
+    else:
+        assert isinstance(MG_sub_median, zarr.core.Array)
     assert MG_sub_median.shape == (I_shape[0], projection_layers, I_shape[-2], I_shape[-1])  # T, Z, Y, X
 
     # Check that the filtered result is within expected range
