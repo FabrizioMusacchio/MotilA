@@ -598,6 +598,7 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
             # info: we do not compress for speed reasons
             zarr_group = zarr.group(zarr_path, overwrite=True)
             if zarr.__version__ >= "3":
+                chunks = tuple(int(x) for x in chunks)
                 zarr_group.create_array("image", shape=I.shape, chunks=chunks, 
                                         dtype=I.dtype, overwrite=True)
             else:
@@ -626,6 +627,7 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
             # info: we do not compress for speed reasons
             zarr_group = zarr.group(zarr_path, overwrite=True)
             if zarr.__version__ >= "3":
+                chunks = tuple(int(x) for x in chunks)
                 zarr_group.create_array("image", shape=I.shape, chunks=chunks, 
                                         dtype=I.dtype, overwrite=True)
             else:
@@ -644,6 +646,8 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
     subvol_chunks = (1, 1, I_shape[-2], I_shape[-1])  # Efficient chunking for Zarr
     subvol_group = zarr_group.require_group("subvolumes")
     if zarr.__version__ >= "3":
+        subvol_shape  = tuple(int(x) for x in subvol_shape)
+        subvol_chunks = tuple(int(x) for x in subvol_chunks)
         MG_sub = subvol_group.create_array("MG_sub", shape=subvol_shape, chunks=subvol_chunks, dtype=I.dtype,
                                            overwrite=True)
     else:
@@ -748,6 +752,8 @@ def extract_and_register_subvolume(fname, I_shape, projection_layers, projection
     subvol_group = zarr_group["subvolumes"]
     #compressor = Blosc(cname='lz4', clevel=5, shuffle=Blosc.SHUFFLE, blocksize=0)
     if zarr.__version__ >= "3":
+        subvol_shape  = tuple(int(x) for x in subvol_shape)
+        subvol_chunks = tuple(int(x) for x in subvol_chunks)
         MG_sub_reg = subvol_group.create_array("MG_sub_tmp", shape=subvol_shape, chunks=subvol_chunks, 
                                                dtype=zarr_group.attrs["dtype"], overwrite=True)
     else:
@@ -837,6 +843,8 @@ def extract_and_register_subvolume(fname, I_shape, projection_layers, projection
     new_shape = tuple(int(x) for x in new_shape)
     subregvol_chunks = tuple(int(x) for x in subregvol_chunks)
     if zarr.__version__ >= "3":
+        new_shape = tuple(int(x) for x in new_shape)
+        subregvol_chunks = tuple(int(x) for x in subregvol_chunks)
         MG_sub_reg_cropped = subvol_group.create_array("MG_sub", shape=new_shape, 
                                                        chunks=subregvol_chunks, dtype=zarr_group.attrs["dtype"],
                                                        overwrite=True)
@@ -926,6 +934,8 @@ def spectral_unmix(MG_sub, N_sub, I_shape, zarr_group, projection_layers, log,
     subvol_shape = (I_shape[0], projection_layers, I_shape[-2], I_shape[-1])
     subvol_chunks = (1, 1, I_shape[-2], I_shape[-1])
     if zarr.__version__ >= "3":
+        subvol_shape  = tuple(int(x) for x in subvol_shape)
+        subvol_chunks = tuple(int(x) for x in subvol_chunks)
         MG_sub_noblead = subvol_group.create_array("MG_sub_noblead_tmp", shape=subvol_shape, chunks=subvol_chunks,
                                                     dtype=zarr_group.attrs["dtype"])
         N_sub_median = subvol_group.create_array("N_sub_noblead_tmp", shape=subvol_shape, chunks=subvol_chunks,
@@ -1262,6 +1272,8 @@ def single_slice_median_filtering(MG_sub, I_shape, zarr_group, median_filter_win
     subvol_shape = (I_shape[0], projection_layers, I_shape[-2], I_shape[-1])
     subvol_chunks = (1, 1, I_shape[-2], I_shape[-1])
     if zarr.__version__ >= "3":
+        subvol_shape  = tuple(int(x) for x in subvol_shape)
+        subvol_chunks = tuple(int(x) for x in subvol_chunks)
         MG_sub_median = subvol_group.create_array("MG_sub_median", shape=subvol_shape, chunks=subvol_chunks,
                                                   dtype=zarr_group.attrs["dtype"], overwrite=True)
     else:
@@ -1320,6 +1332,8 @@ def single_slice_circular_median_filtering(MG_sub, I_shape, zarr_group, median_f
     subvol_shape = (I_shape[0], projection_layers, I_shape[-2], I_shape[-1])
     subvol_chunks = (1, 1, I_shape[-2], I_shape[-1])
     if zarr.__version__ >= "3":
+        subvol_shape  = tuple(int(x) for x in subvol_shape)
+        subvol_chunks = tuple(int(x) for x in subvol_chunks)
         MG_sub_median = subvol_group.create_array("MG_sub_median", shape=subvol_shape, chunks=subvol_chunks,
                                                   dtype=zarr_group.attrs["dtype"], overwrite=True)
     else:

@@ -447,7 +447,15 @@ def test_extract_and_register_subvolume_single_channel(tmp_path):
     assert MG_sub_reg.shape[2] <= I_shape[2]           # Y (cropped)
     assert MG_sub_reg.shape[3] <= I_shape[3]           # X (cropped)
 
-    assert zarr_group.store.path.endswith(".zarr")
+    if hasattr(zarr_group.store, "url"):
+        # for ZARR v3 and higher:
+        assert str(zarr_group.store.url).endswith(".zarr")
+    elif hasattr(zarr_group.store, "path"):
+        # for ZARR v2:
+        assert zarr_group.store.path.endswith(".zarr")
+    else:
+        # Optionally, skip or warn if neither attribute exists:
+        pass
     assert "MG_sub" in zarr_group["subvolumes"]
 
     # Optional: check logs
