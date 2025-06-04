@@ -525,8 +525,12 @@ def test_spectral_unmix(tmp_path):
     zarr_group = zarr.open(tmp_path / "test_zarr.zarr", mode="w")  # Mock Zarr group
 
     # Create mock Zarr datasets inside the group
-    zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
-    zarr_group.create_dataset("subvolumes/N_sub", shape=I_shape, dtype=np.float32)
+    if zarr.__version__ >= "3":
+        zarr_group.create_array("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
+        zarr_group.create_array("subvolumes/N_sub", shape=I_shape, dtype=np.float32)
+    else:
+        zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
+        zarr_group.create_dataset("subvolumes/N_sub", shape=I_shape, dtype=np.float32)
     zarr_group.attrs["dtype"] = "float32"
     
     # Write synthetic data to the Zarr datasets
@@ -863,7 +867,10 @@ def test_single_slice_median_filtering(tmp_path):
 
     # Create a mock Zarr group
     zarr_group = zarr.open(tmp_path / "test_zarr.zarr", mode="w")  # Mock Zarr group
-    zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
+    if zarr.__version__ >= "3":
+        zarr_group.create_array("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
+    else:
+        zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
     zarr_group.attrs["dtype"] = "float32"
 
     # Write synthetic data to the Zarr datasets
@@ -932,7 +939,10 @@ def test_single_slice_median_filtering(tmp_path):
 
     # Create a mock Zarr group
     zarr_group = zarr.open(tmp_path / "test_zarr.zarr", mode="w")  # Mock Zarr group
-    zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
+    if zarr.__version__ >= "3":
+        zarr_group.create_array("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
+    else:
+        zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
     zarr_group.attrs["dtype"] = "float32"
 
     # Write synthetic data to the Zarr datasets
@@ -1271,7 +1281,10 @@ def test_reg_2D_images(tmp_path):
 
     # Create a mock Zarr group for saving the registered images
     zarr_group = zarr.open(tmp_path / "test_zarr.zarr", mode="w")  # Mock Zarr group
-    zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
+    if zarr.__version__ >= "3":
+        zarr_group.create_array("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
+    else:
+        zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
     zarr_group.attrs["dtype"] = "float32"
 
     # Write synthetic data to the Zarr datasets
@@ -1323,7 +1336,10 @@ def test_binarize_2D_images(tmp_path):
 
     # Create a mock Zarr group for saving the binarized images
     zarr_group = zarr.open(tmp_path / "test_zarr.zarr", mode="w")  # Mock Zarr group
-    zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
+    if zarr.__version__ >= "3":
+        zarr_group.create_array("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
+    else:
+        zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.float32)
     zarr_group.attrs["dtype"] = "float32"
 
     # Write synthetic data to the Zarr datasets
@@ -1376,7 +1392,10 @@ def test_remove_small_blobs(tmp_path):
 
     # Create a mock Zarr group
     zarr_group = zarr.open(tmp_path / "test_zarr.zarr", mode="w")  # Mock Zarr group
-    zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.uint16)
+    if zarr.__version__ >= "3":
+        zarr_group.create_array("subvolumes/MG_sub", shape=I_shape, dtype=np.uint16)
+    else:
+        zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.uint16)
     zarr_group.attrs["dtype"] = "uint16"
 
     # Write synthetic data to the Zarr datasets
@@ -1432,7 +1451,10 @@ def test_plot_pixel_areas(tmp_path):
 
     # Create a mock Zarr group
     zarr_group = zarr.open(tmp_path / "test_zarr.zarr", mode="w")  # Mock Zarr group
-    zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.uint16)
+    if zarr.__version__ >= "3":
+        zarr_group.create_array("subvolumes/MG_sub", shape=I_shape, dtype=np.uint16)
+    else:
+        zarr_group.create_dataset("subvolumes/MG_sub", shape=I_shape, dtype=np.uint16)
     zarr_group.attrs["dtype"] = "uint16"
 
     # Write synthetic data to the Zarr datasets
