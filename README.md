@@ -1,4 +1,5 @@
-![GitHub Release](https://img.shields.io/github/v/release/FabrizioMusacchio/motila) [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/) ![Tests](https://github.com/FabrizioMusacchio/motila/actions/workflows/python-tests.yml/badge.svg)
+![GitHub Release](https://img.shields.io/github/v/release/FabrizioMusacchio/motila) [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/) ![Tests](https://github.com/FabrizioMusacchio/motila/actions/workflows/python-tests.yml/badge.svg) [![PyPI version](https://img.shields.io/pypi/v/motila.svg)](https://pypi.org/project/motila/)
+
 
 
 # MotilA: A pipeline for microglial fine process motility analysis
@@ -38,9 +39,22 @@ This turnover rate represents the fraction of pixels undergoing change, providin
 
 
 ## Installation
-To use *MotilA*, first download the repository to your local machine. You can do this by cloning the repository using Git or simply downloading the ZIP file from the GitHub page. 
+The easiest way to install *MotilA* is via [PyPI](https://pypi.org/project/motila):
 
-Then, you need to install the required Python packages. To do so, create and activate a conda environment as follows:
+```bash
+conda create -n motila python=3.12 -y
+conda activate motila
+pip install motila
+```
+
+If you prefer to install *MotilA* from source, you can clone or download the GitHub repository:
+
+```bash
+git clone https://github.com/fabriziomusacchio/MotilA.git
+cd MotilA
+```
+
+We recommend setting up a dedicated conda environment for development and reproducibility:
 
 ```bash
 conda create -n motila python=3.12 mamba -y
@@ -48,7 +62,11 @@ conda activate motila
 mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffile zarr numcodecs openpyxl xlrd ipywidgets ipykernel ipympl
 ```
 
-We have tested *MotilA* for Python 3.9 to 3.12 as well as on Windows, macOS, and Linux systems. The pipeline should work on all these platforms without any issues. If you encounter any issues, please let us know.
+⚠️ **Avoid mixing install methods**:  
+If you install *MotilA* via `pip`, make sure you do **not place a local folder named `motila/`** in the same directory where you run your scripts (e.g., a cloned or downloaded source folder). Python may try to import from the local folder instead of the installed package, leading to confusing errors.
+
+
+We have tested *MotilA* for Python 3.9 to 3.12 on Windows, macOS, and Linux systems. The pipeline should work on all these platforms without any issues. If you encounter any platform-specific issues, feel free to [open an issue](https://github.com/FabrizioMusacchio/MotilA/issues).
 
 ## Example data set and tutorials
 To help you get started with *MotilA*, we provide an example dataset and tutorials to guide you through the pipeline steps. 
