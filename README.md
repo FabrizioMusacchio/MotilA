@@ -221,6 +221,9 @@ PROJECT_Path
 │   └───project_tag ...
 ```
 
+The folder hierarchy follows a structured, [BIDS-inspired format](https://bids-specification.readthedocs.io), organized by subject ID and project-specific subfolders. While not fully BIDS-compliant, this layout supports consistent batch processing and metadata association.
+
+
 By placing an Excel file (e.g., `metadata.xls`) in the `project_tag` folder for each animal ID folder (listed in `ID_list`), the following parameters set in the execution script/notebook will be overwritten by the parameters in the Excel file: 
 
 * `two_channel_default`
