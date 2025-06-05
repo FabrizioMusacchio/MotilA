@@ -1,0 +1,36 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "motila"
+version = "1.0.3"
+description = "MotilA: A pipeline for microglial motility analysis"
+authors = [{ name = "Fabrizio Musacchio", email = "fabrizio.musacchio@posteo.de" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "tifffile",
+    "scikit-image",
+    "scikit-learn",
+    "zarr",
+    "SimpleITK",
+    "pandas",
+    "numcodecs",
+    "openpyxl",
+    "xlrd",
+    "ipywidgets",
+    "ipykernel", 
+    "ipympl"
+]
+
+           
+[project.urls]
+Homepage = "https://github.com/fabriziomusacchio/motila"
+Documentation = "https://github.com/fabriziomusacchio/motila#readme"
+Source = "https://github.com/fabriziomusacchio/motila"
+Tracker = "https://github.com/fabriziomusacchio/motila/issues"
