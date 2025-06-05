@@ -39,6 +39,7 @@ This turnover rate represents the fraction of pixels undergoing change, providin
 
 
 ## Installation
+### Installation via PyPI
 The easiest way to install *MotilA* is via [PyPI](https://pypi.org/project/motila):
 
 ```bash
@@ -47,6 +48,7 @@ conda activate motila
 pip install motila
 ```
 
+### Installation from source
 If you prefer to install *MotilA* from source, you can clone or download the GitHub repository:
 
 ```bash
@@ -65,7 +67,7 @@ mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffil
 ⚠️ **Avoid mixing install methods**:  
 If you install *MotilA* via `pip`, make sure you do **not place a local folder named `motila/`** in the same directory where you run your scripts (e.g., a cloned or downloaded source folder). Python may try to import from the local folder instead of the installed package, leading to confusing errors.
 
-
+### Compatibility
 We have tested *MotilA* for Python 3.9 to 3.12 on Windows, macOS, and Linux systems. The pipeline should work on all these platforms without any issues. If you encounter any platform-specific issues, feel free to [open an issue](https://github.com/FabrizioMusacchio/MotilA/issues).
 
 ## Example data set and tutorials
