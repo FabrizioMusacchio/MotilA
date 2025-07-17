@@ -818,11 +818,11 @@ def extract_and_register_subvolume(fname, I_shape, projection_layers, projection
                 
             # apply the shift to the current slice:
             MG_sub_reg[stack, slice, :, :] = transform.warp(MG_sub[stack, slice, :, :],
-                                                            transform.SimilarityTransform(translation=shifts[stack, :]),
+                                                            transform.SimilarityTransform(translation=shifts[slice, :]),
                                                             preserve_range=True)
             if two_channel:
                 N_sub_reg[stack, slice, :, :] = transform.warp(N_sub[stack, slice, :, :],
-                                                               transform.SimilarityTransform(translation=shifts[stack, :]),
+                                                               transform.SimilarityTransform(translation=shifts[slice, :]),
                                                                preserve_range=True)
         # find the max shifts in both directions; bear in mind, that the shifts can be negative:
         max_shifts[stack, 0] = np.max(shifts[:, 0].__abs__())
@@ -2664,7 +2664,18 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
     else:
         # create a dataset with the same shape as MG_sub and copy MG_sub into it:
         subvol_group = Z["subvolumes"]
-        subvol_group.create_dataset("MG_sub_processed_medfiltered", data=MG_sub_processed)
+        if zarr.__version__ >= "3.0":
+            subvol_group.create_array("MG_sub_processed_medfiltered", 
+                                      shape=MG_sub_processed.shape, dtype=MG_sub_processed.dtype,
+                                      chunks=MG_sub_processed.chunks, overwrite=True)
+            # ZARR>=3.0 + Jupyter notebook have a compatibility issue regarding async operations, thus
+            # we need to use try-except to avoid errors when copying data:
+            try:
+                subvol_group["MG_sub_processed_medfiltered"][:] = MG_sub_processed  # copy data into the array
+            except:
+                subvol_group["MG_sub_processed_medfiltered"][:] = np.array(MG_sub_processed)
+        else:
+            subvol_group.create_dataset("MG_sub_processed_medfiltered", data=MG_sub_processed)
         MG_sub_processed_medfiltered = subvol_group["MG_sub_processed_medfiltered"]
 
     # project and copy so-far processed stacks into MG_projection_pre (for histogram evaluation) and plot current processed stack:
