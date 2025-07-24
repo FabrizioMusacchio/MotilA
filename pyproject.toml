@@ -19,6 +19,7 @@ dependencies = [
     "scikit-learn",
     "zarr",
     "SimpleITK",
+    "pystackreg",
     "pandas",
     "numcodecs",
     "openpyxl",
