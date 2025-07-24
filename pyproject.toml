@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "motila"
-version = "1.0.3"
+version = "1.0.4"
 description = "MotilA: A pipeline for microglial motility analysis"
 authors = [{ name = "Fabrizio Musacchio", email = "fabrizio.musacchio@posteo.de" }]
 license = { text = "MIT" }
