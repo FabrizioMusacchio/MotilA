@@ -320,8 +320,9 @@ If `metadata.xls` is present in `project_tag` folder, the above defined values (
 | Parameter | Values | Description |
 |------------|----------------------|----------------|
 | `regStack3d` | bool (`True` or `False`)     | perform optional registration of slices within each 3D time-stack. |
-| `regStack2d` | bool (`True` or `False`)    | perform optional registration of projections on each other. |
-| `template_mode` | string`    | set the template mode for 3D registration (`mean`, `median`, `max`, `min`, `std`, and `var`).  |
+| `regStack2d` | bool (`True` or `False`)    | perform optional registration of projections on each other using phase cross-correlation. |
+| `usepystackreg` | bool (`True` or `False`) | If `True`, use pystackreg (StackReg) for 2D registration instead of phase cross-correlation. |
+| `template_mode` | string    | set the template mode for 3D registration (`mean`, `median`, `max`, `min`, `std`, and `var`).  |
 | `max_xy_shift_correction` | integer     | Set the maximal shift in x/y direction for 2D registration. |
 
 
