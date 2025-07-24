@@ -119,7 +119,8 @@ import matplotlib.pyplot as plt
 from matplotlib import colors as mcol
 
 from skimage.registration import phase_cross_correlation
-from skimage import transform
+from skimage import transform, io, exposure
+from pystackreg import StackReg
 import tifffile
 
 import skimage.filters as filter
@@ -1632,7 +1633,8 @@ def plot_intensities(MG_pro, log, plot_path, I_shape):
     return intensity_means
 
 def reg_2D_images(MG_pro, I_shape, log, histogram_ref_stack, max_xy_shift_correction=50,
-                  median_filter_projections=None, median_filter_window_projections=3):
+                  median_filter_projections=None, median_filter_window_projections=3,
+                  usepystackreg=False):
     """
     Registers 2D z-projection images using phase cross-correlation.
 
@@ -1692,26 +1694,46 @@ def reg_2D_images(MG_pro, I_shape, log, histogram_ref_stack, max_xy_shift_correc
     else:
         MG_pro_medianfiltered = MG_pro.copy()
     
+    if usepystackreg:
+        sr = StackReg(StackReg.TRANSLATION)
+        ref = MG_pro_medianfiltered[histogram_ref_stack]
     for stack in range(I_shape[0]):
         # stack=0
-        shifts, _, _ = phase_cross_correlation(reference_image=MG_pro_medianfiltered[histogram_ref_stack],
-                                         moving_image=MG_pro_medianfiltered[stack],
-                                         upsample_factor=30)
-        # check if the shifts are within the allowed range:
-        if shifts[0] > max_xy_shift_correction:
-            shifts[0] = max_xy_shift_correction
-        elif shifts[0] < -max_xy_shift_correction:
-            shifts[0] = -max_xy_shift_correction
-        if shifts[1] > max_xy_shift_correction:
-            shifts[1] = max_xy_shift_correction
-        elif shifts[1] < -max_xy_shift_correction:
-            shifts[1] = -max_xy_shift_correction
-        all_shifts_xy[stack, :] = shifts
-                
-        # apply the shift to the current slice:
-        MG_pro_bin_reg[stack, :, :] = transform.warp(MG_pro_medianfiltered[stack],
-                                                     transform.SimilarityTransform(translation=shifts),
-                                                     preserve_range=True)
+        if not usepystackreg:
+            # use phase cross-correlation to find the shifts:
+            shifts, _, _ = phase_cross_correlation(reference_image=MG_pro_medianfiltered[histogram_ref_stack],
+                                            moving_image=MG_pro_medianfiltered[stack],
+                                            upsample_factor=30)
+            # check if the shifts are within the allowed range:
+            if shifts[0] > max_xy_shift_correction:
+                shifts[0] = max_xy_shift_correction
+            elif shifts[0] < -max_xy_shift_correction:
+                shifts[0] = -max_xy_shift_correction
+            if shifts[1] > max_xy_shift_correction:
+                shifts[1] = max_xy_shift_correction
+            elif shifts[1] < -max_xy_shift_correction:
+                shifts[1] = -max_xy_shift_correction
+            all_shifts_xy[stack, :] = shifts
+                    
+            # apply the shift to the current slice:
+            MG_pro_bin_reg[stack, :, :] = transform.warp(MG_pro_medianfiltered[stack],
+                                                        transform.SimilarityTransform(translation=shifts),
+                                                        preserve_range=True)
+            
+            log.log(f"   phase cross-correlation: registered stack {stack} with shifts {all_shifts_xy[stack, :]}")
+        else:
+            # use pystackreg to find the shifts (eg reg = StackReg(StackReg.TRANSLATION).register_transform(ref,mov)):
+            mov = MG_pro_medianfiltered[stack]
+            
+            reg = sr.register(ref,mov)
+            tmat = sr.get_matrix()
+            all_shifts_xy[stack, :] = tmat[:2, 2]  # dx, dy
+            reg = sr.transform(mov, tmat)
+            reg = reg.clip(min=0)
+            
+            MG_pro_bin_reg[stack, :, :] = reg.clip(min=0) # store zero clipped registered 2D image
+            
+            log.log(f"   pystackreg: registered stack {stack} with shifts {all_shifts_xy[stack, :]}")
 
     # zero-edge-clipping:
     clip_r = np.ceil(all_shifts_xy[:,0].max()).astype("int")
@@ -2393,6 +2415,7 @@ def motility(MG_pro, I_shape, log, plot_path, ID="ID00000", group="blinded"):
 def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, projection_layers,
                   histogram_ref_stack, log, blob_pixel_threshold=100, 
                   regStack2d=True, regStack3d=False, template_mode="mean",
+                  usepystackreg=False,
                   spectral_unmixing=True, hist_equalization=False, hist_match=True, 
                   hist_equalization_kernel_size=None, hist_equalization_clip_limit=0.05,
                   RESULTS_Path="motility_analysis",
@@ -2736,7 +2759,8 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
                                                 histogram_ref_stack=histogram_ref_stack, 
                                                 max_xy_shift_correction=max_xy_shift_correction,
                                                 median_filter_projections=median_filter_projections, 
-                                                median_filter_window_projections=median_filter_window_projections)
+                                                median_filter_window_projections=median_filter_window_projections,
+                                                usepystackreg=usepystackreg)
         plot_projected_stack(MG_projection_reg, I_shape=I_shape, plot_path=plot_path, log=log,
                              plottitle="MG projected, proc 5 registered")
     else:
@@ -2787,6 +2811,7 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
                   MG_channel=0, N_channel=1, two_channel=True, projection_center=50, projection_layers=20,
                   histogram_ref_stack=0, log="", blob_pixel_threshold=100, 
                   regStack2d=True, regStack3d=False, template_mode="mean",
+                  usepystackreg=False,
                   spectral_unmixing=True, hist_equalization=False, hist_match=True, 
                   hist_equalization_kernel_size=None, hist_equalization_clip_limit=0.05,
                   max_xy_shift_correction=50,
