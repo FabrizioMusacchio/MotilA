@@ -61,7 +61,7 @@ We recommend setting up a dedicated conda environment for development and reprod
 ```bash
 conda create -n motila python=3.12 mamba -y
 conda activate motila
-mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffile zarr numcodecs openpyxl xlrd ipywidgets ipykernel ipympl
+mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffile zarr numcodecs pystackreg openpyxl xlrd ipywidgets ipykernel ipympl
 ```
 
 ⚠️ **Avoid mixing install methods**:  
