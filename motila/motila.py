@@ -1636,7 +1636,7 @@ def reg_2D_images(MG_pro, I_shape, log, histogram_ref_stack, max_xy_shift_correc
                   median_filter_projections=None, median_filter_window_projections=3,
                   usepystackreg=False):
     """
-    Registers 2D z-projection images using phase cross-correlation.
+    Registers 2D z-projection images using phase cross-correlation or pystackreg.
 
     Parameters:
     -----------
@@ -1647,7 +1647,7 @@ def reg_2D_images(MG_pro, I_shape, log, histogram_ref_stack, max_xy_shift_correc
     log : logger_object
         Logging object for recording the process.
     histogram_ref_stack : int
-        Index of the reference stack for histogram matching.
+        Index of the reference stack for registration.
     max_xy_shift_correction : int, optional
         Maximum allowed XY shift during registration (default is 50 pixels).
     median_filter_projections : str or None, optional
@@ -1655,6 +1655,8 @@ def reg_2D_images(MG_pro, I_shape, log, histogram_ref_stack, max_xy_shift_correc
         Options: "circular", "square", or None (default).
     median_filter_window_projections : int, optional
         Window size for median filtering (default is 3).
+    usepystackreg : bool, optional
+        If True, uses pystackreg (StackReg) for registration instead of phase cross-correlation.
 
     Returns:
     --------
@@ -1665,7 +1667,7 @@ def reg_2D_images(MG_pro, I_shape, log, histogram_ref_stack, max_xy_shift_correc
 
     Notes:
     ------
-    - Uses phase cross-correlation for image alignment.
+    - Uses phase cross-correlation or pystackreg for image alignment.
     - Applies median filtering if not previously performed to enhance registration accuracy.
     - Limits shifts to a defined maximum correction range.
     - Clips image borders to remove misaligned zero-padding regions.
@@ -2453,6 +2455,8 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
         Whether to perform 2D registration on z-projections.
     regStack3d : bool
         Whether to perform 3D intra-stack registration.
+    usepystackreg : bool, optional
+        If True, use pystackreg (StackReg) for 2D registration instead of phase cross-correlation.
     template_mode : str
         Template calculation method for 3D registration.
     spectral_unmixing : bool
@@ -2507,6 +2511,7 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
     ------
     - Loads and processes microglia fluorescence images for motility analysis.
     - Supports optional 3D and 2D registration.
+    - 2D registration can use either phase cross-correlation or pystackreg (StackReg) if `usepystackreg` is True.
     - Includes histogram-based contrast adjustments and thresholding.
     - Computes motility metrics such as gain, loss, and stability.
     - Saves processed images, projections, and statistical results in a designated output directory.
