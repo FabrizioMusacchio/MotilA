@@ -2551,6 +2551,10 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
  
     # calculate and verify projection layers:
     projection_range, projection_layers = calc_projection_range(projection_center, projection_layers, I_shape, log)
+    # check whether we got a valid projection range returned:
+    if projection_layers == 0:
+        log.log(f"Projection center {projection_center} resulted in zero projection layers -> file {fname} will be skipped.")
+        return  # skip processing this file
 
     # save all parameters used in this analysis into an excel file:
     excel_file_name = '_processing_parameters.xlsx'
