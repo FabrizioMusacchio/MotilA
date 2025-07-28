@@ -166,8 +166,8 @@ def calc_projection_range(projection_center, projection_layers, I_shape, log):
         A tuple containing:
         - projection_range : list
             A list of two integers representing the start and end indices of the projection range.
-        - projection_layers_correction : int
-            The number of layers that could not be included due to boundary adjustments.
+        - projection_layers : int
+            The actual number of layers included in the projection range after boundary adjustments.
     """
     
     """ 
@@ -240,7 +240,10 @@ def calc_projection_range(projection_center, projection_layers, I_shape, log):
 
     log.log(f"Projection center: {projection_center}, Projection range: {projection_range}")
 
-    return projection_range
+    # update projection_layers if it was adjusted:
+    projection_layers = current_layers
+
+    return projection_range, projection_layers
 
 def plot_2D_image(image, plot_path, plot_title, fignum=1, figsize=(5,5.15),
                   show_ticks=False, show_borders=False, cbar_show=False,
@@ -2547,7 +2550,7 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
         raise ValueError(f"Error: File {fname} is not a .tif file!")
  
     # calculate and verify projection layers:
-    projection_range = calc_projection_range(projection_center, projection_layers, I_shape, log)
+    projection_range, projection_layers = calc_projection_range(projection_center, projection_layers, I_shape, log)
 
     # save all parameters used in this analysis into an excel file:
     excel_file_name = '_processing_parameters.xlsx'
