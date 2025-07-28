@@ -178,7 +178,7 @@ def calc_projection_range(projection_center, projection_layers, I_shape, log):
     # check if projection_center is out of bounds:
     if projection_center < 0 or projection_center >= I_shape[1]:
         log.log(f"WARNING: projection center {projection_center} is out of bounds for image z-dimension {I_shape[1]} -> skipping.")
-        return [0, 0]
+        return [0, 0], 0  # No valid projection range and number of layers therefore 0
     
     projection_half = projection_layers // 2  # integer division for symmetry
 
@@ -240,8 +240,8 @@ def calc_projection_range(projection_center, projection_layers, I_shape, log):
 
     log.log(f"Projection center: {projection_center}, Projection range: {projection_range}")
 
-    # update projection_layers if it was adjusted:
-    projection_layers = current_layers
+    # update projection_layers if it was adjusted to the actual number of layers:
+    projection_layers = projection_range[1] - projection_range[0] + 1
 
     return projection_range, projection_layers
 

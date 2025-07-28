@@ -71,81 +71,88 @@ class MockLogger:
 
 def test_projection_range_normal_case():
     log = MockLogger()
-    result = calc_projection_range(
+    result_1, result_2 = calc_projection_range(
         projection_center=10,
         projection_layers=5,
         I_shape=(100, 30),  # shape: (y, z)
         log=log
     )
-    assert result == [8, 12]  # For projection_center=10 and projection_layers=5
-    assert "Projection center: 10" in log.messages[-1]
+    assert result_1 == [8, 12]  # For projection_center=10 and projection_layers=5
+    assert result_2 == 5 # The number of layers should be 5
+    assert "Projection center: 10, Projection range: [8, 12]" in log.messages[-1]
 
 def test_projection_range_normal_case1():
     log = MockLogger()
-    result = calc_projection_range(
+    result_1, result_2 = calc_projection_range(
         projection_center=9,
         projection_layers=5,
         I_shape=(100, 30),  # shape: (y, z)
         log=log
     )
-    assert result == [7, 11]  # For projection_center=9 and projection_layers=5
-    assert "Projection center: 9" in log.messages[-1]
+    assert result_1 == [7, 11]  # For projection_center=9 and projection_layers=5
+    assert result_2 == 5 # The number of layers should be 5
+    assert "Projection center: 9, Projection range: [7, 11]" in log.messages[-1]
 
 def test_projection_upper_exceeds():
     log = MockLogger()
-    result = calc_projection_range(
+    result_1, result_2 = calc_projection_range(
         projection_center=28,
         projection_layers=5,
         I_shape=(100, 30),
         log=log
     )
-    assert result == [25, 29]  # Projection center at 28, layers should be [25, 26, 27, 28, 29]
+    assert result_1 == [25, 29]  # Projection center at 28, layers should be [25, 26, 27, 28, 29]
+    assert result_2 == 5  # The number of layers should be 5
     assert "Projection center" in log.messages[-1]
     assert len(log.messages) > 1  # Expect a warning for exceeding
     assert "Projection center: 28, Projection range: [25, 29]" in log.messages[-1]
 
 def test_projection_lower_exceeds():
     log = MockLogger()
-    result = calc_projection_range(
+    result_1, result_2 = calc_projection_range(
         projection_center=1,
         projection_layers=5,
         I_shape=(100, 30),
         log=log
     )
-    assert result == [0, 4]  # Projection center at 1, layers should be [0, 1, 2, 3]
+    assert result_1 == [0, 4]  # Projection center at 1, layers should be [0, 1, 2, 3]
+    assert result_2 == 5  # The number of layers should be 5
     assert "adjusted as it was below 0" in log.messages[-2]
 
 def test_projection_completely_out_of_bounds():
     log = MockLogger()
-    result = calc_projection_range(
+    result_1, result_2 = calc_projection_range(
         projection_center=40,
         projection_layers=5,
         I_shape=(100, 30),
         log=log
     )
-    assert result == [0, 0]  # Projection center at 40, no layers possible, adjusted to [0, 0]
+    assert result_1 == [0, 0]  # Projection center at 40, no layers possible, adjusted to [0, 0]
+    assert result_2 == 0  # No layers can be included
     assert "WARNING: projection center 40 is out of bounds for image z-dimension 30 -> skipping." in log.messages[-1]
 
 def test_projection_even_layers():
     log = MockLogger()
-    result = calc_projection_range(
+    result_1, result_2 = calc_projection_range(
         projection_center=13,
         projection_layers=6,
         I_shape=(100, 30),
         log=log
     )
-    assert result == [11, 16]  # Projection center at 13, layers should be [11, 12, 13, 14, 15, 16]
+    assert result_1 == [11, 16]  # Projection center at 13, layers should be [11, 12, 13, 14, 15, 16]
+    assert result_2 == 6  # The number of layers should be 6
     assert "Projection center: 13" in log.messages[-1]
 
 def test_projection_odd_layers():
     log = MockLogger()
-    result = calc_projection_range(
+    result_1, result_2 = calc_projection_range(
         projection_center=14,
         projection_layers=5,
         I_shape=(100, 30),
         log=log
     )
-    assert result == [12, 16]  # Projection center at 14, layers should be [12, 13, 14, 15, 16]
+    assert result_1 == [12, 16]  # Projection center at 14, layers should be [12, 13, 14, 15, 16]
+    assert result_2 == 5  # The number of layers should be 5
     assert "Projection center: 14" in log.messages[-1]
 
 
