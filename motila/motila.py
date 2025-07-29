@@ -2972,12 +2972,12 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
                 
             
             # search for metadata file in the current TP_folder and extract the parameters from it (if any):
-            _, metadata_file, _ = filterfiles_by_string(Current_TP_Folder, "metadata.xls")
+            _, metadata_files, _ = filterfiles_by_string(Current_TP_Folder, metadata_file)
             # remove dot-files from metadata_file list:
-            metadata_file = [file for file in metadata_file if not file.startswith(".")]
+            metadata_files = [file for file in metadata_files if not file.startswith(".")]
             projection_centers_use = []
-            if metadata_file:
-                metadata = pd.read_excel(Current_TP_Folder + metadata_file[0])
+            if metadata_files:
+                metadata = pd.read_excel(Current_TP_Folder + metadata_files[0])
                 # overwrites processing variables from function input with metadata values:
                 two_channel = metadata["Two Channel"][0]
                 N_channel   = metadata["Neuron Channel"][0]
