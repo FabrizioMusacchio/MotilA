@@ -3051,6 +3051,7 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
                               regStack2d=regStack2d, 
                               regStack3d=regStack3d,
                               template_mode=template_mode,
+                              usepystackreg=usepystackreg,
                               debug_output=debug_output,
                               stats_plots=stats_plots)
         log.log("\n============================================================\n")
