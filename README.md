@@ -49,19 +49,33 @@ pip install motila
 ```
 
 ### Installation from source
-If you prefer to install *MotilA* from source, you can clone or download the GitHub repository:
+We recommend using a dedicated virtual environment for development and reproducibility.
+
+Below is an example using conda:
 
 ```bash
-git clone https://github.com/fabriziomusacchio/MotilA.git
-cd MotilA
+conda create -n motila python=3.12 -y
+conda activate motila
 ```
 
-We recommend setting up a dedicated conda environment for development and reproducibility:
+Clone the GitHub repository and install the package from its root directory:
 
 ```bash
-conda create -n motila python=3.12 mamba -y
-conda activate motila
-mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffile zarr numcodecs pystackreg openpyxl xlrd ipywidgets ipykernel ipympl
+git clone https://github.com/FabrizioMusacchio/MotilA.git
+cd MotilA
+pip install .
+```
+
+Alternatively, install directly from GitHub without cloning:
+
+```bash
+pip install git+https://github.com/FabrizioMusacchio/MotilA.git
+```
+
+**Note:** If you are contributing or making code changes, install in editable mode so updates are immediately reflected:
+
+```bash
+pip install -e .
 ```
 
 ⚠️ **Avoid mixing install methods**:  
@@ -116,7 +130,7 @@ import motila as mt
 from pathlib import Path
 
 tif_file_path = Path("path/to/your/image_stack.tif")
-corrected_tif_file_path = mt.tiff_axes_check_and_correct(tif_file)
+corrected_tif_file_path = mt.tiff_axes_check_and_correct(tif_file_path)
 ```
 
 The output `corrected_tif_file` is the path to the corrected TIFF file, which is automatically saved in the same directory as the original file.
@@ -252,7 +266,7 @@ You can add several projection centers (`Projection Center 1`, `Projection Cente
 | `projection_layers_default` | integer   | define the number of z-layers to project for motility analysis. |
 | `projection_center_default` | integer   | define the center slice of the projection |
 
-In case of image volumes densely packed with microglia, we recommend to subdivided the volume into several subvolumes with different projection centers. This will help to avoid overlapping microglia in the projection and thus ensure a more accurate capturing of the microglial processes' motility.
+In case of image volumes densely packed with microglia, we recommend to subdivide the volume into several subvolumes with different projection centers. This will help to avoid overlapping microglia in the projection and thus ensure a more accurate capturing of the microglial processes' motility.
 
 Avoid including blood vessels in the projection center. Blood vessels can lead to false-positive motility results, as the pipeline cannot distinguish between microglial processes and blood vessels. 
 
@@ -275,7 +289,7 @@ Avoid including blood vessels in the projection center. Blood vessels can lead t
 | `hist_match`            | bool (`True` or `False`)  | match histograms across 3D stacks |
 | `histogram_ref_stack`   | integer     | define the reference 3D stack for histogram matching. |
 
-Histogram equalization enhances the contrast of the image by stretching the intensity range. This can be particularly useful for images with low contrast or uneven illumination. The `hist_equalization_clip_limit` parameter controls the intensity clipping limit for the histogram equalization. A higher value increases the intensity range but may also amplify noise. The `hist_equalization_kernel_size` parameter defines the kernel size for the histogram equalization. The default is `None` which let's the function choose the kernel size automatically. In cases of occurring block artifacts, you can set a fixed kernel size (e.g., (8,8), (16,16), (24,24), ...).
+Histogram equalization enhances the contrast of the image by stretching the intensity range. This can be particularly useful for images with low contrast or uneven illumination. The `hist_equalization_clip_limit` parameter controls the intensity clipping limit for the histogram equalization. A higher value increases the intensity range but may also amplify noise. The `hist_equalization_kernel_size` parameter defines the kernel size for the histogram equalization. The default is `None` which lets the function choose the kernel size automatically. In cases of occurring block artifacts, you can set a fixed kernel size (e.g., (8,8), (16,16), (24,24), ...).
 
 Histogram matching aligns the intensity distributions of different image stacks, ensuring consistent brightness and contrast across time points. The `histogram_ref_stack` parameter defines the reference stack for histogram matching. This reference stack serves as the basis for matching the intensity distributions of all other stacks. Both, the output plot `Normalized average brightness drop rel. to t0.pdf` and Excel file `Normalized average brightness of each stack.xlsx` show the average brightness of each stack relative to the reference stack. This can help to assess the quality of each time point stack and which time points might be excluded from further analysis.
 
@@ -488,7 +502,7 @@ mt.batch_collect(PROJECT_Path=PROJECT_Path,
 
 ## Assessing your results
 ### Single file processing
-After running the pipeline, you can assess the results in the specified output folder. The results of each processing step described above are saved in separate tif and PDF files. By carefully investigating these results, you can evaluate the quality of the processing and adjust the parameters if necessary. An example assessment is given in the tutorial notebook [`single_file_run.ipynb`](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20notebooks/single_file_run.ipynb) including visualizations of the results.
+After running the pipeline, you can assess the results in the specified output folder. The results of each processing step described above are saved in separate TIFF and PDF files. By carefully investigating these results, you can evaluate the quality of the processing and adjust the parameters if necessary. An example assessment is given in the tutorial notebook [`single_file_run.ipynb`](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20notebooks/single_file_run.ipynb) including visualizations of the results.
 
 Besides the intermediate results, the motility metrics are saved in an Excel file called `motility.xlsx` in the results folder. This file contains the 
 
@@ -499,9 +513,9 @@ Besides the intermediate results, the motility metrics are saved in an Excel fil
 
 allowing you to analyze the motility dynamics of microglial processes over time.
 
-Additionally, brightness metrics and pixel counts are saved in separate Excel files for further analysis. The average pixel brightness is an indicator of the overall intensity of the microglial cells in the image. A decreasing brightness over time could indicate bleaching or other issues. Note that the results show are those after applying the histogram matching (if chosen). Thus, if the average pixel brightness still drops even after histogram matching, the shown values may help to assess the quality each time point stack and which time points might be excluded from further analysis.
+Additionally, brightness metrics and pixel counts are saved in separate Excel files for further analysis. The average pixel brightness is an indicator of the overall intensity of the microglial cells in the image. A decreasing brightness over time could indicate bleaching or other issues. Note that the results shown are those after applying the histogram matching (if chosen). Thus, if the average pixel brightness still drops even after histogram matching, the shown values may help to assess the quality each time point stack and which time points might be excluded from further analysis.
 
-The cell pixel area is the number of segmented pixel of all (projected) MG cells per stack. Usually, this number should remain relatively stable over time as the cell motility does not imply a change in cell area/size. A decrease in cell pixel area could indicate a loss of cells over time, e.g., due to cell death or other issues. Bleaching or other issues could also lead to a decrease in cell pixel area. Thus, the same considerations as for the average pixel brightness apply here.
+The cell pixel area is the number of segmented pixels of all (projected) MG cells per stack. Usually, this number should remain relatively stable over time as the cell motility does not imply a change in cell area/size. A decrease in cell pixel area could indicate a loss of cells over time, e.g., due to cell death or other issues. Bleaching or other issues could also lead to a decrease in cell pixel area. Thus, the same considerations as for the average pixel brightness apply here.
 
 ### Batch processing
 The batch collection function aggregates the motility metrics from all datasets into a single Excel file, allowing you to compare the motility dynamics across different experimental conditions and animals. This cohort-level analysis provides a comprehensive overview of the motility metrics, enabling you to identify trends, differences, or similarities between groups. The following Excel files are generated:
