@@ -15,7 +15,7 @@
 - **Motility quantification**: Frame-to-frame analysis of pixel changes in microglial structures.
 - **Batch processing**: Automated handling of multiple datasets with standardized parameter settings.
 
-A high-level description of all processing steps and parameters is given in the [online documentation](https://motila.readthedocs.io/).
+A high-level description of all processing steps and parameters is given in the [online documentation](https://motila.readthedocs.io/en/latest/parameters.html).
 
 
 ## How is "motility" determined?
@@ -179,7 +179,7 @@ mt.process_stack(fname=fname,
 ```
 
 
-More complete examples, including batch processing and collection of cohort-level metrics, are explained in [online documentation](https://motila.readthedocs.io/).
+More complete examples, including batch processing and collection of cohort-level metrics, are explained in [online documentation](https://motila.readthedocs.io/en/latest/tutorials.html#example-usage).
 
 
 ## How to contribute
@@ -224,6 +224,4 @@ For questions, suggestions, or feedback regarding *MotilA*, please contact:
 
 Fabrizio Musacchio  
 German Center for Neurodegenerative Diseases (DZNE)  
-Email: [fabrizio.musacchio@dzne.de](mailto:fabrizio.musacchio@dzne.de)
-GitHub: @[FabrizioMusacchio](https://github.com/FabrizioMusacchio)
-Website: [fabriziomusacchio.com](https://www.fabriziomusacchio.com)
+Email: [fabrizio.musacchio@dzne.de](mailto:fabrizio.musacchio@dzne.de) \| GitHub: @[FabrizioMusacchio](https://github.com/FabrizioMusacchio) \| Website: [fabriziomusacchio.com](https://www.fabriziomusacchio.com)
