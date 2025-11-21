@@ -107,7 +107,7 @@ Import MotilA and initialize logging:
    log = mt.logger_object()
 
 Then, define the corresponding parameters. A set of example values can be 
-found in the [tutorial notebooks](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20notebooks) and [scripts](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20scripts) provided in the repository. 
+found in the `tutorial notebooks <https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20notebooks>`_ and `scripts <https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20scripts>`_ provided in the repository. 
 
 After defining the necessary parameters, run the pipeline:
 
