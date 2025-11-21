@@ -1,4 +1,4 @@
-![GitHub Release](https://img.shields.io/github/v/release/FabrizioMusacchio/motila) [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://motila.readthedocs.io/en/latest/overview.html#license) ![Tests](https://github.com/FabrizioMusacchio/motila/actions/workflows/python-tests.yml/badge.svg) [![PyPI version](https://img.shields.io/pypi/v/motila.svg)](https://pypi.org/project/motila/) [![Documentation Status](https://readthedocs.org/projects/motila/badge/?version=latest)](https://motila.readthedocs.io/en/latest/?badge=latest)
+![GitHub Release](https://img.shields.io/github/v/release/FabrizioMusacchio/motila) [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://motila.readthedocs.io/en/latest/overview.html#license) ![Tests](https://github.com/FabrizioMusacchio/motila/actions/workflows/python-tests.yml/badge.svg) [![PyPI version](https://img.shields.io/pypi/v/motila.svg)](https://pypi.org/project/motila/) [![Documentation Status](https://readthedocs.org/projects/motila/badge/?version=latest)](https://motila.readthedocs.io/en/latest/?badge=latest) 
 
 
 
@@ -141,7 +141,9 @@ Init the logger to get a log file for your current run:
 log = mt.logger_object()
 ```
 
-Then, define the corresponding parameters as described above. When you have set the parameters, you can run the pipeline:
+Then, define the corresponding parameters. A set of example values can be found in the [tutorial notebooks](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20notebooks) and [scripts](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20scripts) provided in the repository. 
+
+When you have set the parameters, run the pipeline via:
 
 ```python
 mt.process_stack(fname=fname,
