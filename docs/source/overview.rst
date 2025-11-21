@@ -202,7 +202,7 @@ MotilA is distributed under the terms of the `GNU General Public License v3.0 (G
 In summary, users are permitted to
 
 * **use** the software for any purpose  
-* **modify** the source code  
+* **modify** the source code and adapt it to their needs
 * **redistribute** the original or modified code
 
 Under the following conditions:
@@ -220,6 +220,7 @@ or fitness for a particular purpose.
 
 For full license terms, see the ``LICENSE`` file in the `repository <https://github.com/FabrizioMusacchio/MotilA?tab=GPL-3.0-1-ov-file>`_ or  
 `https://www.gnu.org/licenses/gpl-3.0.html <https://www.gnu.org/licenses/gpl-3.0.html>`_.
+
 
 Citation
 --------
