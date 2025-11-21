@@ -58,18 +58,18 @@ def check_folder_exist_create(path, verbose=True):
     """
     Check whether a folder exists at the specified path, and create it if it does not.
 
-    Parameters:
+    Parameters
     -----------
     path : str or Path
         The directory path to check or create.
     verbose : bool, optional (default=True)
         If True, prints a message indicating whether the folder was created or already exists.
 
-    Returns:
+    Returns
     --------
     None
 
-    Notes:
+    Notes
     ------
     - Ensures the specified folder is available before performing file operations.
     - Useful for logging, output saving, or checkpointing during pipeline execution.
@@ -89,12 +89,12 @@ def getfile():
     This function returns the filename of the main Python script. If executed in an interactive
     environment (e.g., IPython or Jupyter Notebook), it returns the string "console".
 
-    Returns:
+    Returns
     --------
     str
         The filename of the main executing script or "console" if run interactively.
 
-    Notes:
+    Notes
     ------
     - Useful for dynamically naming log files or output paths based on the script being executed.
     - Handles edge cases where the script is executed from a shell, notebook, or other environments.
@@ -114,14 +114,14 @@ def filterfolder_by_string(path_to_folder, search_string):
     """
     Scans for folders in a specified directory and returns those that match a given search string.
 
-    Parameters:
+    Parameters
     -----------
     path_to_folder : str or Path
         The directory path where folders should be searched.
     search_string : str
         The substring to look for in folder names.
 
-    Returns:
+    Returns
     --------
     MatchingFolders_Indices : list of int
         Indices of matching folders in the sorted directory listing.
@@ -130,7 +130,7 @@ def filterfolder_by_string(path_to_folder, search_string):
     folderlist : list of str
         Full list of folder names in the directory.
 
-    Notes:
+    Notes
     ------
     - Only directories (not files) are considered.
     - The function sorts the folder list before filtering.
@@ -151,14 +151,14 @@ def filterfiles_by_string(path_to_folder, search_string):
     """
     Scans for files in a specified directory and returns those that match a given search string.
 
-    Parameters:
+    Parameters
     -----------
     path_to_folder : str or Path
         The directory path where files should be searched.
     search_string : str
         The substring to look for in file names.
 
-    Returns:
+    Returns
     --------
     MatchingFiles_Indices : list of int
         Indices of matching files in the sorted directory listing.
@@ -167,7 +167,7 @@ def filterfiles_by_string(path_to_folder, search_string):
     filelist : list of str
         Full list of file names in the directory.
 
-    Notes:
+    Notes
     ------
     - Only files (not directories) are considered.
     - The function sorts the file list before filtering.
@@ -289,17 +289,17 @@ def print_ram_usage_in_loop(indent=0):
     real-time memory usage. It updates the same console line without adding newlines,
     making it suitable for progress monitoring in iterative processes.
 
-    Parameters:
+    Parameters
     -----------
     indent : int, optional (default=0)
         Number of spaces to prepend to the output for indentation.
 
-    Returns:
+    Returns
     --------
     None
         The function outputs the current RAM usage to the console and does not return any value.
 
-    Notes:
+    Notes
     ------
     - RAM usage is measured for the current process.
     - Output is formatted in megabytes (MB) with two decimal places.
@@ -317,17 +317,17 @@ def print_ram_usage(indent=0):
     formatted in megabytes (MB). It is useful for tracking memory consumption at 
     specific checkpoints in a script.
 
-    Parameters:
+    Parameters
     -----------
     indent : int, optional (default=0)
         Number of spaces to prepend to the output line for indentation.
 
-    Returns:
+    Returns
     --------
     None
         The function prints the RAM usage to the console and does not return any value.
 
-    Notes:
+    Notes
     ------
     - RAM usage is measured using the `psutil` library.
     - Output is displayed in MB with two decimal places.
@@ -346,12 +346,12 @@ def tiff_axes_check_and_correct(fname):
     If the axes are already correct, the original file path is returned. If correction is needed,
     a new TIFF file is saved with the corrected axis order and updated metadata.
 
-    Parameters:
+    Parameters
     -----------
     fname : str or Path
         Path to the input TIFF file.
 
-    Returns:
+    Returns
     --------
     Path
         Path to the corrected TIFF file (or the original if no correction was necessary).
@@ -361,10 +361,10 @@ def tiff_axes_check_and_correct(fname):
     ValueError
         If the TIFF file does not contain the required axes (T, Z, Y, X).
 
-    Notes:
+    Notes
     ------
     - Expected axis order is either TZYX (for single-channel) or TZCYX (for multi-channel).
-    - The corrected TIFF is saved in the same folder as the original, prefixed with "axes_corrected_".
+    - The corrected TIFF is saved in the same folder as the original, prefixed with ``axes_corrected_``.
     - ImageJ metadata and spatial resolution information are preserved in the output file.
     - This is especially useful when handling TIFFs generated by software that may reorder axes.
     """
