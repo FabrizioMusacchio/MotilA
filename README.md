@@ -1,4 +1,4 @@
-![GitHub Release](https://img.shields.io/github/v/release/FabrizioMusacchio/motila) [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/) ![Tests](https://github.com/FabrizioMusacchio/motila/actions/workflows/python-tests.yml/badge.svg) [![PyPI version](https://img.shields.io/pypi/v/motila.svg)](https://pypi.org/project/motila/) [![Documentation Status](https://readthedocs.org/projects/motila/badge/?version=latest)](https://motila.readthedocs.io/en/latest/?badge=latest)
+![GitHub Release](https://img.shields.io/github/v/release/FabrizioMusacchio/motila) [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://motila.readthedocs.io/en/latest/overview.html#license) ![Tests](https://github.com/FabrizioMusacchio/motila/actions/workflows/python-tests.yml/badge.svg) [![PyPI version](https://img.shields.io/pypi/v/motila.svg)](https://pypi.org/project/motila/) [![Documentation Status](https://readthedocs.org/projects/motila/badge/?version=latest)](https://motila.readthedocs.io/en/latest/?badge=latest)
 
 
 
@@ -190,23 +190,6 @@ More complete examples, including batch processing and collection of cohort-leve
 
 Please find more information on how to contribute in the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
-## License: GPL-3.0 License
-This software is licensed under the GNU General Public License v3.0 (GPL-3.0). In summary, you are free to:
-
-- **Use** this software for any purpose.
-- **Modify** the source code and adapt it to your needs.
-- **Distribute** copies of the original or modified software.
-
-However, you must:
-- **Share modifications under the same license** (copyleft).  
-  If you distribute a modified version, you must also make the source code available under GPL-3.0.  
-- **Include the original copyright notice and license** in any copies or substantial portions of the software.  
-
- You may **not**:
-- Use this software in **proprietary** (closed-source) applications.  
-- Distribute modified versions under a more restrictive license.  
-
-This software is distributed WITHOUT ANY WARRANTY; without even the implied warranty of   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the LICENSE file or <https://www.gnu.org/licenses/gpl-3.0.html> for full terms.
 
 ## Citation
 If you use this software in your research, please cite the following preprint:
