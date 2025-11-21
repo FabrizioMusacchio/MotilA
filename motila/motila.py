@@ -1,100 +1,20 @@
-""" MotilA: Microglial Motility Analysis Pipeline
-=============================================
+"""
+Core routines for the MotilA pipeline.
 
-MotilA is a Python-based pipeline for analyzing microglial fine process motility from in vivo 
-4D and 5D time-lapse image stacks. It supports both single-file and batch processing modes, 
-and includes optional steps for image registration, spectral unmixing, contrast enhancement, 
-and multi-method segmentation.
+This module implements the main processing functions for microglial fine process
+motility analysis from 4D and 5D time-lapse multiphoton imaging stacks. It 
+provides utilities for loading TIFF/Zarr data, optional subvolume extraction, 
+2D and 3D motion correction, spectral unmixing, intensity normalization, 
+contrast adjustments, filtering, segmentation, and computation of motility 
+metrics such as gain, loss, stability, and turnover rate.
 
-Core pipeline steps:
---------------------
-1. Load image data (supports TIFF in TZCYX and TZYX formats)
-2. Extract sub-volumes from the 3D image stack
-3. (Optional) Register sub-volumes to correct motion
-4. (Optional) Perform spectral unmixing to reduce channel bleed-through
-5. z-projection of the sub-volumes for further processing
-6. (Optional) Apply histogram equalization and histogram matching for contrast/bleaching correction
-7. (Optional) Apply filtering (median, Gaussian) to reduce noise
-8. Segment microglial structures via thresholding and blob detection
-9. Analyze motility by tracking pixel changes over time
+The module exposes three high-level entry points:
 
-Batch processing steps:
------------------------
-1. Define a project folder containing multiple registered TIFF stacks
-2. Apply the core pipeline steps to each stack automatically
-3. Store results (plots, metrics, segmentation) per dataset
-4. Aggregate results across animals or conditions for cohort-level analysis
+* ``process_stack`` for single-stack analysis
+* ``batch_process_stacks`` for automated project-folder processing
+* ``batch_collect`` for aggregation of metrics across datasets
 
-Key features:
--------------
-- Handles 4D and 5D TIFF stacks (TZXY, TCZXY)
-- Supports dual-channel imaging (e.g., microglia and neurons)
-- Implements spectral unmixing, histogram equalization and matching
-- Includes 2D and 3D motion correction
-- Offers multiple thresholding and filtering options
-- Computes gain, loss, stability, and turnover rate (TOR) metrics
-
-Dependencies:
--------------
-- Python >= 3.9
-- numpy, scipy, matplotlib, scikit-image, scikit-learn, pandas
-- tifffile, zarr, numcodecs, openpyxl, xlrd
-- ipywidgets, ipykernel, ipympl
-
-Installation:
--------------
-To install dependencies via conda and mamba:
-```bash
-conda create -n motila python=3.12 mamba -y
-conda activate motila
-mamba install -y numpy scipy matplotlib scikit-image scikit-learn pandas tifffile zarr numcodecs openpyxl xlrd ipywidgets ipykernel ipympl
-```
-
-Usage:
--------------
-1. Configure pipeline parameters (e.g., projection layers, channels, filters).
-2. Run process_stack(fname, ...) for single-file or batch_process_stacks(...) for cohort mode with the desired settings.
-3. Output includes processed stacks, Excel tables with metrics, and diagnostic plots
-
-Author
--------------
-Fabrizio Musacchio (lead developer)
-Contributors: Sophie Crux, Felix Nebeling, Nala Gockel, Falko Fuhrmann, Martin Fuhrmann
-First created: September 2023
-
-License: GPL-3.0 License
--------------
-GPL-3.0 License — see LICENSE file for full terms.
-
-Summary:
-* Free to use, modify, and distribute under the same license
-* Must retain license and attribution
-* Not for use in proprietary/closed-source projects
-*  NO WARRANTY provided (see https://www.gnu.org/licenses/gpl-3.0.html)
- 
-See <https://www.gnu.org/licenses/gpl-3.0.html> for full terms.
-
-Citation
--------------
-If you use this software in your research, please cite it as follows:
-
-```
-@software{musacchio2025motila,
-  author       = {Fabrizio Musacchio and Sophie Crux and Felix Nebeling and Nala Gockel and Martin Fuhrmann},
-  title        = {MotilA: A pipeline for microglial fine process motility analysis},
-  year         = {2025},
-  url          = {https://github.com/FabrizioMusacchio/motila},
-  version      = {1.0.0},
-  note         = {Accessed: YYYY-MM-DD},
-}
-```
-
-Contact
--------------
-For questions, suggestions, or bug reports, please contact the lead developer:
-- Fabrizio Musacchio:
-    - Email: fabrizio.musacchio@posteo.de
-    - GitHub: https://github.com/FabrizioMusacchio
+All public functions are documented in detail in the API reference.
 """
 # %% IMPORTS
 import os
@@ -147,33 +67,40 @@ def hello_world():
 
 def calc_projection_range(projection_center, projection_layers, I_shape, log):
     """
-    Calculate the projection range for a given center and number of layers, ensuring it fits within the image dimensions.
+    Calculate a z-projection range for a given center plane and number of layers,
+    ensuring that the range stays within stack boundaries.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     projection_center : int
-        The central layer index for the projection.
+        Index of the central z-plane around which the projection is computed.
     projection_layers : int
-        The total number of layers to include in the projection.
+        Total number of layers to include in the projection (symmetric around
+        ``projection_center``).
     I_shape : tuple
-        The shape of the image stack, where the second element represents the z-dimension.
+        Shape of the input image stack. The second entry must represent the z-dimension.
     log : object
-        A logging object with a `log` method for recording warnings and information.
+        Logging object with a ``log`` method for recording warnings and information.
 
-    Returns:
-    --------
+    Returns
+    -------
     tuple
-        A tuple containing:
-        - projection_range : list
-            A list of two integers representing the start and end indices of the projection range.
-        - projection_layers : int
-            The actual number of layers included in the projection range after boundary adjustments.
+        A tuple ``(projection_range, projection_layers)`` where:
+
+        * **projection_range** : list of int  
+          Two-element list ``[start, end]`` defining the z-range after boundary
+          correction.
+
+        * **projection_layers** : int  
+          Actual number of layers used in the projection after adjusting for
+          stack limits.
+
+    Notes
+    -----
+    The projection range is clipped automatically if ``projection_center ± layers/2``
+    extends beyond stack boundaries. Any correction is reported via ``log.log()``.
     """
-    
-    """ 
-    projection_center = 4
-    projection_layers=4 
-    """
+
     
     # check if projection_center is out of bounds:
     if projection_center < 0 or projection_center >= I_shape[1]:
@@ -192,12 +119,7 @@ def calc_projection_range(projection_center, projection_layers, I_shape, log):
 
     # convert to integer:
     projection_range = [int(projection_range[0]), int(projection_range[1])]
-    
-    """ print(f"projection_center: {projection_center}, projection_layers: {projection_layers}")
-    print(projection_range)
-    print(f"Projection range: {len(np.arange(projection_range[0], projection_range[1]+1))} layers: {np.arange(projection_range[0], projection_range[1]+1)}")
-    print(f"projection_layers: {projection_layers}") """
-    
+        
     # validate against stack dimensions:
     projection_layers_correction = 0
     z_layers = I_shape[1]
@@ -234,10 +156,6 @@ def calc_projection_range(projection_center, projection_layers, I_shape, log):
             if projection_range[1] < z_layers - 1:
                 projection_range[1] += 1
     
-    """ print(projection_range)
-    print(f"Projection range: {len(np.arange(projection_range[0], projection_range[1]+1))} layers: {np.arange(projection_range[0], projection_range[1]+1)}")
-    print(f"projection_layers: {projection_layers}") """
-
     log.log(f"Projection center: {projection_center}, Projection range: {projection_range}")
 
     # update projection_layers if it was adjusted to the actual number of layers:
@@ -252,7 +170,7 @@ def plot_2D_image(image, plot_path, plot_title, fignum=1, figsize=(5,5.15),
     """
     Plots a 2D image and saves it as a PDF file.
 
-    Parameters:
+    Parameters
     -----------
     image : array-like
         The 2D array representing the image to be plotted.
@@ -273,12 +191,12 @@ def plot_2D_image(image, plot_path, plot_title, fignum=1, figsize=(5,5.15),
     title : str, optional
         The title of the plot (default is an empty string).
 
-    Returns:
+    Returns
     --------
     None
         This function saves the plot as a PDF file and does not return a value.
 
-    Notes:
+    Notes
     ------
     - The plot is saved in the specified directory as `<plot_title>.pdf` with a resolution of 500 DPI.
     - A colorbar is added if `cbar_label` is provided.
@@ -311,7 +229,7 @@ def plot_2D_image_as_tif(image, plot_path, plot_title):
     """
     Saves a 2D image as a compressed TIFF file.
 
-    Parameters:
+    Parameters
     -----------
     image : array-like
         The 2D array representing the image to be saved.
@@ -320,12 +238,12 @@ def plot_2D_image_as_tif(image, plot_path, plot_title):
     plot_title : str
         The filename for the saved TIFF file (without extension).
 
-    Returns:
+    Returns
     --------
     None
         This function saves the image as a TIFF file and does not return a value.
 
-    Notes:
+    Notes
     ------
     - The file is saved as `<plot_title>.tif` in the specified directory.
     - The TIFF file is compressed using zlib.
@@ -338,7 +256,7 @@ def plot_histogram(image, plot_path, plot_title, fignum=1, title="histogram"):
     """
     Plots the histogram and cumulative distribution function (CDF) of an image and saves it as a PDF file.
 
-    Parameters:
+    Parameters
     -----------
     image : array-like
         The 2D array representing the image for which the histogram is computed.
@@ -351,12 +269,12 @@ def plot_histogram(image, plot_path, plot_title, fignum=1, title="histogram"):
     title : str, optional
         The title of the plot (default is "histogram").
 
-    Returns:
+    Returns
     --------
     None
         The function saves the histogram plot as a PDF file and does not return a value.
 
-    Notes:
+    Notes
     ------
     - The function computes the histogram and cumulative distribution function (CDF) using `skimage.exposure`.
     - The plot is saved as `<plot_title>.pdf` in the specified directory.
@@ -377,7 +295,7 @@ def plot_histogram_of_projections(image_stack, I_shape, plot_path, log, fignum=1
     """
     Plots histograms for each projected stack in the given image stack and saves them as PDF files.
 
-    Parameters:
+    Parameters
     -----------
     image_stack : array-like
         The stack of 2D images for which histograms will be computed.
@@ -390,12 +308,12 @@ def plot_histogram_of_projections(image_stack, I_shape, plot_path, log, fignum=1
     fignum : int, optional
         The figure number for plotting (default is 1).
 
-    Returns:
+    Returns
     --------
     None
         The function saves histogram plots for each projected stack as PDF files.
 
-    Notes:
+    Notes
     ------
     - Each stack slice is processed separately, and its histogram is saved as `<plot_title>.pdf`.
     - The function logs processing time and status using the provided logger.
@@ -416,7 +334,7 @@ def plot_projected_stack(image_stack, I_shape, plot_path, log, plottitle="MG pro
     """
     Plots and saves z-projected image stacks as grayscale images and a TIFF file.
 
-    Parameters:
+    Parameters
     -----------
     image_stack : array-like
         The stack of 2D projected images to be plotted and saved.
@@ -429,12 +347,12 @@ def plot_projected_stack(image_stack, I_shape, plot_path, log, plottitle="MG pro
     plottitle : str, optional
         The base title for the saved plots and TIFF file (default is "MG projected").
 
-    Returns:
+    Returns
     --------
     None
         The function saves each projected stack as a grayscale plot and the full stack as a TIFF file.
 
-    Notes:
+    Notes
     ------
     - Individual stacks are plotted as grayscale images and saved as PDFs.
     - The full image stack is saved as a TIFF file with metadata.
@@ -460,7 +378,7 @@ def plot_projected_stack_as_tif(image_stack, I_shape, plot_path, log, plottitle=
     """
     Saves z-projected image stacks as TIFF files.
 
-    Parameters:
+    Parameters
     -----------
     image_stack : array-like
         The stack of 2D projected images to be saved as TIFF files.
@@ -473,12 +391,12 @@ def plot_projected_stack_as_tif(image_stack, I_shape, plot_path, log, plottitle=
     plottitle : str, optional
         The base title for the saved TIFF files (default is "MG projected").
 
-    Returns:
+    Returns
     --------
     None
         The function saves each projected stack as an individual TIFF file.
 
-    Notes:
+    Notes
     ------
     - Each stack is saved as a separate TIFF file with a unique filename.
     - The function logs the saving process and execution time.
@@ -497,12 +415,12 @@ def get_stack_dimensions(fname):
     Retrieves the dimensions of a TIFF image stack without loading the entire dataset
     (i.e., of all axis, TZCYX or TZYX (ImageJ default order)).
 
-    Parameters:
+    Parameters
     -----------
     fname : str or Path
         The path to the TIFF file.
 
-    Returns:
+    Returns
     --------
     list
         A list representing the shape of the image stack, ordered as TZCYX or TZYX.
@@ -512,7 +430,7 @@ def get_stack_dimensions(fname):
     ValueError
         If the provided file is not a TIFF file.
 
-    Notes:
+    Notes
     ------
     - The function reads metadata from the TIFF file to determine its dimensions.
     - The file is opened and closed without loading the image into memory.
@@ -535,7 +453,7 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
     """
     Extracts sub-volumes from a multi-dimensional TIFF image stack and stores them in a Zarr format.
 
-    Parameters:
+    Parameters
     -----------
     fname : str or Path
         Path to the TIFF file.
@@ -552,7 +470,7 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
     channel : int, optional
         The primary channel index to be extracted (default is 0).
 
-    Returns:
+    Returns
     --------
     tuple
         If `two_channel` is False: 
@@ -568,7 +486,7 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
     ValueError
         If the provided file is not a TIFF file.
 
-    Notes:
+    Notes
     ------
     - The function converts the TIFF file into a Zarr store for efficient memory access.
     - The extracted sub-volumes are saved in the Zarr format to reduce memory consumption.
@@ -692,7 +610,7 @@ def extract_and_register_subvolume(fname, I_shape, projection_layers, projection
     Extracts sub-volumes from a multi-dimensional TIFF image stack, registers them using 
     phase cross-correlation, and saves the results in a Zarr format.
 
-    Parameters:
+    Parameters
     -----------
     fname : str or Path
         Path to the TIFF file.
@@ -714,7 +632,7 @@ def extract_and_register_subvolume(fname, I_shape, projection_layers, projection
     max_xy_shift_correction : int, optional
         The maximum allowed shift correction in XY directions (default is 5 pixels).
 
-    Returns:
+    Returns
     --------
     tuple
         If `two_channel` is False:
@@ -732,7 +650,7 @@ def extract_and_register_subvolume(fname, I_shape, projection_layers, projection
     ValueError
         If the provided file is not a TIFF file.
 
-    Notes:
+    Notes
     ------
     - The function extracts sub-volumes using `extract_subvolume` and applies 3D registration.
     - Registration is performed via phase cross-correlation using a reference template.
@@ -899,7 +817,7 @@ def spectral_unmix(MG_sub, N_sub, I_shape, zarr_group, projection_layers, log,
     It requires a microglial and a neuronal channel and spectral unmixing is performed by 
     simple subtraction of the neuronal signal from the microglial signal.
 
-    Parameters:
+    Parameters
     -----------
     MG_sub : Zarr dataset
         The extracted microglial channel sub-volume.
@@ -918,12 +836,12 @@ def spectral_unmix(MG_sub, N_sub, I_shape, zarr_group, projection_layers, log,
     amplifyer : float, optional
         Amplification factor applied to the neuronal signal before subtraction (default is 2).
 
-    Returns:
+    Returns
     --------
     MG_sub_processed : Zarr dataset
         The spectrally unmixed microglial sub-volume.
 
-    Notes:
+    Notes
     ------
     - The function applies median filtering and Gaussian smoothing to the neuronal channel.
     - The neuronal signal is scaled and subtracted from the microglial channel to remove bleed-through.
@@ -986,7 +904,7 @@ def histogram_equalization(MG_sub, I_shape, projection_layers, log, clip_limit=0
     """
     Applies adaptive histogram equalization to enhance contrast in microglial image stacks.
 
-    Parameters:
+    Parameters
     -----------
     MG_sub : array-like
         The input microglial sub-volume.
@@ -999,12 +917,12 @@ def histogram_equalization(MG_sub, I_shape, projection_layers, log, clip_limit=0
     clip_limit : float, optional
         Clipping limit for contrast limiting adaptive histogram equalization (default is 0.01).
 
-    Returns:
+    Returns
     --------
     MG_sub_histeq : ndarray
         The histogram-equalized microglial sub-volume.
 
-    Notes:
+    Notes
     ------
     - Adaptive histogram equalization improves local contrast while preventing over-amplification of noise.
     - The function processes each stack slice separately.
@@ -1027,7 +945,7 @@ def histogram_equalization_on_projections(MG_sub, I_shape, log, clip_limit=0.01,
     """
     Applies adaptive histogram equalization to enhance contrast in projected microglial image stacks.
 
-    Parameters:
+    Parameters
     -----------
     MG_sub : array-like
         The input microglial sub-volume projections.
@@ -1040,12 +958,12 @@ def histogram_equalization_on_projections(MG_sub, I_shape, log, clip_limit=0.01,
     kernel_size : tuple or None, optional
         Size of the contextual region for adaptive histogram equalization. If None, the kernel size is automatically determined.
 
-    Returns:
+    Returns
     --------
     MG_sub_histeq : ndarray
         The histogram-equalized projected microglial sub-volume.
 
-    Notes:
+    Notes
     ------
     - This function enhances contrast in 2D projections of the microglial image stacks.
     - Adaptive histogram equalization prevents over-amplification of noise while improving local contrast.
@@ -1069,7 +987,7 @@ def histogram_matching(MG_sub, I_shape, histogram_ref_stack, projection_layers, 
     """
     Matches the histogram of each stack in the microglial sub-volume to a reference stack.
 
-    Parameters:
+    Parameters
     -----------
     MG_sub : array-like
         The input microglial sub-volume containing image stacks.
@@ -1082,12 +1000,12 @@ def histogram_matching(MG_sub, I_shape, histogram_ref_stack, projection_layers, 
     log : logger_object
         Logging object for recording the process.
 
-    Returns:
+    Returns
     --------
     MG_sub_histeq : ndarray
         The histogram-matched microglial sub-volume.
 
-    Notes:
+    Notes
     ------
     - Histogram matching ensures that all stacks have similar intensity distributions.
     - This is useful for normalizing intensity variations across different time points or conditions.
@@ -1110,7 +1028,7 @@ def histogram_matching_on_projections(MG_sub, I_shape, histogram_ref_stack, log)
     """
     Matches the histogram of each projected stack to a reference stack.
 
-    Parameters:
+    Parameters
     -----------
     MG_sub : array-like
         The input microglial projections containing image stacks.
@@ -1121,12 +1039,12 @@ def histogram_matching_on_projections(MG_sub, I_shape, histogram_ref_stack, log)
     log : logger_object
         Logging object for recording the process.
 
-    Returns:
+    Returns
     --------
     MG_sub_histeq : ndarray
         The histogram-matched projected image stacks.
 
-    Notes:
+    Notes
     ------
     - Histogram matching ensures uniform intensity distribution across all projected stacks.
     - Useful for standardizing contrast across different time points or conditions.
@@ -1148,7 +1066,7 @@ def median_filtering_on_projections(MG_sub, I_shape, median_filter_window,  log)
     """
     Applies a median filter to each projected stack to reduce noise, using a square kernel.
     
-    Parameters:
+    Parameters
     -----------
     MG_sub : array-like
         The input microglial projections containing image stacks.
@@ -1159,12 +1077,12 @@ def median_filtering_on_projections(MG_sub, I_shape, median_filter_window,  log)
     log : logger_object
         Logging object for recording the process.
 
-    Returns:
+    Returns
     --------
     MG_sub_median : ndarray
         The median-filtered projected image stacks.
 
-    Notes:
+    Notes
     ------
     - The median filter is a non-linear filter effective for noise removal, especially salt-and-pepper noise.
     - If `median_filter_window` is ≤1, the function skips filtering and returns the original image.
@@ -1192,7 +1110,7 @@ def circular_median_filtering_on_projections(MG_sub, I_shape, median_filter_wind
     """
     Applies a median filter to each projected stack to reduce noise, using a circular kernel.
 
-    Parameters:
+    Parameters
     -----------
     MG_sub : array-like
         The input microglial projections containing image stacks.
@@ -1203,12 +1121,12 @@ def circular_median_filtering_on_projections(MG_sub, I_shape, median_filter_wind
     log : logger_object
         Logging object for recording the process.
 
-    Returns:
+    Returns
     --------
     MG_sub_median : ndarray
         The median-filtered projected image stacks.
 
-    Notes:
+    Notes
     ------
     - Uses a circular structuring element (`skimage.morphology.disk`) to preserve shape integrity.
     - If `median_filter_window` < 1, the function skips filtering and returns the original image.
@@ -1236,7 +1154,7 @@ def single_slice_median_filtering(MG_sub, I_shape, zarr_group, median_filter_win
     """
     Applies square median filtering to each slice within the projected stacks.
 
-    Parameters:
+    Parameters
     -----------
     MG_sub : array-like
         The input microglial projections containing image stacks.
@@ -1251,12 +1169,12 @@ def single_slice_median_filtering(MG_sub, I_shape, zarr_group, median_filter_win
     log : logger_object
         Logging object for recording the process.
 
-    Returns:
+    Returns
     --------
     MG_sub_median : zarr dataset
         The median-filtered image stacks stored in Zarr.
 
-    Notes:
+    Notes
     ------
     - The function checks if `median_filter_window` is an integer; if not, it defaults to 1 (no filtering).
     - Uses `scipy.ndimage.median_filter` for noise reduction while preserving structural integrity.
@@ -1301,7 +1219,7 @@ def single_slice_circular_median_filtering(MG_sub, I_shape, zarr_group, median_f
     """
     Applies circular median filtering to each slice within the projected stacks.
 
-    Parameters:
+    Parameters
     -----------
     MG_sub : array-like
         The input microglial projections containing image stacks.
@@ -1316,12 +1234,12 @@ def single_slice_circular_median_filtering(MG_sub, I_shape, zarr_group, median_f
     log : logger_object
         Logging object for recording the process.
 
-    Returns:
+    Returns
     --------
     MG_sub_median : zarr dataset
         The median-filtered image stacks stored in Zarr.
 
-    Notes:
+    Notes
     ------
     - Uses `skimage.morphology.disk` to create a circular filter mask.
     - If `median_filter_window < 1`, filtering is skipped, and the original image is returned.
@@ -1363,7 +1281,7 @@ def gaussian_blurr_filtering_on_projections(MG_sub, I_shape, gaussian_blurr_sigm
     """
     Applies Gaussian blur filtering to each projected stack.
 
-    Parameters:
+    Parameters
     -----------
     MG_sub : array-like
         The input microglial projections containing image stacks.
@@ -1374,12 +1292,12 @@ def gaussian_blurr_filtering_on_projections(MG_sub, I_shape, gaussian_blurr_sigm
     log : logger_object
         Logging object for recording the process.
 
-    Returns:
+    Returns
     --------
     MG_sub_gaussian : ndarray
         The Gaussian-blurred image stacks.
 
-    Notes:
+    Notes
     ------
     - Uses `skimage.filters.gaussian` to apply Gaussian blurring.
     - Helps in reducing noise while preserving edges to a certain extent.
@@ -1400,7 +1318,7 @@ def single_slice_gaussian_blurr_filtering(MG_sub, I_shape, gaussian_blurr_sigma,
     """
     Applies Gaussian blur filtering to each individual slice in the image stack.
 
-    Parameters:
+    Parameters
     -----------
     MG_sub : array-like
         The input microglial image stack.
@@ -1413,12 +1331,12 @@ def single_slice_gaussian_blurr_filtering(MG_sub, I_shape, gaussian_blurr_sigma,
     log : logger_object
         Logging object for recording the process.
 
-    Returns:
+    Returns
     --------
     MG_sub_gaussian : ndarray
         The Gaussian-blurred image stack.
 
-    Notes:
+    Notes
     ------
     - Uses `skimage.filters.gaussian` to apply Gaussian blurring.
     - The filter is applied independently to each slice within each stack.
@@ -1441,7 +1359,7 @@ def z_max_project(MG_sub, I_shape, log):
     """
     Computes the maximum intensity Z-projection of an image stack.
 
-    Parameters:
+    Parameters
     -----------
     MG_sub : array-like
         The input microglial image stack.
@@ -1450,12 +1368,12 @@ def z_max_project(MG_sub, I_shape, log):
     log : logger_object
         Logging object for recording the process.
 
-    Returns:
+    Returns
     --------
     MG_pro : ndarray
         The Z-projected image stack using maximum intensity projection.
 
-    Notes:
+    Notes
     ------
     - This function collapses the Z-dimension by selecting the maximum 
       intensity value for each pixel across all Z-slices.
@@ -1482,7 +1400,7 @@ def compare_histograms(MG_sub_pre, MG_sub_post, log, plot_path, I_shape, xlim=(0
     """
     Compares histograms of projected stacks before and after histogram adjustments.
 
-    Parameters:
+    Parameters
     -----------
     MG_sub_pre : array-like
         The image stack before histogram adjustments.
@@ -1497,12 +1415,12 @@ def compare_histograms(MG_sub_pre, MG_sub_post, log, plot_path, I_shape, xlim=(0
     xlim : tuple, optional
         Limits for the x-axis of the histogram (default is (0, 6000)).
 
-    Returns:
+    Returns
     --------
     None
         The function saves the histogram plots as PDF files.
 
-    Notes:
+    Notes
     ------
     - Each stack’s histogram is plotted and saved separately.
     - The function normalizes intensity values before plotting.
@@ -1549,7 +1467,7 @@ def plot_intensities(MG_pro, log, plot_path, I_shape):
     """
     Plots and saves the normalized average brightness per projected stack.
 
-    Parameters:
+    Parameters
     -----------
     MG_pro : array-like
         The projected image stack.
@@ -1560,12 +1478,12 @@ def plot_intensities(MG_pro, log, plot_path, I_shape):
     I_shape : tuple
         Shape of the input image stack.
 
-    Returns:
+    Returns
     --------
     intensity_means : ndarray
         Array containing the mean intensity values for each stack.
 
-    Notes:
+    Notes
     ------
     - The function calculates the average intensity for each projected stack.
     - Normalizes intensity values relative to the first stack.
@@ -1641,7 +1559,7 @@ def reg_2D_images(MG_pro, I_shape, log, histogram_ref_stack, max_xy_shift_correc
     """
     Registers 2D z-projection images using phase cross-correlation or pystackreg.
 
-    Parameters:
+    Parameters
     -----------
     MG_pro : array-like
         The projected image stack.
@@ -1661,14 +1579,14 @@ def reg_2D_images(MG_pro, I_shape, log, histogram_ref_stack, max_xy_shift_correc
     usepystackreg : bool, optional
         If True, uses pystackreg (StackReg) for registration instead of phase cross-correlation.
 
-    Returns:
+    Returns
     --------
     MG_pro_bin_reg_clipped : ndarray
         The registered and cropped image stack.
     I_shape_create : tuple
         New shape of the registered stack after cropping.
 
-    Notes:
+    Notes
     ------
     - Uses phase cross-correlation or pystackreg for image alignment.
     - Applies median filtering if not previously performed to enhance registration accuracy.
@@ -1763,7 +1681,7 @@ def binarize_2D_images(MG_pro, I_shape, log, plot_path, threshold_method="otsu",
     """
     Binarizes 2D z-projection images using various thresholding methods.
 
-    Parameters:
+    Parameters
     -----------
     MG_pro : array-like
         The projected image stack.
@@ -1781,12 +1699,12 @@ def binarize_2D_images(MG_pro, I_shape, log, plot_path, threshold_method="otsu",
     gaussian_sigma_proj : float, optional
         Standard deviation for Gaussian blurring applied before thresholding (default is 1).
 
-    Returns:
+    Returns
     --------
     MG_pro_bin : ndarray
         The binarized image stack.
 
-    Notes:
+    Notes
     ------
     - Applies Gaussian blur before thresholding if `gaussian_sigma_proj` > 0.
     - Supports multiple thresholding methods and can auto-select the best based on Pearson correlation.
@@ -1957,7 +1875,7 @@ def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100, sta
     """
     Removes small microglial regions based on pixel connectivity and area threshold in segmented 2D images.
 
-    Parameters:
+    Parameters
     -----------
     MG_pro : array-like
         The binarized projected image stack.
@@ -1972,14 +1890,14 @@ def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100, sta
     stats_plots : bool, optional
         Whether to generate and save additional statistics plots (default is False).
 
-    Returns:
+    Returns
     --------
     MG_pro_bin_area_thresholded : ndarray
         The binarized image stack after removing small regions.
     MG_pro_bin_area_sum : ndarray
         The total number of pixels retained after thresholding.
 
-    Notes:
+    Notes
     ------
     - Labels and counts connected regions using `skimage.measure.label`.
     - Segments regions that meet the pixel area threshold.
@@ -2127,7 +2045,7 @@ def plot_pixel_areas(MG_areas, log, plot_path, I_shape):
     """
     Plots and saves the detected pixel areas per projected stack.
 
-    Parameters:
+    Parameters
     -----------
     MG_areas : array-like
         The total segmented pixel area per stack.
@@ -2138,12 +2056,12 @@ def plot_pixel_areas(MG_areas, log, plot_path, I_shape):
     I_shape : tuple
         Shape of the input image stack.
 
-    Returns:
+    Returns
     --------
     None
         The function saves a bar plot and an Excel file with pixel area statistics.
 
-    Notes:
+    Notes
     ------
     - Normalizes pixel areas relative to stack 0.
     - Saves a bar plot representing relative pixel areas per stack.
@@ -2229,7 +2147,7 @@ def motility(MG_pro, I_shape, log, plot_path, ID="ID00000", group="blinded"):
     Microglial fine processes turn-over is calculated as the ratio of gained and lost pixels to the total 
     number of stable, gained, and lost pixels as it is common in the literature (e.g., Nebeling et al., 2023).
 
-    Parameters:
+    Parameters
     -----------
     MG_pro : array-like
         The binarized projected image stacks.
@@ -2244,14 +2162,14 @@ def motility(MG_pro, I_shape, log, plot_path, ID="ID00000", group="blinded"):
     group : str, optional
         Experimental group (default is "blinded").
 
-    Returns:
+    Returns
     --------
     MG_pro_delta_t : array-like
         The computed difference images representing changes between consecutive stacks.
     summary_df : pandas.DataFrame
         Dataframe summarizing motility metrics, including stable, gain, and loss percentages.
 
-    Notes:
+    Notes
     ------
     - Computes changes in segmented pixels between consecutive time points.
     - Visualizes differences in motility with colormap images and histograms.
@@ -2432,9 +2350,15 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
                   clear_previous_results=False, spectral_unmixing_median_filter_window=3,
                   debug_output=False, stats_plots=False):
     """
-    Processes a 4D/5D image stack to analyze microglial motility (MAIN MotiLA pipeline).
+    Process a single 4D or 5D multiphoton imaging stack and extract microglial
+    motility metrics. This is the main entry point of the MotilA pipeline.
 
-    Parameters:
+    The function loads a TIFF stack, optionally performs 2D or 3D registration,
+    applies spectral unmixing and contrast corrections, generates z-projections,
+    segments microglial structures, and computes motility metrics such as gain,
+    loss and stability. Outputs are written to a structured results directory.
+
+    Parameters
     -----------
     fname : str or Path
         Path to the input TIFF file.
@@ -2505,20 +2429,21 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
     stats_plots : bool
         Whether to generate additional statistics plots.
 
-    Returns:
-    --------
+    Returns
+    -------
     None
-        The function processes the image stack and saves various output files.
+        The function writes processed images, projections, segmentation masks,
+        motility metrics and auxiliary outputs to ``RESULTS_Path``.
 
-    Notes:
+    Notes
     ------
-    - Loads and processes microglia fluorescence images for motility analysis.
-    - Supports optional 3D and 2D registration.
-    - 2D registration can use either phase cross-correlation or pystackreg (StackReg) if `usepystackreg` is True.
-    - Includes histogram-based contrast adjustments and thresholding.
-    - Computes motility metrics such as gain, loss, and stability.
-    - Saves processed images, projections, and statistical results in a designated output directory.
-    - Deletes intermediate large datasets to optimize memory usage.
+    * Loads and processes microglia fluorescence images for motility analysis.
+    * Supports optional 3D and 2D registration.
+    * 2D registration can use either phase cross-correlation or pystackreg (StackReg) if ``usepystackreg`` is True.
+    * Includes histogram-based contrast adjustments and thresholding.
+    * Computes motility metrics such as gain, loss, and stability.
+    * Saves processed images, projections, and statistical results in a designated output directory.
+    * Deletes intermediate large datasets to optimize memory usage.
     """
     Total_Process_t0 = time.time()
     log.log(f"Processing file {fname}...")
@@ -2834,10 +2759,17 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
                   clear_previous_results=False, spectral_unmixing_median_filter_window=3,
                   debug_output=False, stats_plots=False):
     """
-    Processes multiple image stacks in a batch, extracting sub-volumes, registering them
-    (optional), performing image processing, and analyzing microglial motility.
+    Batch-processing wrapper that applies the MotilA pipeline to multiple 4D/5D
+    multiphoton imaging stacks.
 
-    Parameters:
+    This function detects all project folders matching a given tag, loads the
+    associated registered stacks, and processes each dataset using
+    :func:`process_stack`. The function handles metadata loading, optional
+    registration, spectral unmixing, contrast adjustments, thresholding, and
+    motility extraction. Results for each dataset are written into structured
+    output directories.
+
+    Parameters
     -----------
     PROJECT_Path : str or Path
         The base directory containing the image stacks.
@@ -2914,17 +2846,17 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
     stats_plots : bool, optional
         Whether to generate additional statistics plots (default is False).
 
-    Returns:
+    Returns
     --------
     None
         The function processes each stack and saves the results in the specified output directory.
 
-    Notes:
+    Notes
     ------
-    - The function scans for project folders and extracts relevant image files.
-    - Metadata files, if present, override certain function parameters.
-    - Each stack is processed using the `process_stack` function.
-    - Results are saved in subdirectories within `RESULTS_Path`, organized by projection center.
+    * The function scans for project folders and extracts relevant image files.
+    * Metadata files, if present, override certain function parameters.
+    * Each stack is processed using :func:`process_stack`.
+    * Results are saved in subdirectories within `RESULTS_Path`, organized by projection center.
     """
     Total_batch_Process_t0 = time.time()
     log.log(f"Batch processing of stacks...")
@@ -3062,11 +2994,15 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
 def batch_collect(PROJECT_Path, ID_list=[], project_tag="TP000", motility_folder="motility_analysis",
                   RESULTS_Path="batch_results", log=""):
     """
-    Scans for processed results from multiple stacks and compiles data from 
-    'motility_analysis.xlsx', 'Normalized average brightness of each stack.xlsx', 
-    and 'pixel area sums.xlsx' into three consolidated DataFrames.
+    Collect motility outputs from multiple processed stacks and consolidate them
+    into combined tables.
 
-    Parameters:
+    This function scans all project subfolders, loads the output files generated
+    by the MotilA pipeline (motility metrics, brightness tables, and pixel area
+    summaries), merges them across stacks or animals, and saves the resulting
+    DataFrames into a summary directory.
+
+    Parameters
     -----------
     PROJECT_Path : str or Path
         The base directory containing the image stacks.
@@ -3079,22 +3015,35 @@ def batch_collect(PROJECT_Path, ID_list=[], project_tag="TP000", motility_folder
     RESULTS_Path : str or Path, optional
         Directory where the consolidated results will be saved (default is "batch_results").
 
-    Returns:
+    Returns
     --------
     None
         Saves three DataFrames as Excel files in the `RESULTS_Path` directory.
 
-    Notes:
+    Notes
     ------
-    - This function assumes a folder structure like:
-      `ID/project_tag*/motility_analysis/projection_center*/`
-    - Extracts content from:
-      - "motility_analysis.xlsx"
-      - "Normalized average brightness of each stack.xlsx"
-      - "pixel area sums.xlsx"
-    - Saves three consolidated DataFrames in `RESULTS_Path`.
-    - averages the motility data over all projection centers and t_i points.
-    - excel files are saved as "all_motility.xlsx", "all_brightness.xlsx", "all_pixel_area.xlsx" and "average_motility.xlsx".
+    Expected folder structure::
+
+        ID/
+            project_tag*/motility_analysis/projection_center*/
+
+    Extracted files include:
+
+    * ``motility_analysis.xlsx``
+    * ``Normalized average brightness of each stack.xlsx``
+    * ``pixel area sums.xlsx``
+    
+    The function saves three consolidated DataFrames in `RESULTS_Path`.   
+    
+    Motility metrics are averaged across projection centers and across time
+    points before export.
+    
+    Additional excel files are saved as:
+    
+    * ``all_motility.xlsx``
+    * ``all_brightness.xlsx``
+    * ``all_pixel_area.xlsx``
+    * ``average_motility.xlsx``.
     """
 
     log.log(f"Collecting motility data from processed stacks...")
