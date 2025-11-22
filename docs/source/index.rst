@@ -6,7 +6,6 @@
 MotilA documentation
 ====================
 
-
 .. image:: https://img.shields.io/github/v/release/FabrizioMusacchio/motila
    :target: https://github.com/FabrizioMusacchio/motila/releases
    :alt: GitHub Release
@@ -18,6 +17,10 @@ MotilA documentation
 .. image:: https://github.com/FabrizioMusacchio/motila/actions/workflows/python-tests.yml/badge.svg
    :target: https://github.com/FabrizioMusacchio/motila/actions/workflows/python-tests.yml
    :alt: Test Status
+
+.. image:: https://codecov.io/gh/fabriziomusacchio/motila/branch/main/graph/badge.svg
+   :target: https://codecov.io/gh/fabriziomusacchio/motila
+   :alt: Codecov
 
 .. image:: https://img.shields.io/pypi/v/motila.svg
    :target: https://pypi.org/project/motila/
