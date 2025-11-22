@@ -37,4 +37,9 @@ jobs:
       run: |
         source $(conda info --base)/etc/profile.d/conda.sh
         conda activate motila
-        pytest
+        pytest --cov --cov-branch --cov-report=xml
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
