@@ -35,7 +35,10 @@ Fabrizio Musacchio,  March 20, 2025
 # %% IMPORTS
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+# sys.path.append(str(Path(__file__).resolve().parent.parent))
+# ↑ Uncomment only when developing MotilA locally from a cloned repository
+
 from motila import motila as mt
 import os
 import pandas as pd
