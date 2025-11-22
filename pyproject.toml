@@ -35,3 +35,10 @@ Homepage = "https://github.com/fabriziomusacchio/motila"
 Documentation = "https://github.com/fabriziomusacchio/motila#readme"
 Source = "https://github.com/fabriziomusacchio/motila"
 Tracker = "https://github.com/fabriziomusacchio/motila/issues"
+
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+]
