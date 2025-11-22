@@ -45,9 +45,25 @@ bibliography: paper.bib
 *MotilA* is an open-source Python pipeline for quantifying microglial fine-process motility in 3D time-lapse two-channel fluorescence microscopy. It was developed for high-resolution *in vivo* multiphoton imaging and supports single-stack and batch analyses. The workflow performs sub-volume extraction, optional registration/unmixing, z-projection, segmentation, and pixel-wise change detection to compute the turnover rate (TOR). The code is platform independent, documented with tutorials and example datasets, and released under GPL-3.0.
 
 ## Statement of need
-Microglia are immune cells of the central nervous system and continuously remodel processes to survey brain tissue and respond to pathology [@Nimmerjahn:2005; @Fuhrmann:2010; @Tremblay:2010; @Prinz:2019]. Quantifying this subcellular motility is important for studies of neuroinflammation, neurodegeneration, and synaptic plasticity. Current practice in many labs relies on manual or semi-manual measurements in general-purpose tools such as Fiji/ImageJ or proprietary software [@Schindelin:2012; @ZeissZEN:2025]. These procedures are time consuming, hard to reproduce, focus on single cells, and are sensitive to user bias. [@Wall:2018; @Brown:2017]. There is no dedicated, open, and batch-capable solution tailored to this task.
+Microglia are immune cells of the central nervous system and continuously remodel processes to survey brain tissue and respond to pathology [@Nimmerjahn:2005; @Fuhrmann:2010; @Tremblay:2010; @Prinz:2019]. Quantifying this subcellular motility is important for studies of neuroinflammation, neurodegeneration, and synaptic plasticity. Current practice in many labs relies on manual or semi-manual measurements in general-purpose tools such as Fiji/ImageJ or proprietary software [@Schindelin:2012; @ZeissZEN:2025]. These procedures are time consuming, hard to reproduce, focus on single cells, and are sensitive to user bias [@Wall:2018; @Brown:2017]. There is no dedicated, open, and batch-capable solution tailored to this task.
 
-*MotilA* fills this gap with an end-to-end, reproducible pipeline for 3D time-lapse two-channel imaging. It standardizes preprocessing, segmentation, and motility quantification and scales from individual stacks to large experimental cohorts. Although optimized for microglia, the approach generalizes to other motile structures that can be reliably segmented over time.
+*MotilA* fills this gap with an end-to-end, reproducible pipeline for 3D time-lapse two-channel imaging. It standardizes preprocessing, segmentation, and motility quantification and scales from individual stacks to large experimental cohorts. Unlike Fiji/ImageJ macros or proprietary packages, *MotilA* provides a fully automated non-interactive workflow in Python that applies identical parameters across datasets, logs all intermediate steps, and avoids user-dependent adjustments. This ensures reproducible, bias-minimized, and scalable processing of large 3D time-lapse datasets, including optional motion correction and spectral unmixing. Although optimized for microglia, the approach generalizes to other motile structures that can be reliably segmented across time.
+
+To clarify *MotilA*'s novelty relative to existing analysis approaches, the following table summarizes key differences between *MotilA*, Fiji/ImageJ, and ZEISS ZEN:
+
+
+**Table 1.** Comparison of MotilA with commonly used alternatives for microglial motility analysis.
+
+| Feature | Fiji/ImageJ | ZEISS ZEN | MotilA |
+|---------|--------------|-----------|--------|
+| **Automation** | Limited. User-recorded macros; complex workflows often require manual steps and must be split across several macros. | None. Full user interaction required. | Full. End-to-end non-interactive workflow. |
+| **Batch processing** | Limited. Macros can process several files in one folder, but they cannot navigate nested directory structures or manage multi-step 3D multi-channel time-series pipelines. | None. Each dataset processed manually. | Full. Metadata-driven cohort processing. |
+| **Reproducibility** | Moderate. Requires complete manual logging; interactive tuning reduces reproducibility. | Low. Manual adjustments introduce strong user bias. | High. Full parameter logging and deterministic runs. |
+| **Scalability** | Low. Full-stack RAM loading; no chunked I/O for large 3D data. | Low–medium. Efficient viewing but no automated processing for large time-lapse datasets. | High. Chunked I/O for multi-gigabyte 3D two-channel stacks. |
+| **Open-source** | Yes (GPL-3.0). | No (proprietary). | Yes (GPL-3.0). |
+
+
+
 
 ## Implementation and core method
 Input is a 5D stack in TZCYX or TZYX order, where T is time, Z is depth, C is channel, and YX are spatial dimensions. For each time point, *MotilA* extracts a user-defined z-sub-volume, optionally performs 3D motion correction and spectral unmixing, and computes a 2D maximum-intensity projection to enable interpretable segmentation. After thresholding, the binarized projection $B(t_i)$ is compared with $B(t_{i+1})$ to derive a change map
