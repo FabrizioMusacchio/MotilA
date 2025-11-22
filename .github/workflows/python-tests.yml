@@ -31,7 +31,7 @@ jobs:
       run: |
         source $(conda info --base)/etc/profile.d/conda.sh
         conda activate motila
-        pip install pytest
+        pip install pytest pytest-cov
 
     - name: Run tests
       run: |
