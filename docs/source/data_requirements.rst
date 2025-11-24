@@ -32,7 +32,6 @@ Example usage of axis correction function:
 .. code-block:: python
 
    import sys
-   sys.path.append('motila/')
    import motila as mt
    from pathlib import Path
 
