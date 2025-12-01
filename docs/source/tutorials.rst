@@ -110,9 +110,7 @@ Import MotilA and initialize logging:
 
 .. code-block:: python
 
-   import sys
-   # sys.path.append('../motila')  # uncomment only when developing MotilA locally
-   import motila as mt
+   from motila import motila as mt
    from pathlib import Path
 
    # verify installation

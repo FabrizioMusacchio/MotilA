@@ -120,14 +120,10 @@ This script includes all parameter settings used during analysis and can be empl
 Here is an example of how to use *MotilA* for single file processing. First, import the necessary modules:
 
 ```python
-import sys
-# sys.path.append('../motila')  # uncomment only when developing MotilA locally
-import motila as mt
+from motila import motila as mt
+
 from pathlib import Path
 ```
-
-
-**Note**:  `sys.path.append('../motila')` is **only** required when developing *MotilA* from a local clone of the repository. This line is used to add the *MotilA* directory to the system path – relative to the current working directory. If you execute the notebook from a different location, you may need to adjust the path accordingly. If you installed *MotilA* via `pip install motila`, this line must remain commented out.
 
 You can verify the correct import by running the following cell:
 

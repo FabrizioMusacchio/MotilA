@@ -27,7 +27,10 @@ This script demonstrates how to use the **MotilA** pipeline for batch-processing
 - **Check Outputs:** Processed images, histograms, and motility metrics are saved in structured folders.
 
 ## Dependencies
-- Requires **MotilA** to be installed and accessible (available in the GitHub repository).
+- Requires **MotilA** to be installed and accessible. Please refer to the 
+[MotilA GitHub repository](https://github.com/FabrizioMusacchio/MotilA#installation) 
+or the [MotilA documentation](https://motila.readthedocs.io/en/latest/overview.html#installation) 
+for installation instructions.
 
 ## Notes
 - The `metadata.xls` file (if present) overrides user-defined parameters during batch processing.
@@ -39,12 +42,7 @@ This script demonstrates how to use the **MotilA** pipeline for batch-processing
 Fabrizio Musacchio,  March 20, 2025
 """
 # %% IMPORTS
-import sys
 from pathlib import Path
-
-# sys.path.append(str(Path(__file__).resolve().parent.parent))
-# ↑ Uncomment only when developing MotilA locally from a cloned repository
-
 from motila import motila as mt
 # %% VERIFY IMPORT
 mt.hello_world()

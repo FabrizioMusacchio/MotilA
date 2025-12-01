@@ -22,7 +22,10 @@ in 4D/5D image stacks.
    Processed images, histograms, and analysis results are saved in the specified output folder.
 
 ## Dependencies
-- Requires **MotilA** to be installed and accessible. (Download it from the GitHub repository.)
+- Requires **MotilA** to be installed and accessible. Please refer to the 
+[MotilA GitHub repository](https://github.com/FabrizioMusacchio/MotilA#installation) 
+or the [MotilA documentation](https://motila.readthedocs.io/en/latest/overview.html#installation) 
+for installation instructions.
 
 ## Notes
 - The `metadata.xls` file (if present) will override some user-defined parameters (e.g., projection settings) ONLY during batch processing.
@@ -33,12 +36,7 @@ in 4D/5D image stacks.
 Fabrizio Musacchio,  March 20, 2025
 """
 # %% IMPORTS
-import sys
 from pathlib import Path
-
-# sys.path.append(str(Path(__file__).resolve().parent.parent))
-# ↑ Uncomment only when developing MotilA locally from a cloned repository
-
 from motila import motila as mt
 # %% VERIFY IMPORT
 mt.hello_world()
