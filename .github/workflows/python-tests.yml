@@ -1,4 +1,4 @@
-name: Run Python Tests (via conda + mamba)
+name: Run Python tests
 
 on: [push, pull_request]
 
@@ -7,39 +7,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - name: Check out repository
+        uses: actions/checkout@v4
 
-    - name: Set up Conda
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        auto-update-conda: true
-        python-version: 3.12
-        environment-name: motila
-        miniforge-variant: Miniforge3
-        activate-environment: motila
-        use-mamba: false # we'll install mamba manually
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          python-version: "3.12"
+          environment-name: motila
+          activate-environment: motila
+          auto-update-conda: true
+          miniforge-variant: Miniforge3
 
-    - name: Install mamba and main dependencies
-      run: |
-        conda install -y -n motila -c conda-forge mamba
-        mamba install -y -n motila -c conda-forge \
-            numpy scipy matplotlib scikit-image scikit-learn \
-            pandas tifffile zarr numcodecs pystackreg openpyxl xlrd \
-            ipywidgets ipykernel ipympl psutil
+      - name: Install MotilA and test dependencies
+        run: |
+          source "$(conda info --base)/etc/profile.d/conda.sh"
+          conda activate motila
+          pip install .
+          pip install pytest pytest-cov
 
-    - name: Activate environment and install pytest
-      run: |
-        source $(conda info --base)/etc/profile.d/conda.sh
-        conda activate motila
-        pip install pytest pytest-cov
+      - name: Run tests
+        run: |
+          source "$(conda info --base)/etc/profile.d/conda.sh"
+          conda activate motila
+          pytest --cov --cov-branch --cov-report=xml
 
-    - name: Run tests
-      run: |
-        source $(conda info --base)/etc/profile.d/conda.sh
-        conda activate motila
-        pytest --cov --cov-branch --cov-report=xml
-
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v5
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
