@@ -37,7 +37,7 @@ Fabrizio Musacchio,  March 20, 2025
 """
 # %% IMPORTS
 from pathlib import Path
-from motila import motila as mt
+import motila as mt
 import os
 import pandas as pd
 import matplotlib.pyplot as plt

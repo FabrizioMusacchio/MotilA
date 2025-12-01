@@ -31,7 +31,7 @@ Example usage of axis correction function:
 
 .. code-block:: python
 
-   from motila import motila as mt
+   import motila as mt
    from pathlib import Path
 
    tif_file_path = Path("path/to/your/image_stack.tif")

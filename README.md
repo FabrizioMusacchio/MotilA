@@ -120,8 +120,7 @@ This script includes all parameter settings used during analysis and can be empl
 Here is an example of how to use *MotilA* for single file processing. First, import the necessary modules:
 
 ```python
-from motila import motila as mt
-
+import motila as mt
 from pathlib import Path
 ```
 
