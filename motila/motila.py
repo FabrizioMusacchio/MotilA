@@ -29,8 +29,7 @@ from motila.utils import (
     filterfiles_by_string,
     logger_object, 
     print_ram_usage_in_loop, 
-    print_ram_usage,
-    tiff_axes_check_and_correct)
+    print_ram_usage)
 
 import numpy as np
 import pandas as pd
