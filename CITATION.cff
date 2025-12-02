@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use MotilA in your research, please cite it as below."
 title: "MotilA: A pipeline for microglial fine process motility analysis"
-version: 1.0.0
+version: 1.0.7
 date-released: 2025-03-22
 authors:
   - family-names: Musacchio
