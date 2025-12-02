@@ -10,7 +10,7 @@ This roadmap summarizes planned improvements and future extensions derived from 
 ## Data formats and metadata handling
 * Transition all tabular outputs from **.xls** to **.csv** for long term sustainability and interoperability.
 * Migrating metadata files (currently .xls) to **.yml**. Migration must preserve backward compatibility.
-* Standardizing all folder and file names to avoid whitespace and to use underscores for cross-platform stability (e.g., `example dataset` ⟶ `example_dataset`).
+* Standardizing all folder and file names to **avoid whitespace** and to use underscores for cross-platform stability (e.g., `example dataset` ⟶ `example_dataset`).
 
 
 ## Repository organization and auxiliary datasets
