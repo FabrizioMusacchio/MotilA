@@ -4,21 +4,18 @@ This roadmap summarizes planned improvements and future extensions derived from 
 
 
 ## Support for additional input formats and axis configurations
-* Implement dedicated support for **TYX time-lapse stacks**.
-  The core algorithm is already compatible, but explicit input handling and metadata inference still need to be added.
+* Implementing dedicated support for **TYX time-lapse stacks**. <br> The core algorithm is already compatible, but explicit input handling and metadata inference still need to be added.
 
 
 ## Data formats and metadata handling
 * Transition all tabular outputs from **.xls** to **.csv** for long term sustainability and interoperability.
-* Consider migrating metadata files (currently .xls) to **.yml**.
-  Migration will preserve backward compatibility and be phased in gradually.
-* Standardize all folder and file names to avoid whitespace and to use underscores for cross-platform stability (e.g., `example dataset` ⟶ `example_dataset`).
+* Migrating metadata files (currently .xls) to **.yml**. Migration must preserve backward compatibility.
+* Standardizing all folder and file names to avoid whitespace and to use underscores for cross-platform stability (e.g., `example dataset` ⟶ `example_dataset`).
 
 
 ## Repository organization and auxiliary datasets
-* Provide the **cutout dataset** as a separate Zenodo record linked to the main example dataset.
-  This avoids overwriting example projects and allows independent downloads.
+* Providing the **cutout dataset** as a separate Zenodo record linked to the main example datasets. This avoids overwriting example projects and allows independent downloads. Also, it reduced the size of the main repository.
 
 
 ## After the revision process
-* Push a new release to v1.1.0 on PyPI to include all changes made during the JOSS review process.
+* Push a new release to **v1.1.0** on GitHub and PyPI to include all changes made during the JOSS review process.
