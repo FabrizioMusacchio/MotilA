@@ -1,4 +1,4 @@
-# MotilA Roadmap
+# MotilA Roadmap 🛣️
 
 This roadmap summarizes planned improvements and future extensions derived from user feedback, JOSS reviewer suggestions, and long term development goals. Items listed here are not part of the current release but are planned for future versions.
 
@@ -18,3 +18,7 @@ This roadmap summarizes planned improvements and future extensions derived from 
 ## Repository organization and auxiliary datasets
 * Provide the **cutout dataset** as a separate Zenodo record linked to the main example dataset.
   This avoids overwriting example projects and allows independent downloads.
+
+
+## After the revision process
+* Push a new release to v1.1.0 on PyPI to include all changes made during the JOSS review process.
