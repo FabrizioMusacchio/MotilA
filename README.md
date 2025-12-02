@@ -189,6 +189,10 @@ mt.process_stack(fname=fname,
 More complete examples, including batch processing and collection of cohort-level metrics, are explained in [online documentation](https://motila.readthedocs.io/en/latest/tutorials.html#example-usage).
 
 
+## Future developments
+Please refer to the [ROADMAP.md](ROADMAP.md) file for an overview of planned improvements and future extensions of *MotilA*.
+
+
 ## How to contribute
 *MotilA* is an open-source software and improves because of contributions from users all over the world. If there is something about *Motila* that you would like to work on, then please reach out: 
 
