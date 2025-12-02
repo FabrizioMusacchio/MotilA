@@ -112,6 +112,15 @@ We used the following Python script to generate the figures presented in our sub
 
 This script includes all parameter settings used during analysis and can be employed to reproduce the figures. It was applied to a subset of the example dataset described above. This specific subset is available in the repository under [`example project/Data/ID240103_P17_1_cutout/`](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20project/Data/ID240103_P17_1_cutout/TP000).
 
+### Running the example scripts and notebooks
+The example scripts in `example scripts` and `example notebooks` expect a relative path layout and therefore must be executed from within that directory. For example:
+
+```bash
+cd example_scripts
+python single_file_run_paper.py
+```
+
+Alternatively, users may modify the `DATA_Path` variable inside the script to point to the absolute location of the example project. 
 
 
 ## Quick start
