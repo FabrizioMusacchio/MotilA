@@ -18,7 +18,7 @@ MotilA documentation
    :target: https://pypi.org/project/motila/
    :alt: PyPI Version
 
-.. image:: https://img.shields.io/badge/License-GPL%20v3-yellow.svg
+.. image:: https://img.shields.io/badge/License-GPL%20v3-green.svg
    :target: https://motila.readthedocs.io/en/latest/overview.html#license
    :alt: GPLv3 License
 
@@ -38,7 +38,7 @@ MotilA documentation
    :target: https://github.com/FabrizioMusacchio/MotilA/issues
    :alt: Open Issues
 
-.. image:: https://img.shields.io/github/issues-closed/FabrizioMusacchio/MotilA
+.. image:: https://img.shields.io/github/issues-closed/FabrizioMusacchio/MotilA?color=53c92e
    :target: https://github.com/FabrizioMusacchio/MotilA/issues?q=is%3Aissue%20state%3Aclosed
    :alt: Closed Issues
 
