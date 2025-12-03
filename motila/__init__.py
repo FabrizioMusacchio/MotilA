@@ -9,9 +9,7 @@ from .utils import (
     check_folder_exist_create,
     filterfolder_by_string,
     filterfiles_by_string,
-    logger_object,
-    print_ram_usage_in_loop,
-    print_ram_usage
+    logger_object
 )
 
 __all__ = [
@@ -24,8 +22,6 @@ __all__ = [
     "filterfolder_by_string",
     "filterfiles_by_string",
     "logger_object",
-    "print_ram_usage_in_loop",
-    "print_ram_usage",
 ]
 
 # expose the motila submodule for backward compatibility
