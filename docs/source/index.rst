@@ -10,21 +10,51 @@ MotilA documentation
    :target: https://github.com/FabrizioMusacchio/motila/releases
    :alt: GitHub Release
 
+.. image:: https://img.shields.io/pypi/v/motila.svg
+   :target: https://pypi.org/project/motila/
+   :alt: PyPI Version
+
 .. image:: https://img.shields.io/badge/License-GPL%20v3-yellow.svg
-   :target: https://opensource.org/licenses/GPL-3.0
+   :target: https://motila.readthedocs.io/en/latest/overview.html#license
    :alt: GPLv3 License
 
 .. image:: https://github.com/FabrizioMusacchio/motila/actions/workflows/python-tests.yml/badge.svg
    :target: https://github.com/FabrizioMusacchio/motila/actions/workflows/python-tests.yml
    :alt: Test Status
 
+.. image:: https://img.shields.io/github/last-commit/FabrizioMusacchio/MotilA
+   :target: https://github.com/FabrizioMusacchio/MotilA/commits/main/
+   :alt: GitHub Last Commit
+
 .. image:: https://codecov.io/gh/fabriziomusacchio/motila/branch/main/graph/badge.svg
    :target: https://codecov.io/gh/fabriziomusacchio/motila
-   :alt: Codecov
+   :alt: Code Coverage
 
-.. image:: https://img.shields.io/pypi/v/motila.svg
-   :target: https://pypi.org/project/motila/
-   :alt: PyPI version
+.. image:: https://img.shields.io/github/issues/FabrizioMusacchio/MotilA
+   :target: https://github.com/FabrizioMusacchio/MotilA/issues
+   :alt: Open Issues
+
+.. image:: https://img.shields.io/github/issues-closed/FabrizioMusacchio/MotilA
+   :target: https://github.com/FabrizioMusacchio/MotilA/issues?q=is%3Aissue%20state%3Aclosed
+   :alt: Closed Issues
+
+.. image:: https://img.shields.io/github/issues-pr/FabrizioMusacchio/MotilA
+   :target: https://github.com/FabrizioMusacchio/MotilA/pulls
+   :alt: Pull Requests
+
+.. image:: https://readthedocs.org/projects/motila/badge/?version=latest
+   :target: https://motila.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
+.. image:: https://img.shields.io/github/languages/code-size/fabriziomusacchio/motila
+   :alt: GitHub Code Size
+
+.. image:: https://img.shields.io/pypi/dm/Motila
+   :alt: PyPI Downloads
+
+.. image:: https://img.shields.io/badge/PyPI-stats-blue?link=https%3A%2F%2Fpypistats.org%2Fpackages%2Fmotila
+   :target: https://pypistats.org/packages/motila
+   :alt: PyPI Stats
 
 `MotilA <https://github.com/FabrizioMusacchio/MotilA>`_ is a Python-based pipeline for microglial fine process motility analysis
 from 4D and 5D multiphoton imaging data.
