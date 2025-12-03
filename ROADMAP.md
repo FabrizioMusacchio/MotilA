@@ -15,7 +15,7 @@ This roadmap summarizes planned improvements and future extensions derived from 
 
 
 ## Repository organization and auxiliary datasets
-* Providing the **cutout dataset** as a separate Zenodo record linked to the main example datasets. This avoids overwriting example projects and allows independent downloads. Also, it reduced the size of the main repository.
+* ✅ **[addressed in release v1.1.0]** Providing the **cutout dataset** as a separate Zenodo record linked to the main example datasets. This avoids overwriting example projects and allows independent downloads. Also, it reduced the size of the main repository.
 
 
 ## After the revision process
