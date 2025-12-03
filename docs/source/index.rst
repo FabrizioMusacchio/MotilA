@@ -53,7 +53,7 @@ MotilA documentation
 .. image:: https://img.shields.io/github/languages/code-size/fabriziomusacchio/motila
    :alt: GitHub Code Size
 
-.. image:: https://img.shields.io/pypi/dm/MotilA?logo=pypy&label=PiPY%20downloads
+.. image:: https://img.shields.io/pypi/dm/MotilA?logo=pypy&label=PiPY%20downloads&color=blue
    :target: https://pypistats.org/packages/motila
    :alt: PyPI Downloads and Stats
 
