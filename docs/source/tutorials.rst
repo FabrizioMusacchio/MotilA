@@ -41,6 +41,13 @@ is functioning correctly and produces meaningful motility metrics.
 We also provide a smaller "cutout" version of the example dataset for quick testing and 
 demonstration purposes: Musacchio (2025), `doi: 10.5281/zenodo.17803977 <https://zenodo.org/records/17803978>`_.
 
+If you use one of the provided datasets for any purpose beyond the example tutorials, 
+please cite both the dataset record (Musacchio et al., 2025, doi: `10.5281/zenodo.15061566 <https://zenodo.org/records/15061566>`_ / 
+Musacchio, 2025, doi: `10.5281/zenodo.17803977 <https://zenodo.org/records/17803978>`_) 
+and Gockel & Nieves-Rivera et al., currently  under revision (we will update 
+the citation once available).
+
+
 Tutorial notebooks
 ------------------
 

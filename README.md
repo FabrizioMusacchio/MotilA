@@ -92,10 +92,10 @@ To help you get started with *MotilA*, we provide an example dataset and tutoria
 
 The example dataset includes sample image stacks and metadata files for testing the pipeline. You can download the 
 
-* **full example dataset** from [Zenodo](https://zenodo.org/records/15061566) (Musacchio et al., 2025, doi: 10.5281/zenodo.15061566; data based on Gockel & Nieves-Rivera et al., currently under revision, or a
+* **full example dataset** from [Zenodo](https://zenodo.org/records/15061566) (Musacchio et al., 2025, doi: 10.5281/zenodo.15061566; data based on Gockel & Nieves-Rivera et al., currently under revision), or a
 * **subset ("cutout") of the example dataset**, also from [Zenodo](https://zenodo.org/records/17803978) (Musacchio, 2025, doi: 10.5281/zenodo.17803977)
 
-After downloading and extracting, place it in the [`example project`](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20project) directory. If you use one of the provided datasets, please cite both the dataset record (Musacchio et al., 2025, doi: 10.5281/zenodo.15061566 / Musacchio, 2025, doi: 10.5281/zenodo.17803977) and Gockel & Nieves-Rivera et al., currently under revision (we will update the citation once available).
+After downloading and extracting, place it in the [`example project`](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20project) directory. If you use one of the provided datasets for any purpose beyond the example tutorials, please cite both the dataset record (Musacchio et al., 2025, doi: 10.5281/zenodo.15061566 / Musacchio, 2025, doi: 10.5281/zenodo.17803977) and Gockel & Nieves-Rivera et al., currently under revision (we will update the citation once available).
 
 The tutorials cover the core pipeline steps, from loading and preprocessing image data to analyzing microglial motility and visualizing the results. A second tutorial demonstrates batch processing for analyzing multiple datasets in a structured project folder.
 
