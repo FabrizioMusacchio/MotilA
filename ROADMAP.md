@@ -18,5 +18,5 @@ This roadmap summarizes planned improvements and future extensions derived from 
 * ✅ **[addressed in release v1.1.0]** Providing the **cutout dataset** as a separate Zenodo record linked to the main example datasets. This avoids overwriting example projects and allows independent downloads. Also, it reduced the size of the main repository.
 
 
-## After the revision process
-* Push a new release to **v1.1.0** on GitHub and PyPI to include all changes made during the JOSS review process.
+## Including JOSS review changes
+* ✅ **[release v1.1.0 is done]** Push a new release to **v1.1.0** on GitHub and PyPI to include all changes made during the JOSS review process.
