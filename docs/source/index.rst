@@ -30,7 +30,7 @@ MotilA documentation
    :target: https://github.com/FabrizioMusacchio/MotilA/commits/main/
    :alt: GitHub Last Commit
 
-.. image:: https://codecov.io/gh/fabriziomusacchio/motila/branch/main/graph/badge.svg
+.. image:: https://img.shields.io/codecov/c/github/FabrizioMusacchio/Motila?logo=codecov
    :target: https://codecov.io/gh/fabriziomusacchio/motila
    :alt: Code Coverage
 
