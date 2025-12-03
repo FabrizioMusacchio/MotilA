@@ -6,6 +6,10 @@
 MotilA documentation
 ====================
 
+.. image:: https://badgen.net/badge/icon/GitHub%20repository?icon=github&label&color=green
+   :target: https://github.com/FabrizioMusacchio/motila/
+   :alt: GitHub Repository
+
 .. image:: https://img.shields.io/github/v/release/FabrizioMusacchio/motila
    :target: https://github.com/FabrizioMusacchio/motila/releases
    :alt: GitHub Release
@@ -50,6 +54,7 @@ MotilA documentation
    :alt: GitHub Code Size
 
 .. image:: https://img.shields.io/pypi/dm/Motila
+   :target: https://pypistats.org/packages/motila
    :alt: PyPI Downloads
 
 .. image:: https://img.shields.io/badge/PyPI-stats-blue?link=https%3A%2F%2Fpypistats.org%2Fpackages%2Fmotila
