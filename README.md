@@ -90,7 +90,12 @@ We have tested *MotilA* for Python 3.9 to 3.12 on Windows, macOS, and Linux syst
 ## Example data set and tutorials
 To help you get started with *MotilA*, we provide an example dataset and tutorials to guide you through the pipeline steps. 
 
-The example dataset includes a sample image stack and metadata file for testing the pipeline. Please download the example dataset from [Zenodo](https://zenodo.org/records/15061566) (Gockel &  Nieves-Rivera, 2025, doi: 10.5281/zenodo.15061566) and place it in the [`example project`](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20project) directory.
+The example dataset includes sample image stacks and metadata files for testing the pipeline. You can download the 
+
+* **full example dataset** from [Zenodo](https://zenodo.org/records/15061566) (Musacchio et al., 2025, doi: 10.5281/zenodo.15061566; data based on Gockel & Nieves-Rivera et al., currently under revision, or a
+* **subset ("cutout") of the example dataset**, also from [Zenodo](https://zenodo.org/records/17803978) (Musacchio, 2025, doi: 10.5281/zenodo.17803977)
+
+After downloading and extracting, place it in the [`example project`](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20project) directory. If you use one of the provided datasets, please cite both the dataset record (Musacchio et al., 2025, doi: 10.5281/zenodo.15061566 / Musacchio, 2025, doi: 10.5281/zenodo.17803977) and Gockel & Nieves-Rivera et al., currently under revision (we will update the citation once available).
 
 The tutorials cover the core pipeline steps, from loading and preprocessing image data to analyzing microglial motility and visualizing the results. A second tutorial demonstrates batch processing for analyzing multiple datasets in a structured project folder.
 
@@ -109,7 +114,7 @@ We used the following Python script to generate the figures presented in our sub
 
 * [single_file_run_paper.py](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20scripts/single_file_run_paper.py)
 
-This script includes all parameter settings used during analysis and can be employed to reproduce the figures. It was applied to a subset of the example dataset described above. This specific subset is available in the repository under [`example project/Data/ID240103_P17_1_cutout/`](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20project/Data/ID240103_P17_1_cutout/TP000).
+This script includes all parameter settings used during analysis and can be employed to reproduce the figures. It was applied to the subset of the example dataset described above.
 
 ### Running the example scripts and notebooks
 The example scripts in `example scripts` and `example notebooks` expect a relative path layout and therefore must be executed from within that directory. For example:
@@ -119,7 +124,7 @@ cd example_scripts
 python single_file_run_paper.py
 ```
 
-Alternatively, users may modify the `DATA_Path` variable inside the script to point to the absolute location of the example project. 
+Alternatively, users may modify the `DATA_Path` variable inside the script to point to the absolute location of your `example project` folder. 
 
 
 ## Quick start
@@ -226,7 +231,7 @@ url = {https://www.biorxiv.org/content/10.1101/2025.08.04.668426v1}
 ## Acknowledgments
 We gratefully acknowledge the **Light Microscopy Facility (LMF)** and the **Animal Research Facility (ARF)** at the **German Center for Neurodegenerative Diseases (DZNE)** for their essential support in acquiring the in vivo imaging data upon which this pipeline is built.
 
-We also thank [Gockel & Nieves-Rivera (2025)](https://zenodo.org/records/15061566) and colleagues for providing the example dataset used in this repository, which allows users to test and explore MotilA.
+We also thank Gockel & Nieves-Rivera  and colleagues (currently under revision) for providing the [example dataset](https://zenodo.org/records/15061566) used in this repository, which allows users to test and explore MotilA.
 
 
 ## Contact

@@ -10,7 +10,9 @@ results shown in the associated manuscript.
 Example dataset
 ------------------------
 
-A curated example dataset is available on Zenodo: Gockel & Nieves-Rivera (2025), `doi: 10.5281/zenodo.15061566 <https://zenodo.org/records/15061566>`_
+A curated example dataset is available on Zenodo: Musacchio et al. (2025), `doi: 10.5281/zenodo.15061566 <https://zenodo.org/records/15061566>`_;
+the dataset is based on Gockel & Nieves-Rivera et al., currently under revision.
+
 
 The dataset contains:
 
@@ -35,6 +37,9 @@ An example of the expected folder structure can also be found `in the repository
 
 Running MotilA directly on this dataset allows users to verify that the pipeline
 is functioning correctly and produces meaningful motility metrics.
+
+We also provide a smaller "cutout" version of the example dataset for quick testing and 
+demonstration purposes: Musacchio (2025), `doi: 10.5281/zenodo.17803977 <https://zenodo.org/records/17803978>`_.
 
 Tutorial notebooks
 ------------------
