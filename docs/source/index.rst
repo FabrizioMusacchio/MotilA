@@ -6,7 +6,7 @@
 MotilA documentation
 ====================
 
-.. image:: https://badgen.net/badge/icon/GitHub%20repository?icon=github&label&color=green
+.. image:: https://badgen.net/badge/icon/GitHub%20repository?icon=github&label
    :target: https://github.com/FabrizioMusacchio/motila/
    :alt: GitHub Repository
 
@@ -53,13 +53,10 @@ MotilA documentation
 .. image:: https://img.shields.io/github/languages/code-size/fabriziomusacchio/motila
    :alt: GitHub Code Size
 
-.. image:: https://img.shields.io/pypi/dm/Motila
+.. image:: https://img.shields.io/pypi/dm/MotilA?logo=pypy&label=PiPY%20downloads
    :target: https://pypistats.org/packages/motila
-   :alt: PyPI Downloads
+   :alt: PyPI Downloads and Stats
 
-.. image:: https://img.shields.io/badge/PyPI-stats-blue?link=https%3A%2F%2Fpypistats.org%2Fpackages%2Fmotila
-   :target: https://pypistats.org/packages/motila
-   :alt: PyPI Stats
 
 `MotilA <https://github.com/FabrizioMusacchio/MotilA>`_ is a Python-based pipeline for microglial fine process motility analysis
 from 4D and 5D multiphoton imaging data.
