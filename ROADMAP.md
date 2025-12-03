@@ -9,7 +9,8 @@ This roadmap summarizes planned improvements and future extensions derived from 
 
 ## Data formats and metadata handling
 * Transition all tabular outputs from **.xls** to **.csv** for long term sustainability and interoperability.
-* Migrating metadata files (currently .xls) to **.yml**. Migration must preserve backward compatibility.
+* Transition `_processing_parameters.xlsx` to **.yml** format to improve open access, better human readability and easier parsing.
+* Migrating metadata files (currently .xls) to **.yml**  format to improve open access, better human readability and easier parsing. Migration must preserve backward compatibility.
 * Standardizing all folder and file names to **avoid whitespace** and to use underscores for cross-platform stability (e.g., `example dataset` ⟶ `example_dataset`).
 
 
