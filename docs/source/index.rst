@@ -57,6 +57,10 @@ MotilA documentation
    :target: https://pypistats.org/packages/motila
    :alt: PyPI Downloads and Stats
 
+.. image:: https://static.pepy.tech/personalized-badge/motila?period=total&units=INTERNATIONAL_SYSTEM&left_color=GRAY&right_color=BLUE&left_text=PiPY+total+downloads
+   :target: https://pepy.tech/projects/motila
+   :alt: PyPI Total Downloads and Stats (via pepy.tech)
+
 .. image:: https://img.shields.io/badge/Zenodo%20Archive-10.5281%2Fzenodo.17807127-blue
    :target: https://doi.org/10.5281/zenodo.17807127
    :alt: Zenodo Archive
