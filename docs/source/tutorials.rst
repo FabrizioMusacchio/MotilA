@@ -10,7 +10,7 @@ results shown in the associated manuscript.
 Example dataset
 ------------------------
 
-A curated example dataset is available on Zenodo: Musacchio et al. (2025), `doi: 10.5281/zenodo.15061566 <https://zenodo.org/records/15061566>`_;
+A curated example dataset is available on Zenodo: Gockel & Nieves-Rivera & Musacchio et al. (2025), `doi: 10.5281/zenodo.15061566 <https://zenodo.org/records/15061566>`_;
 the dataset is based on Gockel & Nieves-Rivera et al., currently under revision.
 
 
@@ -42,7 +42,7 @@ We also provide a smaller "cutout" version of the example dataset for quick test
 demonstration purposes: Musacchio (2025), `doi: 10.5281/zenodo.17803977 <https://zenodo.org/records/17803978>`_.
 
 If you use one of the provided datasets for any purpose beyond the example tutorials, 
-please cite both the dataset record (Musacchio et al., 2025, doi: `10.5281/zenodo.15061566 <https://zenodo.org/records/15061566>`_ / 
+please cite both the dataset record (Gockel & Nieves-Rivera & Musacchio et al., 2025, doi: `10.5281/zenodo.15061566 <https://zenodo.org/records/15061566>`_ / 
 Musacchio, 2025, doi: `10.5281/zenodo.17803977 <https://zenodo.org/records/17803978>`_) 
 and Gockel & Nieves-Rivera et al., currently  under revision (we will update 
 the citation once available).
