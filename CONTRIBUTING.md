@@ -26,7 +26,7 @@ conda create -n motila-dev -c conda-forge python=3.9
 conda activate motila-dev
 
 pip install -e .
-````
+```
 
 If you wish to install optional development dependencies (testing, linting):
 
