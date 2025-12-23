@@ -193,7 +193,7 @@ Example Python scripts mirror these workflows for use outside of notebooks.
 
 
 Running the example scripts and notebooks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The example scripts in ``example scripts`` and ``example notebooks`` expect a relative path 
 layout and therefore must be executed from within that directory. For example:
