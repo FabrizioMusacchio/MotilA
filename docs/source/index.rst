@@ -65,10 +65,9 @@ MotilA documentation
    :target: https://doi.org/10.5281/zenodo.17807127
    :alt: Zenodo Archive
 
-.. image:: https://img.shields.io/badge/bioRxiv-10.1101%2F2025.08.04.668426-red
-   :target: https://doi.org/10.1101/2025.08.04.668426
-   :alt: bioRxiv Preprint
-
+.. image:: https://joss.theoj.org/papers/10.21105/joss.09267/status.svg
+   :target: https://doi.org/10.21105/joss.09267
+   :alt: JOSS Paper
 
 `MotilA <https://github.com/FabrizioMusacchio/MotilA>`_ is a Python-based pipeline for microglial fine process motility analysis
 from 4D and 5D multiphoton imaging data.
