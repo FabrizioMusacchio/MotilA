@@ -1,8 +1,6 @@
 cff-version: 1.2.0
 message: "If you use MotilA in your research, please cite it as below."
 title: "MotilA: A pipeline for microglial fine process motility analysis"
-version: 1.0.7
-date-released: 2025-03-22
 authors:
   - family-names: Musacchio
     given-names: Fabrizio
@@ -32,3 +30,28 @@ keywords:
   - image processing
   - image registration
   - image analysis pipeline
+
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Musacchio
+      given-names: Fabrizio
+      orcid: https://orcid.org/0000-0002-9043-3349
+    - family-names: Crux
+      given-names: Sophie
+    - family-names: Nebeling
+      given-names: Felix
+    - family-names: Gockel
+      given-names: Nala
+    - family-names: Fuhrmann
+      given-names: Falko
+    - family-names: Fuhrmann
+      given-names: Martin
+      orcid: https://orcid.org/0000-0001-7672-2913
+  title: "MotilA – A Python pipeline for the analysis of microglial fine process motility in 3D time-lapse multiphoton microscopy data"
+  journal: "Journal of Open Source Software"
+  year: 2025
+  volume: 10
+  issue: 116
+  pages: 9267
+  doi: 10.21105/joss.09267

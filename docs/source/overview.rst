@@ -241,32 +241,38 @@ For full license terms, see the ``LICENSE`` file in the `repository <https://git
 Citation
 --------
 
-If you use MotilA in your research, please cite the associated preprint:
+If you use MotilA in your research, please cite the peer-reviewed article
+published in the Journal of Open Source Software:
 
 Musacchio, F., Crux, S., Nebeling, F., Gockel, N., Fuhrmann, F., & Fuhrmann, M. (2025).  
-*MotilA – A Python pipeline for the analysis of microglial fine process motility in 3D time-lapse multiphoton microscopy data*.  
-bioRxiv. https://doi.org/10.1101/2025.08.04.668426
+*MotilA – A Python pipeline for the analysis of microglial fine process motility in
+3D time-lapse multiphoton microscopy data*.  
+Journal of Open Source Software, 10(116), 9267.  
+https://doi.org/10.21105/joss.09267
 
 BibTeX:
 
 .. code-block:: bibtex
 
-    @article{musacchio2025motila,
-      author  = {Fabrizio Musacchio and Sophie Crux and Felix Nebeling and
-                  Nala Gockel and Falko Fuhrmann and Martin Fuhrmann},
-      title   = {MotilA – A Python pipeline for the analysis of microglial fine
-                 process motility in 3D time-lapse multiphoton microscopy data},
-      journal = {bioRxiv},
-      year    = {2025},
-      doi     = {10.1101/2025.08.04.668426},
-      url     = {https://www.biorxiv.org/content/10.1101/2025.08.04.668426v1}
+    @article{Musacchio2025,
+      doi       = {10.21105/joss.09267},
+      url       = {https://doi.org/10.21105/joss.09267},
+      year      = {2025},
+      publisher = {The Open Journal},
+      volume    = {10},
+      number    = {116},
+      pages     = {9267},
+      author    = {Musacchio, Fabrizio and Crux, Sophie and Nebeling, Felix and
+                   Gockel, Nala and Fuhrmann, Falko and Fuhrmann, Martin},
+      title     = {MotilA – A Python pipeline for the analysis of microglial fine
+                   process motility in 3D time-lapse multiphoton microscopy data},
+      journal   = {Journal of Open Source Software}
     }
 
-The citation metadata (authors, ORCID identifiers, release date, keywords and
-software version) are also provided in the repository via the ``CITATION.cff``
-`file <https://github.com/FabrizioMusacchio/MotilA/blob/main/CITATION.cff>`_. This ensures compatibility with GitHub, Zenodo and other indexing tools.
-The entry will be updated if the associated manuscript is accepted by the
-Journal of Open Source Software (JOSS).
+The citation metadata (authors, ORCID identifiers, keywords and license
+information) are provided in the repository via the ``CITATION.cff``
+`file <https://github.com/FabrizioMusacchio/MotilA/blob/main/CITATION.cff>`_.
+This ensures compatibility with GitHub, Zenodo and other indexing services.
 
 
 Acknowledgments and contact

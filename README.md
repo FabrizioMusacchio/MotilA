@@ -207,26 +207,32 @@ Please find more information on how to contribute in the [CONTRIBUTING.md](CONTR
 
 
 ## Citation
-If you use this software in your research, please cite the following preprint:
+
+If you use this software in your research, please cite the peer-reviewed article published in the Journal of Open Source Software:
 
 Musacchio, F., Crux, S., Nebeling, F., Gockel, N., Fuhrmann, F., & Fuhrmann, M. (2025).  
 *MotilA – A Python pipeline for the analysis of microglial fine process motility in 3D time-lapse multiphoton microscopy data*.  
-bioRxiv. https://doi.org/10.1101/2025.08.04.668426
+Journal of Open Source Software, 10(116), 9267.  
+https://doi.org/10.21105/joss.09267
 
-BibTeX:
+### BibTeX
 
-```
-@article{musacchio2025motila,
-author = {Fabrizio Musacchio and Sophie Crux and Felix Nebeling and Nala Gockel and Falko Fuhrmann and Martin Fuhrmann},
-title = {MotilA – A Python pipeline for the analysis of microglial fine process motility in 3D time-lapse multiphoton microscopy data},
-journal = {bioRxiv},
-year = {2025},
-doi = {10.1101/2025.08.04.668426},
-url = {https://www.biorxiv.org/content/10.1101/2025.08.04.668426v1}
+```bibtex
+@article{Musacchio2025,
+  doi       = {10.21105/joss.09267},
+  url       = {https://doi.org/10.21105/joss.09267},
+  year      = {2025},
+  publisher = {The Open Journal},
+  volume    = {10},
+  number    = {116},
+  pages     = {9267},
+  author    = {Musacchio, Fabrizio and Crux, Sophie and Nebeling, Felix and Gockel, Nala and Fuhrmann, Falko and Fuhrmann, Martin},
+  title     = {MotilA – A Python pipeline for the analysis of microglial fine process motility in 3D time-lapse multiphoton microscopy data},
+  journal   = {Journal of Open Source Software}
 }
 ```
 
-**Note**: This manuscript has also been submitted to the Journal of Open Source Software (JOSS) and is currently under review. Once peer-reviewed and accepted, the citation will be updated accordingly.
+**Note:** An earlier version of this work was available as a bioRxiv preprint.  The peer-reviewed JOSS article above is the canonical reference.
 
 ## Acknowledgments
 We gratefully acknowledge the **Light Microscopy Facility (LMF)** and the **Animal Research Facility (ARF)** at the **German Center for Neurodegenerative Diseases (DZNE)** for their essential support in acquiring the in vivo imaging data upon which this pipeline is built.
