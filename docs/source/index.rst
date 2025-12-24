@@ -73,6 +73,19 @@ MotilA documentation
 from 4D and 5D multiphoton imaging data.
 
 
+.. figure:: _static/figures/all_stacks_4D_reg_cut_out_MotilA_example_small.gif
+   :alt: MotilA pipeline overview
+   :align: center
+   :figwidth: 100%
+
+   **MotilA's segmentation and 
+   microglial turnover rate assessment**. This animation illustrates the structural 
+   changes that MotilA detects and quantifies. The left panel shows one representative 
+   Z-slice per time point after MotilA's internal preprocessing steps. The right panel 
+   shows the corresponding :math:`\Delta B` classification maps, which are computed as 
+   difference images between two consecutive time points :math:`t_i` and :math:`t_{i+1}`.
+
+
 This documentation provides:
 
 * an overview of the pipeline and its scientific context,
