@@ -213,8 +213,7 @@ Please find more information on how to contribute in the [CONTRIBUTING.md](CONTR
 
 If you use this software in your research, please cite the peer-reviewed article published in the Journal of Open Source Software:
 
-> Musacchio, F., Crux, S., Nebeling, F., Gockel, N., Fuhrmann, F., & Fuhrmann, M. (2025).  
-*MotilA – A Python pipeline for the analysis of microglial fine process motility in 3D time-lapse multiphoton microscopy data*.   Journal of Open Source Software, 10(116), 9267.  https://doi.org/10.21105/joss.09267
+> Musacchio, F., Crux, S., Nebeling, F., Gockel, N., Fuhrmann, F., & Fuhrmann, M. (2025). *MotilA – A Python pipeline for the analysis of microglial fine process motility in 3D time-lapse multiphoton microscopy data*.   Journal of Open Source Software, 10(116), 9267.  https://doi.org/10.21105/joss.09267
 
 ### BibTeX
 
