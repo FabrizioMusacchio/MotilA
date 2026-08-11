@@ -7,6 +7,13 @@ Each release is also archived on Zenodo for long-term preservation and citation 
 
 [![Zenodo Archive](https://img.shields.io/badge/Zenodo%20Archive-10.5281%2Fzenodo.15175053-blue)](https://doi.org/10.5281/zenodo.15175053)
 
+--- 
+
+### 🚀 MotilA v1.1.2
+
+August 11, 2026
+
+This is just a minor post-v1.1.1 release to fix a small issue in pyproject.toml: Since MotilA runs now with OMIO, which requires Python 3.12 or higher, the `requires-python` field in pyproject.toml has been updated to reflect this requirement.
 
 --- 
 
