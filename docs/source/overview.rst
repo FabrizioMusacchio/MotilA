@@ -171,6 +171,11 @@ If you plan to modify the code, use editable installation:
 Avoid mixing local source folders and installed packages with the same name in
 the same working directory, as this can lead to confusing import behaviour.
 
+To verify your installation, run the following command in your activated environment:
+
+.. code-block:: bash
+
+   python -c "import motila; print(motila.hello_world())"
 
 Example dataset and tutorials
 -----------------------------
