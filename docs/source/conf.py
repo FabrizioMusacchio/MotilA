@@ -34,10 +34,9 @@ def _resolve_omio_version() -> str:
     return "0.0.0+unknown"
 
 project = 'MotilA'
-copyright = '2025, Fabrizio Musacchio'
 author = 'Fabrizio Musacchio'
 release = _resolve_omio_version()
-copyright = f"{datetime.now().year}, {author}"
+copyright = f"2025-{datetime.now().year}, {author}"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -48,7 +47,9 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "sphinx_autodoc_typehints",
+    "myst_parser",
     "sphinx.ext.mathjax",
+    "sphinx_copybutton",
 ]
 autosummary_generate = True
 napoleon_google_docstring = False
@@ -69,6 +70,9 @@ mathjax3_config = {
         "displayMath": [["$$", "$$"], ["\\[", "\\]"]],
     }
 }
+
+# allow copy button for all code blocks, not just Python code blocks
+copybutton_selector = "div.highlight pre"
 
 
 # -- Options for HTML output -------------------------------------------------

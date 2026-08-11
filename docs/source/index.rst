@@ -89,7 +89,7 @@ This documentation provides:
 * an automatically generated API reference.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    overview
@@ -97,6 +97,7 @@ This documentation provides:
    tutorials
    parameters
    api
+   changelog
    contributing
 
 MotilA is `free and open-source software (FOSS) <https://en.wikipedia.org/wiki/Free_and_open-source_software>`_ distributed under the :ref:`GPL-3.0 license <license>`.

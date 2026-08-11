@@ -12,7 +12,7 @@ Each release is also archived on Zenodo for long-term preservation and citation 
 
 ### 🔜 MotilA v1.1.1 - UNRELEASED
 
-#### Flexible Image I/O via OMIO
+#### Flexible image I/O via OMIO
 
 MotilA now uses **OMIO** for image reading and stack-style TIFF output writing. Input stacks are normalized to OME-compliant ``TZCYX`` order before MotilA's core processing begins, which relaxes the previous requirement that TIFF files already arrive in MotilA's expected axis order.
 
@@ -25,7 +25,7 @@ Supported pipeline input formats now include:
 
 The core motility-processing logic remains unchanged: MotilA still extracts subvolumes, uses its existing Zarr-backed intermediate storage, performs the same registration/filtering/segmentation steps, and computes the same motility metrics. A future OMIO-Zarr migration remains a separate follow-up.
 
-#### API and Batch Processing Updates
+#### API and batch processing updates
 
 * Added OMIO-backed ``read_image_stack`` and ``write_image_stack`` helpers.
 * ``process_stack`` now reads supported image files via OMIO and logs the normalized input shape and axes.
@@ -33,7 +33,7 @@ The core motility-processing logic remains unchanged: MotilA still extracts subv
 * ``extract_subvolume`` and ``extract_and_register_subvolume`` now operate on OMIO-normalized ``TZCYX`` input while preserving the 4D subvolume arrays used by downstream MotilA processing.
 * ``batch_process_stacks`` now searches the registered-image folder for all supported OMIO image extensions instead of only ``.tif`` files.
 
-#### Repository Path Cleanup
+#### Repository path cleanup
 
 The example and internal script folders were renamed to remove whitespace:
 
@@ -44,7 +44,7 @@ The example and internal script folders were renamed to remove whitespace:
 
 All affected scripts, notebooks, README links, and Read the Docs pages were updated accordingly.
 
-#### Tests and Documentation
+#### Tests and documentation
 
 * Added tests for OMIO-based axis normalization from ``TZYX`` to ``TZCYX``.
 * Updated tests for the new normalized shape semantics.
@@ -56,12 +56,12 @@ All affected scripts, notebooks, README links, and Read the Docs pages were upda
 
 ### 🚀 MotilA v1.1.0 Release Notes
 
-#### 🚀 Major Improvements: Installation, API Structure, CI, Code Coverage, Documentation, and Roadmap
+#### 🚀 Major improvements: installation, API structure, CI, code coverage, documentation, and roadmap
 This release introduces several substantial improvements that modernize the installation workflow, strengthen the package structure, add full Read the Docs documentation, ensure consistent behavior across environments, notebooks, and CI testing, and formally introduce a project-level roadmap for future development.  In addition, citation metadata has been consolidated. The previously included `.zenodo.json` file has been removed to avoid duplication and version mismatches. MotilA now uses `CITATION.cff` as the single authoritative source of citation information.
 
 Many of these enhancements were developed in direct response to the constructive feedback provided during the JOSS review process, which greatly strengthened the overall robustness of the software and significantly improved its readiness for sustainable open-source development.
 
-#### 📚 **Full Read the Docs Documentation**
+#### 📚 **Full Read the Docs documentation**
 
 MotilA now includes a complete, structured documentation site:
 
@@ -84,7 +84,7 @@ The new documentation provides:
 These changes make MotilA's documentation maintainable and easy to extend.
 
 
-#### 🔧 **API Improvements**
+#### 🔧 **API improvements**
 ##### ✔️ Clean top-level API
 MotilA now exposes its main functions directly at package level:
 
@@ -109,7 +109,7 @@ The older import style remains functional:
 from motila import motila as mt
 ```
 
-#### 🧹 **Internal Code Cleanup**
+#### 🧹 **Internal code cleanup**
 
 * Removed all debugging code under `if __name__ == '__main__':` in production modules
 * Removed all `sys.path.append(...)` development helpers
@@ -123,11 +123,11 @@ from motila import motila as mt
 * Updated in-code comments for clarity
 * Updated example_notebooks and scripts
 
-#### 🏷️ Citation Metadata Cleanup
+#### 🏷️ Citation metadata cleanup
 
 MotilA now standardizes its citation metadata by removing the obsolete `.zenodo.json` file. This file originated from an older DOI workflow and is no longer required. Maintaining two parallel metadata sources introduced the possibility of version inconsistencies. With this change, `CITATION.cff` is the sole source of truth for citation information, ensuring clarity and long-term maintainability.
 
-#### 📦 **Installation & Environment Handling**
+#### 📦 **Installation & environment handling**
 
 ##### ✔️ Modernized installation instructions
 
@@ -152,7 +152,7 @@ Additions include:
 * All development-only `sys.path.append` statements commented out with explanation
 * Scripts now run out-of-the-box after a standard installation
 
-#### 📂 Example Dataset Externalization
+#### 📂 Example dataset externalization
 The example dataset previously included inside the repository has been removed and is now hosted on Zenodo as a citable research object. Both the full dataset and a curated subset ("cutout") are available for independent download:
 
 * Full dataset: **Musacchio et al., 2025**, DOI: [10.5281/zenodo.15061566](https://zenodo.org/records/15061566)  
@@ -160,7 +160,7 @@ The example dataset previously included inside the repository has been removed a
 
 Externalizing the data avoids accidental overwriting of example_projects inside the repository, enables clean and reproducible workflows, and significantly reduces the size of the main MotilA installation.
 
-#### 🧪 **CI Workflow Modernization**
+#### 🧪 **CI workflow modernization**
 The GitHub Actions workflow (`python-tests.yml`) has been updated to match real-world user workflows:
 
 * creates a clean conda environment
@@ -170,7 +170,7 @@ The GitHub Actions workflow (`python-tests.yml`) has been updated to match real-
 
 This ensures consistent behavior across systems.
 
-#### 📊 **Test Coverage Integration**
+#### 📊 **Test coverage integration**
 MotilA now includes full test coverage reporting integrated directly into the development workflow.
 
 * The test suite is executed with `pytest-cov`, generating standardized coverage reports.
@@ -180,7 +180,7 @@ MotilA now includes full test coverage reporting integrated directly into the de
 
 This integration enhances transparency, supports reproducibility, and improves long-term maintainability of the pipeline.
 
-#### 🧭 **Contribution and Community Guidelines**
+#### 🧭 **Contribution and community guidelines**
 MotilA now includes:
 
 * **CONTRIBUTING.md**, covering:
@@ -194,10 +194,10 @@ MotilA now includes:
 
 These additions support healthy, sustainable project development.
 
-#### 🗺️ **Roadmap Implementation**
+#### 🗺️ **Roadmap implementation**
 MotilA now includes a project-level roadmap (`ROADMAP.md`) that outlines planned future enhancements and long-term development priorities. The roadmap documents upcoming changes such as dedicated TYX support, transition of tabular outputs from `.xls` to `.csv` or `.yml`, standardization of naming conventions for cross-platform compatibility, restructuring of example_scripts, and further expansions to the documentation. This file provides a transparent reference for users and contributors and supports structured, forward-looking development.
 
-#### 🧹 **Additional Documentation Refinements**
+#### 🧹 **Additional documentation refinements**
 
 * Expanded "Example Usage" with parameter explanations
 * Added example parameter blocks from tutorial scripts
@@ -233,18 +233,18 @@ Thank you for using MotilA!
 
 ### 🚀 MotilA v1.0.7 Release Notes
 
-#### 🐞 Critical Bugfix: PyStackReg Support in Batch Processing
+#### 🐞 Critical bugfix: PyStackReg support in batch processing
 This release fixes a critical issue that prevented PyStackReg from being used in batch processing, along with a minor metadata filtering correction.
 
-##### 🚨 Critical Bug Fixed
+##### 🚨 Critical bug fixed
 
 - **Missing `usepystackreg` parameter in `batch_process_stacks`**: The `usepystackreg` parameter was not being passed through to the `process_stack` function during batch processing. This meant that even when `usepystackreg=True` was set, the batch processor would always use phase cross-correlation instead of PyStackReg for 2D registration. This has been fixed and PyStackReg now works correctly in batch mode.
 
-##### 🐞 Minor Bug Fixed
+##### 🐞 Minor bug fixed
 
 - **Metadata file filtering**: Fixed hardcoded "metadata.xls" string in the batch processor's metadata file search. The function now correctly uses the `metadata_file` parameter, allowing for flexible metadata file naming (e.g., "metadata.xlsx", "parameters.xls", etc.).
 
-##### Technical Details
+##### Technical details
 
 - The `usepystackreg` parameter is now properly passed from `batch_process_stacks` to `process_stack`.
 - Metadata file filtering now uses the configurable `metadata_file` parameter instead of a hardcoded string.
@@ -258,15 +258,15 @@ Thank you for using MotilA! If you encounter any issues, please open
 
 ### 🚀 MotilA v1.0.6 Release Notes
 
-#### 🐞 Bugfix: Skip Processing for Invalid Projection Ranges
+#### 🐞 Bugfix: skip processing for invalid projection ranges
 
 This release adds an important safety check to prevent processing of files with invalid projection parameters.
 
-##### Bug Fixed
+##### Bug fixed
 
 - **Added file skipping for invalid projection ranges**: The main processing pipeline now properly checks if `calc_projection_range` returns zero projection layers and skips processing the current file instead of continuing with invalid parameters. This prevents errors and wasted processing time when projection parameters are incompatible with the image stack dimensions.
 
-##### Technical Details
+##### Technical details
 
 - When `projection_center` is out of bounds or results in an invalid projection range, `calc_projection_range` returns `projection_layers = 0`.
 - The main processing function now detects this condition and logs a warning message before safely skipping the file.
@@ -280,15 +280,15 @@ Thank you for using MotilA! If you encounter any issues, please open an issue
 
 ### 🚀 MotilA v1.0.5 Release Notes
 
-#### 🐞 Bugfix: Projection Range and Layer Count Consistency
+#### 🐞 Bugfix: projection range and layer count consistency
 
 This release fixes an important consistency issue in the projection range calculation logic.
 
-##### Bug Fixed
+##### Bug fixed
 
 - **Corrected `calc_projection_range` output consistency**: Fixed an issue where the `projection_layers` count could become inconsistent with the actual `projection_range` when the requested range exceeded the image stack's z-dimension boundaries. The function now properly updates and returns the corrected `projection_layers` count to match the adjusted projection range, ensuring accurate layer counting for downstream processing steps.
 
-##### Technical Details
+##### Technical details
 
 - When a projection range exceeds the available z-layers in an image stack, MotilA now correctly adjusts both the range boundaries AND the layer count to maintain consistency.
 - This prevents potential errors or unexpected behavior in subsequent processing steps that rely on accurate layer counts.
@@ -302,16 +302,16 @@ Thank you for using MotilA! If you encounter any issues, please open
 
 ### 🚀 MotilA v1.0.4 Release Notes
 
-#### 🐞 Bugfix & 🚀 New Feature: Registration Improvements
+#### 🐞 Bugfix & 🚀 New feature: registration improvements
 
 This release includes a critical bugfix for subvolume extraction and registration, along with an exciting new registration option for enhanced flexibility.
 
-##### 🐞 Bug Fixes
+##### 🐞 Bug fixes
 - **Fixed Shift Application in Subvolume Extraction**
   - Corrected shift application logic in `extract_and_register_subvolume` function to ensure proper alignment of extracted subvolumes.
   - Updated dataset creation for full Zarr 3.0+ compatibility within the same function, resolving potential data handling issues.
 
-##### 🚀 New Features
+##### 🚀 New features
 - **PyStackReg Support for 2D Registration**
   - Added support for **PyStackReg** (StackReg) as an alternative method for 2D image registration of projected stacks.
   - Enhanced `reg_2D_images` and `process_stack` functions with new parameter `usepystackreg`.
@@ -320,7 +320,7 @@ This release includes a critical bugfix for subvolume extraction and registratio
     - Set `usepystackreg=True` to use PyStackReg registration
   - PyStackReg may provide more robust registration in certain imaging conditions, particularly for images with low contrast or minimal features.
 
-#### Parameter Updates
+#### Parameter updates
 The following new parameter is available in both single-file and batch processing:
 
 | Parameter | Values | Description |
@@ -333,7 +333,7 @@ The following new parameter is available in both single-file and batch processin
 
 ### 🚀 MotilA v1.0.3 Release Notes
 
-#### 🐞 Bugfix: Zarr v3+ Compatibility
+#### 🐞 Bugfix: Zarr v3+ compatibility
 
 This release brings important fixes to ensure MotilA works seamlessly with Zarr version 3 and higher.
 
@@ -360,7 +360,7 @@ If you encounter any further problems, please open an issue on GitHub.
 
 ### 🚀 MotilA v1.0.2 Release Notes
 
-#### 🐞 Bugfix & Improvement: Projection Range Calculation
+#### 🐞 Bugfix & improvement: projection range calculation
 
 This release focuses on a critical bugfix and improvements to the projection range logic in MotilA's core image processing pipeline.
 
@@ -372,7 +372,7 @@ This release focuses on a critical bugfix and improvements to the projection ran
   - The projection range is now symmetrically expanded around the center when possible, and boundaries are correctly handled if the range would exceed the image stack's z-dimension.
   - Improved the robustness and readability of the `calc_projection_range` function for more accurate and predictable behavior.
 
-##### Bug Fixed
+##### Bug fixed
 
 - Fixed an issue where the projection range could be off by one or not include the correct number of layers, especially when the projection center was close to the start or end of the z-stack.
 
@@ -388,7 +388,7 @@ If you encounter any further problems, please open an issue on GitHub.
 
 ---
 
-### 🚀 MotilA v1.0.1 - Dummy release for Zenodo
+### 🚀 MotilA v1.0.1 - Dummy release
 
 * dummy release for Zenodo
 
@@ -409,11 +409,9 @@ MotilA is designed for automated and scalable analysis of **4D and 5D multi-phot
 * **Jupyter-based tutorials** for easy onboarding and reproducibility
 * Modular pipeline structure for future extensions
 
-#### 📦 Dataset and Tutorials
+#### 📦 Dataset and tutorials
 
 You can find the example dataset accompanying this release here:  
 👉 [https://zenodo.org/records/15061566](https://zenodo.org/records/15061566)  
 
 A hands-on tutorial notebook is included in the `tutorials/` folder of this repository.
-
----

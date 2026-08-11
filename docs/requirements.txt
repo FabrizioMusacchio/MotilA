@@ -2,3 +2,7 @@
 sphinx>=8,<10
 sphinx-rtd-theme>=3.0.0
 sphinx-autodoc-typehints>=2.0.0
+myst-parser
+sphinx-copybutton
+
+# if you add a new dependency here, you need to run `pip install -r docs/requirements.txt` to install it in your virtual environment
