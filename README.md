@@ -15,6 +15,7 @@
 - **Segmentation**: Adaptive thresholding and noise filtering to isolate microglial processes.
 - **Motility quantification**: Frame-to-frame analysis of pixel changes in microglial structures.
 - **Batch processing**: Automated handling of multiple datasets with standardized parameter settings.
+- **Flexible image I/O**: Reading is handled through [OMIO](https://omio.readthedocs.io), supporting TIFF/OME-TIFF, CZI, Thorlabs RAW and LSM files with automatic normalization to `TZCYX`.
 
 A high-level description of all processing steps and parameters is given in the [online documentation](https://motila.readthedocs.io/en/latest/parameters.html).
 
@@ -97,36 +98,36 @@ The example dataset includes sample image stacks and metadata files for testing 
 * **full example dataset** from [Zenodo](https://zenodo.org/records/15061566) (Gockel & Nieves-Rivera & Musacchio et al., 2025, doi: 10.5281/zenodo.15061566; data based on [Gockel & Nieves-Rivera et al., 2026](https://doi.org/10.1016/j.celrep.2026.117161)), or a
 * **subset ("cutout") of the example dataset**, also from [Zenodo](https://zenodo.org/records/17803978) (Musacchio, 2025, doi: 10.5281/zenodo.17803977)
 
-After downloading and extracting, place it in the [`example project`](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20project) directory. If you use one of the provided datasets for any purpose beyond the example tutorials, please cite both the dataset record (Gockel & Nieves-Rivera & Musacchio et al., 2025, doi: 10.5281/zenodo.15061566 / Musacchio, 2025, doi: 10.5281/zenodo.17803977) and [Gockel & Nieves-Rivera et al., 2026](https://doi.org/10.1016/j.celrep.2026.117161).
+After downloading and extracting, place it in the [`example_project`](https://github.com/FabrizioMusacchio/MotilA/tree/main/example_project) directory. If you use one of the provided datasets for any purpose beyond the example tutorials, please cite both the dataset record (Gockel & Nieves-Rivera & Musacchio et al., 2025, doi: 10.5281/zenodo.15061566 / Musacchio, 2025, doi: 10.5281/zenodo.17803977) and [Gockel & Nieves-Rivera et al., 2026](https://doi.org/10.1016/j.celrep.2026.117161).
 
 The tutorials cover the core pipeline steps, from loading and preprocessing image data to analyzing microglial motility and visualizing the results. A second tutorial demonstrates batch processing for analyzing multiple datasets in a structured project folder.
 
-[Jupyter notebooks](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20notebooks):
+[Jupyter notebooks](https://github.com/FabrizioMusacchio/MotilA/tree/main/example_notebooks):
 
-* [single_file_run.ipynb](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20notebooks/single_file_run.ipynb)
-* [batch_run.ipynb](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20notebooks/batch_run.ipynb)
+* [single_file_run.ipynb](https://github.com/FabrizioMusacchio/MotilA/blob/main/example_notebooks/single_file_run.ipynb)
+* [batch_run.ipynb](https://github.com/FabrizioMusacchio/MotilA/blob/main/example_notebooks/batch_run.ipynb)
 
-[Python scripts](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20scripts):
+[Python scripts](https://github.com/FabrizioMusacchio/MotilA/tree/main/example_scripts):
 
-* [single_file_run.py](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20scripts/single_file_run.py)
-* [batch_run.py](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20scripts/batch_run.py)
+* [single_file_run.py](https://github.com/FabrizioMusacchio/MotilA/blob/main/example_scripts/single_file_run.py)
+* [batch_run.py](https://github.com/FabrizioMusacchio/MotilA/blob/main/example_scripts/batch_run.py)
 
 
 We used the following Python script to generate the figures presented in our submitted manuscript:
 
-* [single_file_run_paper.py](https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20scripts/single_file_run_paper.py)
+* [single_file_run_paper.py](https://github.com/FabrizioMusacchio/MotilA/blob/main/example_scripts/single_file_run_paper.py)
 
 This script includes all parameter settings used during analysis and can be employed to reproduce the figures. It was applied to the subset of the example dataset described above.
 
 ### Running the example scripts and notebooks
-The example scripts in `example scripts` and `example notebooks` expect a relative path layout and therefore must be executed from within that directory. For example:
+The example scripts in `example_scripts` and `example_notebooks` expect a relative path layout and therefore must be executed from within that directory. For example:
 
 ```bash
 cd example_scripts
 python single_file_run_paper.py
 ```
 
-Alternatively, users may modify the `DATA_Path` variable inside the script to point to the absolute location of your `example project` folder. 
+Alternatively, users may modify the `DATA_Path` variable inside the script to point to the absolute location of your `example_project` folder. 
 
 
 ## Quick start
@@ -152,7 +153,7 @@ Init the logger to get a log file for your current run:
 log = mt.logger_object()
 ```
 
-Then, define the corresponding parameters. A set of example values can be found in the [tutorial notebooks](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20notebooks) and [scripts](https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20scripts) provided in the repository. 
+Then, define the corresponding parameters. A set of example values can be found in the [tutorial notebooks](https://github.com/FabrizioMusacchio/MotilA/tree/main/example_notebooks) and [scripts](https://github.com/FabrizioMusacchio/MotilA/tree/main/example_scripts) provided in the repository. 
 
 When you have set the parameters, run the pipeline via:
 
@@ -212,10 +213,8 @@ Please find more information on how to contribute in the [CONTRIBUTING.md](CONTR
 
 If you use this software in your research, please cite the peer-reviewed article published in the Journal of Open Source Software:
 
-Musacchio, F., Crux, S., Nebeling, F., Gockel, N., Fuhrmann, F., & Fuhrmann, M. (2025).  
-*MotilA – A Python pipeline for the analysis of microglial fine process motility in 3D time-lapse multiphoton microscopy data*.  
-Journal of Open Source Software, 10(116), 9267.  
-https://doi.org/10.21105/joss.09267
+> Musacchio, F., Crux, S., Nebeling, F., Gockel, N., Fuhrmann, F., & Fuhrmann, M. (2025).  
+*MotilA – A Python pipeline for the analysis of microglial fine process motility in 3D time-lapse multiphoton microscopy data*.   Journal of Open Source Software, 10(116), 9267.  https://doi.org/10.21105/joss.09267
 
 ### BibTeX
 

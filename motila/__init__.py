@@ -1,5 +1,7 @@
 from .motila import (
     hello_world,
+    read_image_stack,
+    write_image_stack,
     process_stack,
     batch_process_stacks,
     batch_collect,
@@ -14,6 +16,8 @@ from .utils import (
 
 __all__ = [
     "hello_world",
+    "read_image_stack",
+    "write_image_stack",
     "process_stack",
     "batch_process_stacks",
     "batch_collect",

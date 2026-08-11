@@ -4,6 +4,7 @@ This roadmap summarizes planned improvements and future extensions derived from 
 
 
 ## Support for additional input formats and axis configurations
+* ✅ **[addressed in release v1.1.1]** Using **OMIO** for image I/O. MotilA can now read TIFF/OME-TIFF, CZI, Thorlabs RAW, and LSM files through a single normalized TZCYX input path while preserving the existing core processing logic.
 * Implementing dedicated support for **TYX time-lapse stacks**. <br> The core algorithm is already compatible, but explicit input handling and metadata inference still need to be added.
 
 
@@ -11,11 +12,11 @@ This roadmap summarizes planned improvements and future extensions derived from 
 * Transition all tabular outputs from **.xls** to **.csv** for long term sustainability and interoperability.
 * Transition `_processing_parameters.xlsx` to **.yml** format to improve open access, better human readability and easier parsing.
 * Migrating metadata files (currently .xls) to **.yml**  format to improve open access, better human readability and easier parsing. Migration must preserve backward compatibility.
-* Standardizing all folder and file names to **avoid whitespace** and to use underscores for cross-platform stability (e.g., `example dataset` ⟶ `example_dataset`).
+* ✅ **[addressed in release v1.1.1]** Standardizing repository example and user-script folder names to **avoid whitespace** and to use underscores for cross-platform stability (`example_scripts`, `example_project`, `example_notebooks`, `user_scripts`).
 
 
 ## Repository organization and auxiliary datasets
-* ✅ **[addressed in release v1.1.0]** Providing the **cutout dataset** as a separate Zenodo record linked to the main example datasets. This avoids overwriting example projects and allows independent downloads. Also, it reduced the size of the main repository.
+* ✅ **[addressed in release v1.1.0]** Providing the **cutout dataset** as a separate Zenodo record linked to the main example datasets. This avoids overwriting example_projects and allows independent downloads. Also, it reduced the size of the main repository.
 
 
 ## Including JOSS review changes

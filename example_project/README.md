@@ -4,4 +4,4 @@
 
 * [Gockel & Nieves-Rivera & Musacchio et al. (2025), doi: 10.5281/zenodo.15061566](https://zenodo.org/records/15061566)
 
-Place the downloaded and extracted data set into this folder (`example project`).
+Place the downloaded and extracted data set into this folder (`example_project`).

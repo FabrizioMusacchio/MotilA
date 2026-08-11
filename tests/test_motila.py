@@ -17,6 +17,7 @@ from motila.motila import (
     plot_histogram_of_projections,
     plot_projected_stack_as_tif,
     plot_projected_stack,
+    read_image_stack,
     get_stack_dimensions,
     extract_subvolume,
     extract_and_register_subvolume,
@@ -334,7 +335,7 @@ def test_plot_projected_stack(tmp_path):
         assert loaded.shape == stack.shape
         assert np.allclose(loaded, stack)
 
-        axes = tif.imagej_metadata.get("axes")
+        axes = (tif.imagej_metadata or {}).get("axes")
         if axes is not None:
             assert axes in {"ZYX", "TZYX"}
 
@@ -353,14 +354,26 @@ def test_get_stack_dimensions(tmp_path):
 
     # Get shape using the tested function
     shape = get_stack_dimensions(fname)
-    assert shape == list(arr.shape)
+    assert shape == [2, 3, 1, 64, 64]
+
+def test_read_image_stack_normalizes_tzyx_to_tzcyx(tmp_path):
+    np.random.seed(42)
+    arr = np.random.rand(2, 3, 16, 16).astype(np.float32)
+    fname = tmp_path / "test_stack.tiff"
+    tifffile.imwrite(fname, arr, imagej=True, metadata={"axes": "TZYX"})
+
+    image, metadata = read_image_stack(fname)
+
+    assert image.shape == (2, 3, 1, 16, 16)
+    assert metadata["axes"] == "TZCYX"
+    assert np.allclose(image[:, :, 0, :, :], arr)
 
 def test_get_stack_dimensions_non_tif(tmp_path):
     # Create a fake non-TIFF file
     fake_file = tmp_path / "image.png"
     fake_file.write_text("not a tif")
 
-    with pytest.raises(ValueError, match="Currently, only TIFF files are supported."):
+    with pytest.raises(ValueError, match="Unsupported image file"):
         get_stack_dimensions(fake_file)
 
 
@@ -397,6 +410,7 @@ def test_extract_subvolume_single_channel(tmp_path):
 
     # Check shapes
     assert MG_sub.shape == (2, 3, 32, 32)
+    assert np.allclose(MG_sub[:], arr[:, 1:4, :, :])
 
     # Check zarr path
     zarr_path = tmp_path / "test_stack.zarr"
@@ -2062,6 +2076,4 @@ def test_batch_collect(setup_batch_collect_test_data):
 
     # Optional: check logger messages
     assert "Collected data saved in test_batch_results" in log.messages[-1]
-
-
 

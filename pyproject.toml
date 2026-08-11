@@ -26,7 +26,8 @@ dependencies = [
     "xlrd",
     "ipywidgets",
     "ipykernel", 
-    "ipympl"
+    "ipympl",
+    "omio-microscopy"
 ]
 
            
@@ -44,5 +45,5 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov=motila --cov-report=xml"
+addopts = "-p no:napari -p no:npe2 -p no:napari-plugin-engine"
 testpaths = ["tests"]

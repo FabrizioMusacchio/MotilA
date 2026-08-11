@@ -12,6 +12,45 @@ Each release is also archived on Zenodo for long-term preservation and citation 
 
 ### 🔜 MotilA v1.1.1 - UNRELEASED
 
+#### Flexible Image I/O via OMIO
+
+MotilA now uses **OMIO** for image reading and stack-style TIFF output writing. Input stacks are normalized to OME-compliant ``TZCYX`` order before MotilA's core processing begins, which relaxes the previous requirement that TIFF files already arrive in MotilA's expected axis order.
+
+Supported pipeline input formats now include:
+
+* ``.tif`` / ``.tiff`` / OME-TIFF
+* ``.czi``
+* Thorlabs ``.raw``
+* ``.lsm``
+
+The core motility-processing logic remains unchanged: MotilA still extracts subvolumes, uses its existing Zarr-backed intermediate storage, performs the same registration/filtering/segmentation steps, and computes the same motility metrics. A future OMIO-Zarr migration remains a separate follow-up.
+
+#### API and Batch Processing Updates
+
+* Added OMIO-backed ``read_image_stack`` and ``write_image_stack`` helpers.
+* ``process_stack`` now reads supported image files via OMIO and logs the normalized input shape and axes.
+* ``get_stack_dimensions`` now reports the OMIO-normalized ``TZCYX`` shape. For single-channel data this includes ``C=1``.
+* ``extract_subvolume`` and ``extract_and_register_subvolume`` now operate on OMIO-normalized ``TZCYX`` input while preserving the 4D subvolume arrays used by downstream MotilA processing.
+* ``batch_process_stacks`` now searches the registered-image folder for all supported OMIO image extensions instead of only ``.tif`` files.
+
+#### Repository Path Cleanup
+
+The example and internal script folders were renamed to remove whitespace:
+
+* ``example scripts`` → ``example_scripts``
+* ``example project`` → ``example_project``
+* ``example notebooks`` → ``example_notebooks``
+* ``user scripts`` → ``user_scripts``
+
+All affected scripts, notebooks, README links, and Read the Docs pages were updated accordingly.
+
+#### Tests and Documentation
+
+* Added tests for OMIO-based axis normalization from ``TZYX`` to ``TZCYX``.
+* Updated tests for the new normalized shape semantics.
+* Updated the RTD data requirements, tutorials, overview, and API reference for OMIO-supported formats.
+* Disabled GUI-related pytest plugin autoloading for Napari/NPE plugins in the project test configuration, avoiding terminal/CI cache issues introduced by OMIO's optional Napari dependencies.
+* Removed coverage options from default pytest arguments so ``pytest`` works in a minimal test environment; coverage can still be requested explicitly in CI or development runs.
 
 ---
 
@@ -82,7 +121,7 @@ from motila import motila as mt
   ```
 
 * Updated in-code comments for clarity
-* Updated example notebooks and scripts
+* Updated example_notebooks and scripts
 
 #### 🏷️ Citation Metadata Cleanup
 
@@ -119,7 +158,7 @@ The example dataset previously included inside the repository has been removed a
 * Full dataset: **Musacchio et al., 2025**, DOI: [10.5281/zenodo.15061566](https://zenodo.org/records/15061566)  
 * Subset ("cutout"): **Musacchio, 2025**, DOI: [10.5281/zenodo.17803977](https://zenodo.org/records/17803977)
 
-Externalizing the data avoids accidental overwriting of example projects inside the repository, enables clean and reproducible workflows, and significantly reduces the size of the main MotilA installation.
+Externalizing the data avoids accidental overwriting of example_projects inside the repository, enables clean and reproducible workflows, and significantly reduces the size of the main MotilA installation.
 
 #### 🧪 **CI Workflow Modernization**
 The GitHub Actions workflow (`python-tests.yml`) has been updated to match real-world user workflows:
@@ -156,7 +195,7 @@ MotilA now includes:
 These additions support healthy, sustainable project development.
 
 #### 🗺️ **Roadmap Implementation**
-MotilA now includes a project-level roadmap (`ROADMAP.md`) that outlines planned future enhancements and long-term development priorities. The roadmap documents upcoming changes such as dedicated TYX support, transition of tabular outputs from `.xls` to `.csv` or `.yml`, standardization of naming conventions for cross-platform compatibility, restructuring of example scripts, and further expansions to the documentation. This file provides a transparent reference for users and contributors and supports structured, forward-looking development.
+MotilA now includes a project-level roadmap (`ROADMAP.md`) that outlines planned future enhancements and long-term development priorities. The roadmap documents upcoming changes such as dedicated TYX support, transition of tabular outputs from `.xls` to `.csv` or `.yml`, standardization of naming conventions for cross-platform compatibility, restructuring of example_scripts, and further expansions to the documentation. This file provides a transparent reference for users and contributors and supports structured, forward-looking development.
 
 #### 🧹 **Additional Documentation Refinements**
 

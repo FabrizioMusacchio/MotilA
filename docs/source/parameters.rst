@@ -70,10 +70,10 @@ Input/output parameters for batch processing
      - Tag that identifies project-specific subfolders inside each ID folder
    * - ``reg_tif_file_folder``
      - string
-     - Name of the folder inside the project_tag folder that stores the registered TIFF files
+     - Name of the folder inside the project_tag folder that stores the registered image files
    * - ``reg_tif_file_tag``
      - string
-     - Substring used to select the TIFF file to process inside ``reg_tif_file_folder``
+     - Substring used to select the supported image file to process inside ``reg_tif_file_folder``
    * - ``RESULTS_foldername``
      - string
      - Name of the folder where MotilA writes the results inside each project_tag folder
@@ -456,4 +456,3 @@ Input/output parameters for batch collection
 The batch collection function expects the same folder hierarchy as batch
 processing and aggregates per-dataset results into cohort-level Excel
 files.
-

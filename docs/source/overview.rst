@@ -99,7 +99,8 @@ Core pipeline steps
 
 MotilA follows a structured sequence of image processing and analysis steps to extract motility metrics from microscopy data:
 
-1. **Load image data**: Supports TIFF in TZCYX and TZYX formats.
+1. **Load image data**: Uses OMIO to read TIFF/OME-TIFF, CZI, Thorlabs RAW
+   and LSM files and normalize them to TZCYX.
 2. **Extract sub-volumes**: Extracts a sub-volume from each 3D stack at every time point to ensure consistent analysis across time frames.
 3. **(Optional) Register sub-volumes**: Performs motion correction by aligning sub-volumes across time points, improving tracking accuracy.
 4. **(Optional) Perform spectral unmixing**: Reduces channel bleed-through, particularly for two-channel imaging setups.
@@ -137,8 +138,8 @@ Installation
 ------------
 
 MotilA targets Python 3.9–3.12 and builds on the standard scientific Python
-stack (NumPy, SciPy, scikit-image, scikit-learn, pandas, tifffile, zarr and
-related packages). The recommended way to install MotilA for end users is via
+stack (NumPy, SciPy, scikit-image, scikit-learn, pandas, tifffile, zarr, OMIO
+and related packages). The recommended way to install MotilA for end users is via
 PyPI:
 
 .. code-block:: bash
@@ -185,7 +186,7 @@ Zenodo and several example notebooks and scripts in the repository.
 
 The :doc:`example dataset <tutorials>` contains a subset of in vivo multiphoton imaging data used
 in the associated manuscript and can be downloaded from Zenodo. Placing the
-data into the provided example project folder allows users to run the pipeline
+data into the provided example_project folder allows users to run the pipeline
 end-to-end using the supplied notebooks and scripts.
 
 Jupyter notebooks :doc:`demonstrate <tutorials>`:
@@ -200,7 +201,7 @@ Example Python scripts mirror these workflows for use outside of notebooks.
 Running the example scripts and notebooks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The example scripts in ``example scripts`` and ``example notebooks`` expect a relative path 
+The example scripts in ``example_scripts`` and ``example_notebooks`` expect a relative path 
 layout and therefore must be executed from within that directory. For example:
 
 .. code-block:: bash
@@ -210,7 +211,7 @@ layout and therefore must be executed from within that directory. For example:
 
 
 Alternatively, users may modify the ``DATA_Path`` variable inside the script to point 
-to the absolute location of the example project. 
+to the absolute location of the example_project. 
 
 
 .. _license:

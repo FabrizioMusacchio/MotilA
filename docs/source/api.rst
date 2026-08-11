@@ -15,6 +15,8 @@ Additional functions
 .. currentmodule:: motila.motila
 
 .. autofunction:: hello_world
+.. autofunction:: read_image_stack
+.. autofunction:: write_image_stack
 .. autofunction:: calc_projection_range
 .. autofunction:: plot_2D_image
 .. autofunction:: plot_2D_image_as_tif

@@ -49,8 +49,8 @@ mt.hello_world()
 # define data input paths:
 Current_ID = "ID240103_P17_1_cutout"           # define the ID of the mouse/animal
 group      = "blinded"                  # define the group of the mouse/animal
-#DATA_Path  = "/Users/husker/Science/Python/Projekte/MotilA/example project/Data/ID240103_P17_1_cutout/TP000/registered/"
-DATA_Path  = "../example project/Data/ID240103_P17_1_cutout/TP000/registered/"
+#DATA_Path  = "/Users/husker/Science/Python/Projekte/MotilA/example_project/Data/ID240103_P17_1_cutout/TP000/registered/"
+DATA_Path  = "../example_project/Data/ID240103_P17_1_cutout/TP000/registered/"
                                         # define the path to the data folder; can be absolute or relative to the
                                         # location of this script
 IMG_File   = "all stacks 4D reg.tif"    # define the image file name

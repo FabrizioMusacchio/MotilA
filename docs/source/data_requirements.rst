@@ -1,17 +1,19 @@
 Data Prerequisites and Project Structure
 ========================================
 
-MotilA operates on time-lapse multiphoton imaging data stored in TIFF format.
-This page summarizes the required file structure, the expected axis order, the
-handling of metadata, and the preprocessing considerations for accurate
-microglial motility analysis.
+MotilA operates on time-lapse multiphoton imaging data read through
+`OMIO <https://omio.readthedocs.io>`_. This page summarizes the supported file
+formats, the normalized axis order, the handling of metadata, and the
+preprocessing considerations for accurate microglial motility analysis.
 
-TIFF file format and image axis order
--------------------------------------
+Image file formats and axis order
+---------------------------------
 
-MotilA expects input image stacks in TIFF format with axes structured as either
-**TZCYX** (for multi-channel data) or **TZYX** (for single-channel data). These
-axes correspond to:
+MotilA accepts image formats supported by OMIO in the pipeline entry points,
+including ``.tif``, ``.tiff``, ``.czi``, Thorlabs ``.raw`` and ``.lsm`` files.
+OMIO reads these formats and normalizes the image data to the OME-compliant
+**TZCYX** axis order before MotilA's processing steps begin. These axes
+correspond to:
 
 * **T**: time (imaging frames over time)  
 * **Z**: depth (z-stack layers)  
@@ -20,12 +22,15 @@ axes correspond to:
 * **Y**: height (spatial dimension)  
 * **X**: width (spatial dimension)
 
-This format follows the standard used in ImageJ/Fiji. 
+For single-channel data, OMIO still provides a channel axis with ``C=1``. This
+means MotilA's internal image shape after reading is always ``(T, Z, C, Y, X)``,
+even if the source file did not explicitly store all dimensions.
 
-If an input file uses a different axis order, MotilA provides the function
-:meth:`motila.utils.tiff_axes_check_and_correct`, which reads the axis labels
-from the ImageJ metadata and writes a corrected TIFF file with properly ordered
-dimensions.
+Older TIFF-only workflows that already produce ImageJ/Fiji ``TZYX`` or
+``TZCYX`` stacks remain supported. The legacy helper
+:meth:`motila.utils.tiff_axes_check_and_correct` is still available for manual
+TIFF axis correction, but most users no longer need to run it before
+``process_stack`` because OMIO performs axis normalization during reading.
 
 Example usage of axis correction function:
 
@@ -118,12 +123,12 @@ Here:
 
 * ``reg_tif_file_folder``  
   Folder within the ``project_tag`` directory that contains the registered
-  TIFF files.
+  image files.
 
 * ``reg_tif_file_tag``  
-  Substring used to identify the TIFF file(s) to process within
-  ``reg_tif_file_folder``; if multiple files contain this tag, the folder
-  is skipped.
+  Substring used to identify the image file(s) to process within
+  ``reg_tif_file_folder``. MotilA searches across the supported OMIO image
+  extensions; if multiple files contain this tag, the folder is skipped.
 
 * ``RESULTS_foldername``  
   Folder name where MotilA will save the results for each project. It can
@@ -183,8 +188,7 @@ Summary
 
 In summary, MotilA expects:
 
-* TIFF image stacks with axes ordered as ``TZCYX`` (multi-channel) or
-  ``TZYX`` (single-channel), and
+* OMIO-supported image stacks that can be normalized to ``TZCYX``, and
 * spatially registered 3D stacks for accurate motility analysis.
 
 For batch processing, MotilA additionally requires:
@@ -192,4 +196,3 @@ For batch processing, MotilA additionally requires:
 * a structured project folder hierarchy, 
 * correctly assigned channel indices via parameters, and
 * optional per-dataset metadata Excel files to override selected parameters.
-

@@ -28,12 +28,12 @@ The dataset contains:
    Contents of the `Zenodo example dataset <https://zenodo.org/records/15061566>`_, including the required project-folder
    structure for batch processing. The dataset mirrors the directory layout
    expected by MotilA, with ``ID`` folders, ``project_tag`` subfolders,
-   registered TIFF stacks, and an accompanying ``metadata.xls`` file.
+   registered image stacks, and an accompanying ``metadata.xls`` file.
 
-After downloading, place the dataset into the ``example project`` directory of
+After downloading, place the dataset into the ``example_project`` directory of
 your MotilA working directory (i.e., the folder, where you run the scripts from). 
 
-An example of the expected folder structure can also be found `in the repository <https://github.com/FabrizioMusacchio/MotilA/tree/main/example%20project>`_.
+An example of the expected folder structure can also be found `in the repository <https://github.com/FabrizioMusacchio/MotilA/tree/main/example_project>`_.
 
 Running MotilA directly on this dataset allows users to verify that the pipeline
 is functioning correctly and produces meaningful motility metrics.
@@ -54,10 +54,10 @@ Tutorial notebooks
 MotilA includes Jupyter notebooks that illustrate the core processing steps on
 the example data:
 
-* `single_file_run.ipynb <https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20notebooks/single_file_run.ipynb>`_  
+* `single_file_run.ipynb <https://github.com/FabrizioMusacchio/MotilA/blob/main/example_notebooks/single_file_run.ipynb>`_  
   Demonstrates the complete workflow for processing a single image stack.
 
-* `batch_run.ipynb <https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20notebooks/batch_run.ipynb>`_  
+* `batch_run.ipynb <https://github.com/FabrizioMusacchio/MotilA/blob/main/example_notebooks/batch_run.ipynb>`_  
   Shows how to process multiple datasets stored in a structured project folder.
 
 These notebooks guide users through image loading, optional preprocessing,
@@ -70,8 +70,8 @@ Example Python scripts
 Equivalent Python scripts are provided for users who prefer script-based
 workflows or who want to integrate MotilA into automated analysis pipelines:
 
-* `single_file_run.py <https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20scripts/single_file_run.py>`_
-* `batch_run.py <https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20scripts/batch_run.py>`_
+* `single_file_run.py <https://github.com/FabrizioMusacchio/MotilA/blob/main/example_scripts/single_file_run.py>`_
+* `batch_run.py <https://github.com/FabrizioMusacchio/MotilA/blob/main/example_scripts/batch_run.py>`_
 
 These scripts mirror the behavior of the tutorial notebooks and can be adapted
 for larger projects or command-line environments.
@@ -82,11 +82,11 @@ Reproducing manuscript figures
 The figures shown in the associated manuscript were generated using a dedicated
 script that applies MotilA to a specific subset of the example dataset:
 
-* `single_file_run_paper.py <https://github.com/FabrizioMusacchio/MotilA/blob/main/example%20scripts/single_file_run_paper.py>`_
+* `single_file_run_paper.py <https://github.com/FabrizioMusacchio/MotilA/blob/main/example_scripts/single_file_run_paper.py>`_
 
 The subset used for figure generation is located at:
 
-* ``example project/Data/ID240103_P17_1_cutout/TP000``
+* ``example_project/Data/ID240103_P17_1_cutout/TP000``
 
 The script contains all parameter settings used during analysis and can be used
 to reproduce the manuscript figures exactly.
@@ -96,7 +96,7 @@ Additional example datasets
 
 The repository may include additional reduced datasets, project templates or
 folder structures intended to help users set up their own analyses. These
-resources are located in the ``example project`` directory and follow the same
+resources are located in the ``example_project`` directory and follow the same
 format expected by the batch processing routines of MotilA. They can be used as
 templates for structuring new experimental datasets.
 
@@ -109,11 +109,11 @@ The following examples illustrate how to use MotilA in practice, starting from
 a registered time-lapse stack and proceeding through single-file processing,
 batch processing and batch-level result collection.
 
-MotilA expects input data as TIFF image stacks in either TZCYX or TZYX format,
-with T denoting time, Z depth, C channels and X/Y the spatial dimensions. See
-the :doc:`data requirements <data_requirements>` for details on axis order,
-multi-channel handling and the optional axis correction function
-``tiff_axes_check_and_correct``.
+MotilA uses OMIO to read TIFF/OME-TIFF, CZI, Thorlabs RAW and LSM files and
+normalizes them to TZCYX, with T denoting time, Z depth, C channels and X/Y the
+spatial dimensions. See the :doc:`data requirements <data_requirements>` for
+details on axis order, multi-channel handling and the optional legacy TIFF axis
+correction function ``tiff_axes_check_and_correct``.
 
 Single-file processing
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -239,7 +239,7 @@ practical starting point and can be adapted to your own data.
    group      = "blinded"
 
    # input file
-   DATA_Path  = "../example project/Data/ID240103_P17_1/TP000/registered/"
+   DATA_Path  = "../example_project/Data/ID240103_P17_1/TP000/registered/"
    IMG_File   = "all stacks 4D reg.tif"
    fname      = Path(DATA_Path).joinpath(IMG_File)
 
@@ -344,8 +344,8 @@ which datasets are processed and where the results are written:
 * ``PROJECT_Path`` specifies the root directory containing all ID folders.
 * ``ID_list`` selects which IDs inside ``PROJECT_Path`` are processed.
 * ``project_tag`` identifies project-specific subfolders within each ID.
-* ``reg_tif_file_folder`` and ``reg_tif_file_tag`` select the TIFF files
-  that should be processed inside each project.
+* ``reg_tif_file_folder`` and ``reg_tif_file_tag`` select the supported image
+  files that should be processed inside each project.
 * ``RESULTS_foldername`` defines where the motility results will be stored
   within each project folder.
 * ``metadata_file`` (for example ``"metadata.xls"``) optionally overrides
@@ -362,7 +362,7 @@ The following parameter set is taken from the tutorial script
 ``batch_run.py`` and demonstrates how to batch-process the included example
 datasets from the Zenodo record::
 
-   PROJECT_Path = "../example project/Data/"
+   PROJECT_Path = "../example_project/Data/"
    ID_list = ["ID240103_P17_1", "ID240321_P17_3"]
 
    project_tag = "TP000"
@@ -477,10 +477,10 @@ Example batch collection configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The following configuration mirrors the settings used in the tutorial script
-``batch_run.py`` for collecting results from the example project::
+``batch_run.py`` for collecting results from the example_project::
 
-   PROJECT_Path = "../example project/Data/"
-   RESULTS_Path = "../example project/Analysis/MG_motility/"
+   PROJECT_Path = "../example_project/Data/"
+   RESULTS_Path = "../example_project/Analysis/MG_motility/"
 
    ID_list = ["ID240103_P17_1", "ID240321_P17_3"]
    project_tag = "TP000"

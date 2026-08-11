@@ -22,6 +22,8 @@ import shutil
 from pathlib import Path
 import glob
 import gc
+import sys
+import tempfile
 
 from motila.utils import (
     check_folder_exist_create, 
@@ -40,7 +42,6 @@ from matplotlib import colors as mcol
 from skimage.registration import phase_cross_correlation
 from skimage import transform, io, exposure
 from pystackreg import StackReg
-import tifffile
 
 import skimage.filters as filter
 import skimage.exposure as exposure
@@ -57,6 +58,130 @@ import time
 import warnings
 warnings.filterwarnings("ignore")
 # %% ESSENTIAL FUNCTIONS
+
+SUPPORTED_IMAGE_EXTENSIONS = (".tif", ".tiff", ".czi", ".raw", ".lsm")
+
+
+def _is_supported_image_file(fname):
+    """Return True if OMIO can handle the image file extension."""
+    return Path(fname).suffix.lower() in SUPPORTED_IMAGE_EXTENSIONS
+
+
+def _prepare_omio_import_environment():
+    """Prepare writable cache locations for OMIO's optional Napari dependencies."""
+    cache_dir = Path(tempfile.gettempdir()).joinpath("motila_numba_cache")
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    os.environ.setdefault("NUMBA_CACHE_DIR", str(cache_dir))
+
+
+def _purge_partial_imports(module_prefixes):
+    """Remove partially imported modules after a failed lazy import."""
+    for module_name in list(sys.modules):
+        if any(module_name == prefix or module_name.startswith(prefix + ".")
+               for prefix in module_prefixes):
+            sys.modules.pop(module_name, None)
+
+
+def _import_omio():
+    """
+    Import OMIO lazily and keep terminal/CI runs robust against Napari cache setup.
+
+    OMIO itself is used only for image I/O here, but its optional Napari support
+    can initialize cache files during import. If the user's home cache is not
+    writable, retry with a temporary home directory.
+    """
+    _prepare_omio_import_environment()
+    try:
+        import omio as om
+        return om
+    except (RuntimeError, PermissionError, FileNotFoundError):
+        _purge_partial_imports(("omio", "napari", "numba"))
+        fallback_home = Path(tempfile.gettempdir()).joinpath("motila_omio_home")
+        fallback_home.mkdir(parents=True, exist_ok=True)
+        os.environ["HOME"] = str(fallback_home)
+        _prepare_omio_import_environment()
+        import omio as om
+        return om
+
+
+def read_image_stack(fname):
+    """
+    Read an image stack with OMIO and return an OME-style ``TZCYX`` image.
+
+    Supported input formats are TIFF/OME-TIFF, CZI, Thorlabs RAW and LSM.
+    OMIO normalizes all supported inputs to ``TZCYX`` before MotilA receives
+    the array, so downstream processing can use one consistent axis order.
+    """
+    if not _is_supported_image_file(fname):
+        supported = ", ".join(SUPPORTED_IMAGE_EXTENSIONS)
+        raise ValueError(f"Unsupported image file '{fname}'. Supported extensions: {supported}.")
+
+    om = _import_omio()
+    image, metadata = om.imread(fname, verbose=False)
+    if isinstance(image, list):
+        if len(image) != 1:
+            raise ValueError(
+                f"OMIO returned {len(image)} image stacks for '{fname}'. "
+                "MotilA currently expects one stack per process_stack call."
+            )
+        image = image[0]
+        metadata = metadata[0]
+
+    axes = metadata.get("axes", "")
+    if axes == "TZYX" and len(image.shape) == 4:
+        image = image[:, :, np.newaxis, :, :]
+        metadata = om.update_metadata_from_image(metadata, image, verbose=False)
+    elif axes != "TZCYX" or len(image.shape) != 5:
+        raise ValueError(
+            f"OMIO returned unsupported axes '{axes}' and shape {image.shape} "
+            f"for '{fname}'. MotilA expects TZCYX after reading."
+        )
+
+    return image, metadata
+
+
+def _as_tzcyx(image):
+    """Convert MotilA output arrays to TZCYX for OMIO writing."""
+    image = np.asarray(image)
+    if image.ndim == 2:
+        return image[np.newaxis, np.newaxis, np.newaxis, :, :]
+    if image.ndim == 3:
+        return image[:, np.newaxis, np.newaxis, :, :]
+    if image.ndim == 4:
+        return image[:, :, np.newaxis, :, :]
+    if image.ndim == 5:
+        return image
+    raise ValueError(f"Cannot write image with unsupported shape {image.shape}.")
+
+
+def write_image_stack(fname, image, metadata=None):
+    """
+    Write an image with OMIO while preserving MotilA's historical file names.
+
+    OMIO writes OME-TIFF stacks with an ``.ome.tif`` suffix. If callers request
+    a plain ``.tif`` name, the OME-TIFF file is moved back to that requested
+    path so existing scripts and notebooks keep working.
+    """
+    om = _import_omio()
+    fname = Path(fname)
+    image_tzcyx = _as_tzcyx(image)
+    if metadata is None:
+        metadata = om.create_empty_metadata(shape=image_tzcyx.shape, verbose=False)
+    metadata = om.update_metadata_from_image(metadata, image_tzcyx, verbose=False)
+    written = om.imwrite(
+        str(fname),
+        image_tzcyx,
+        metadata,
+        overwrite=True,
+        return_fnames=True,
+        verbose=False,
+    )
+    written_path = Path(written[0])
+    if written_path != fname:
+        if fname.exists():
+            fname.unlink()
+        written_path.replace(fname)
+    return fname
 
 def hello_world():
     """
@@ -226,30 +351,29 @@ def plot_2D_image(image, plot_path, plot_title, fignum=1, figsize=(5,5.15),
 
 def plot_2D_image_as_tif(image, plot_path, plot_title):
     """
-    Saves a 2D image as a compressed TIFF file.
+    Saves a 2D image as an OME-TIFF file.
 
     Parameters
     -----------
     image : array-like
         The 2D array representing the image to be saved.
     plot_path : str or Path
-        The directory where the TIFF file will be saved.
+        The directory where the image file will be saved.
     plot_title : str
-        The filename for the saved TIFF file (without extension).
+        The filename for the saved image file (without extension).
 
     Returns
     --------
     None
-        This function saves the image as a TIFF file and does not return a value.
+        This function saves the image as an image file and does not return a value.
 
     Notes
     ------
     - The file is saved as `<plot_title>.tif` in the specified directory.
-    - The TIFF file is compressed using zlib.
-    - The function requires `tifffile` and `os` for file handling.
+    - The image is written through OMIO while preserving the historical `.tif` filename.
     """
     TIFF_path = os.path.join(plot_path, plot_title+".tif")
-    tifffile.imwrite(TIFF_path, image, compression='zlib')
+    write_image_stack(TIFF_path, image)
 
 def plot_histogram(image, plot_path, plot_title, fignum=1, title="histogram"):
     """
@@ -331,7 +455,7 @@ def plot_histogram_of_projections(image_stack, I_shape, plot_path, log, fignum=1
 
 def plot_projected_stack(image_stack, I_shape, plot_path, log, plottitle="MG projected"):
     """
-    Plots and saves z-projected image stacks as grayscale images and a TIFF file.
+    Plots and saves z-projected image stacks as grayscale images and an OME-TIFF file.
 
     Parameters
     -----------
@@ -340,21 +464,21 @@ def plot_projected_stack(image_stack, I_shape, plot_path, log, plottitle="MG pro
     I_shape : tuple
         The shape of the image stack, used to determine the number of stacks.
     plot_path : str or Path
-        The directory where the plots and TIFF file will be saved.
+        The directory where the plots and image file will be saved.
     log : logger_object
         A logging object to record processing steps and execution time.
     plottitle : str, optional
-        The base title for the saved plots and TIFF file (default is "MG projected").
+        The base title for the saved plots and image file (default is "MG projected").
 
     Returns
     --------
     None
-        The function saves each projected stack as a grayscale plot and the full stack as a TIFF file.
+        The function saves each projected stack as a grayscale plot and the full stack as an image file.
 
     Notes
     ------
     - Individual stacks are plotted as grayscale images and saved as PDFs.
-    - The full image stack is saved as a TIFF file with metadata.
+    - The full image stack is saved as an image file with metadata.
     - The function logs the plotting process and execution time.
     """
     Process_t0 = time.time()
@@ -366,43 +490,40 @@ def plot_projected_stack(image_stack, I_shape, plot_path, log, plottitle="MG pro
                       title=f"{plottitle}, stack {stack}", cbar_show=False)
                       # cbar_ticks=np.arange(0,255,10), cbar_ticks_labels=np.arange(0,255,10),
     TIFF_path = os.path.join(plot_path, plottitle+".tif")
-    tifffile.imwrite(TIFF_path, image_stack.astype("float32"), 
-                        resolution=(image_stack[0].shape[-2], image_stack[0].shape[-1]),
-                        metadata={'spacing': 1, 'unit': 'um', 'axes': 'ZYX'},
-                        imagej=True, bigtiff=False)
+    write_image_stack(TIFF_path, image_stack.astype("float32"))
 
     _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="z-projection plotting ")
 
 def plot_projected_stack_as_tif(image_stack, I_shape, plot_path, log, plottitle="MG projected"):
     """
-    Saves z-projected image stacks as TIFF files.
+    Saves z-projected image stacks as OME-TIFF files.
 
     Parameters
     -----------
     image_stack : array-like
-        The stack of 2D projected images to be saved as TIFF files.
+        The stack of 2D projected images to be saved as image files.
     I_shape : tuple
         The shape of the image stack, used to determine the number of stacks.
     plot_path : str or Path
-        The directory where the TIFF files will be saved.
+        The directory where the image files will be saved.
     log : logger_object
         A logging object to record processing steps and execution time.
     plottitle : str, optional
-        The base title for the saved TIFF files (default is "MG projected").
+        The base title for the saved image files (default is "MG projected").
 
     Returns
     --------
     None
-        The function saves each projected stack as an individual TIFF file.
+        The function saves each projected stack as an individual image file.
 
     Notes
     ------
-    - Each stack is saved as a separate TIFF file with a unique filename.
+    - Each stack is saved as a separate image file with a unique filename.
     - The function logs the saving process and execution time.
     """
     Process_t0 = time.time()
 
-    log.log(f"saving z-projections as tif files...")
+    log.log(f"saving z-projections as image files...")
     for stack in range(I_shape[0]):
         plot_2D_image_as_tif(image=image_stack[stack], plot_path=plot_path,
                              plot_title=plottitle+", stack " + str(stack))
@@ -411,53 +532,43 @@ def plot_projected_stack_as_tif(image_stack, I_shape, plot_path, log, plottitle=
 
 def get_stack_dimensions(fname):
     """
-    Retrieves the dimensions of a TIFF image stack without loading the entire dataset
-    (i.e., of all axis, TZCYX or TZYX (ImageJ default order)).
+    Retrieves the dimensions of an image stack after OMIO normalization.
 
     Parameters
     -----------
     fname : str or Path
-        The path to the TIFF file.
+        The path to the image file.
 
     Returns
     --------
     list
-        A list representing the shape of the image stack, ordered as TZCYX or TZYX.
+        A list representing the shape of the image stack, ordered as TZCYX.
 
     Raises:
     -------
     ValueError
-        If the provided file is not a TIFF file.
+        If the provided file format is not supported.
 
     Notes
     ------
-    - The function reads metadata from the TIFF file to determine its dimensions.
-    - The file is opened and closed without loading the image into memory.
+    - OMIO normalizes TIFF, CZI, RAW and LSM inputs to TZCYX.
+    - Some formats require reading the image data to determine the normalized shape.
     """
-
-    if Path(fname).suffix != ".tif":
-        raise ValueError("Currently, only TIFF files are supported.")
-    else:
-        # get information about the image stack in the TIFF file without reading any image data:
-        I = tifffile.TiffFile(fname)
-        I_shape = I.series[0].shape
-        I.close()
-        #convert tuple to list:
-        I_shape = list(I_shape)
-        
-    return I_shape
+    image, _ = read_image_stack(fname)
+    return list(image.shape)
 
 def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
-                      two_channel=False, channel=0):
+                      two_channel=False, channel=0, image_stack=None,
+                      image_metadata=None):
     """
-    Extracts sub-volumes from a multi-dimensional TIFF image stack and stores them in a Zarr format.
+    Extracts sub-volumes from a multi-dimensional image stack and stores them in a Zarr format.
 
     Parameters
     -----------
     fname : str or Path
-        Path to the TIFF file.
+        Path to the image file.
     I_shape : tuple
-        Shape of the input image stack.
+        Shape of the input image stack in OMIO-normalized TZCYX order.
     projection_layers : int
         Number of layers to extract for projection.
     projection_range : tuple
@@ -483,85 +594,40 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
     Raises:
     -------
     ValueError
-        If the provided file is not a TIFF file.
+        If the provided image file format is not supported.
 
     Notes
     ------
-    - The function converts the TIFF file into a Zarr store for efficient memory access.
+    - The function converts the OMIO-normalized image stack into a Zarr store for efficient memory access.
     - The extracted sub-volumes are saved in the Zarr format to reduce memory consumption.
     - The function supports both single-channel and two-channel extractions.
     """
     Process_t0 = time.time()
     log.log(f"extracting sub-volumes...")
     
-    # we assume the input image stack is a 5D (TCZXY) or 4D (TZXY) tif stack:
-    
-    if Path(fname).suffix != ".tif":
-        raise ValueError("Currently, only TIFF files are supported.")
+    if image_stack is None:
+        image_stack, image_metadata = read_image_stack(fname)
+    I_shape = list(image_stack.shape)
+    chunks = (1, 1, 1, I_shape[-2], I_shape[-1])
+    zarr_path = Path(fname).parent.joinpath(Path(fname).stem + ".zarr")
+    # info: we do not compress for speed reasons
+    zarr_group = zarr.group(zarr_path, overwrite=True)
+    if zarr.__version__ >= "3":
+        chunks = tuple(int(x) for x in chunks)
+        zarr_group.create_array("image", shape=image_stack.shape, chunks=chunks,
+                                dtype=image_stack.dtype, overwrite=True)
     else:
-        # open the tif file as zarr store:
-        # tifffile's zarr support works a) for ZARR >= 3.0 and b) not within a Jupyter notebook due to
-        # ZARR asynchronous loading of the data, which is not supported in Jupyter notebooks. Thus, we
-        # use the following try-except block to handle this:
-        try:
-            store = tifffile.imread(fname, aszarr=True)
-            I = zarr.open(store, mode='r')
-            
-            # ensure that the zarr store is indeed memory-mapped and not in-memory loaded (which is the default in tifffile):
-            if two_channel:
-                chunks = (1, 1, 1, I_shape[-2], I_shape[-1])
-            else:
-                chunks = (1, 1, I_shape[-2], I_shape[-1])
-            zarr_path = Path(fname).parent.joinpath(Path(fname).stem + ".zarr")
-            #compressor = Blosc(cname='lz4', clevel=5, shuffle=Blosc.SHUFFLE, blocksize=0)
-            #compressor = Blosc(cname='zlib', clevel=9, shuffle=Blosc.SHUFFLE, blocksize=0)
-            #compressor = Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE, blocksize=0)
-            # info: we do not compress for speed reasons
-            zarr_group = zarr.group(zarr_path, overwrite=True)
-            if zarr.__version__ >= "3":
-                chunks = tuple(int(x) for x in chunks)
-                zarr_group.create_array("image", shape=I.shape, chunks=chunks, 
-                                        dtype=I.dtype, overwrite=True)
-            else:
-                zarr_group.create_dataset("image", shape=I.shape, chunks=chunks, 
-                                        dtype=I.dtype)
-            zarr_group["image"][:] = I
-            zarr_group.attrs["original_file"] = str(fname)
-            zarr_group.attrs["ZARR file path"] = str(zarr_path)
-            zarr_group.attrs["shape"] = I.shape
-            zarr_group.attrs["dtype"] = str(I.dtype)
-            store.close()
-            
-        except:
-            # otherwise, we read the tif file using tifffile and convert it to a zarr store:
-            I = tifffile.imread(fname)
-            
-            # ensure that the zarr store is indeed memory-mapped and not in-memory loaded (which is the default in tifffile):
-            if two_channel:
-                chunks = (1, 1, 1, I_shape[-2], I_shape[-1])
-            else:
-                chunks = (1, 1, I_shape[-2], I_shape[-1])
-            zarr_path = Path(fname).parent.joinpath(Path(fname).stem + ".zarr")
-            #compressor = Blosc(cname='lz4', clevel=5, shuffle=Blosc.SHUFFLE, blocksize=0)
-            #compressor = Blosc(cname='zlib', clevel=9, shuffle=Blosc.SHUFFLE, blocksize=0)
-            #compressor = Blosc(cname='zstd', clevel=9, shuffle=Blosc.SHUFFLE, blocksize=0)
-            # info: we do not compress for speed reasons
-            zarr_group = zarr.group(zarr_path, overwrite=True)
-            if zarr.__version__ >= "3":
-                chunks = tuple(int(x) for x in chunks)
-                zarr_group.create_array("image", shape=I.shape, chunks=chunks, 
-                                        dtype=I.dtype, overwrite=True)
-            else:
-                zarr_group.create_dataset("image", shape=I.shape, chunks=chunks, 
-                                        dtype=I.dtype)
-            zarr_group["image"][:] = I
-            zarr_group.attrs["original_file"] = str(fname)
-            zarr_group.attrs["ZARR file path"] = str(zarr_path)
-            zarr_group.attrs["shape"] = I.shape
-            zarr_group.attrs["dtype"] = str(I.dtype)
+        zarr_group.create_dataset("image", shape=image_stack.shape, chunks=chunks,
+                                  dtype=image_stack.dtype)
+    zarr_group["image"][:] = image_stack
+    zarr_group.attrs["original_file"] = str(fname)
+    zarr_group.attrs["ZARR file path"] = str(zarr_path)
+    zarr_group.attrs["shape"] = image_stack.shape
+    zarr_group.attrs["dtype"] = str(image_stack.dtype)
+    zarr_group.attrs["axes"] = "TZCYX"
 
-        I = zarr_group["image"]
-        #I.info
+    I = zarr_group["image"]
+    #I.info
 
     subvol_shape = (I_shape[0], projection_layers, I_shape[-2], I_shape[-1])
     subvol_chunks = (1, 1, I_shape[-2], I_shape[-1])  # Efficient chunking for Zarr
@@ -590,7 +656,7 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
             MG_sub[stack] = I[stack, projection_range[0]:projection_range[1]+1, channel, :, :]
             N_sub[stack] = I[stack, projection_range[0]:projection_range[1]+1, channel_N, :, :]
         else:
-            MG_sub[stack] = I[stack, projection_range[0]:projection_range[1]+1, :, :]
+            MG_sub[stack] = I[stack, projection_range[0]:projection_range[1]+1, channel, :, :]
     
     del I
     gc.collect()
@@ -604,7 +670,8 @@ def extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
 
 def extract_and_register_subvolume(fname, I_shape, projection_layers, projection_range,
                                    MG_channel, log, two_channel, template_mode="mean",
-                                   max_xy_shift_correction=5, debug_output=False):
+                                   max_xy_shift_correction=5, debug_output=False,
+                                   image_stack=None, image_metadata=None):
     """
     Extracts sub-volumes from a multi-dimensional TIFF image stack, registers them using 
     phase cross-correlation, and saves the results in a Zarr format.
@@ -612,7 +679,7 @@ def extract_and_register_subvolume(fname, I_shape, projection_layers, projection
     Parameters
     -----------
     fname : str or Path
-        Path to the TIFF file.
+        Path to the image file.
     I_shape : tuple
         Shape of the input image stack.
     projection_layers : int
@@ -647,7 +714,7 @@ def extract_and_register_subvolume(fname, I_shape, projection_layers, projection
     Raises:
     -------
     ValueError
-        If the provided file is not a TIFF file.
+        If the provided file is not a supported image file.
 
     Notes
     ------
@@ -662,10 +729,14 @@ def extract_and_register_subvolume(fname, I_shape, projection_layers, projection
     
     if two_channel:
         MG_sub, N_sub, zarr_group = extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
-                                                        two_channel=True, channel=MG_channel)
+                                                        two_channel=True, channel=MG_channel,
+                                                        image_stack=image_stack,
+                                                        image_metadata=image_metadata)
     else:
         MG_sub, zarr_group = extract_subvolume(fname, I_shape, projection_layers, projection_range, log,
-                                               two_channel=False)
+                                               two_channel=False, channel=MG_channel,
+                                               image_stack=image_stack,
+                                               image_metadata=image_metadata)
 
     # register sub-volume:
     subvol_shape = (I_shape[0], projection_layers, I_shape[-2], I_shape[-1])
@@ -2172,7 +2243,7 @@ def motility(MG_pro, I_shape, log, plot_path, ID="ID00000", group="blinded"):
     ------
     - Computes changes in segmented pixels between consecutive time points.
     - Visualizes differences in motility with colormap images and histograms.
-    - Saves computed motility differences as a multi-frame TIFF file.
+    - Saves computed motility differences as a multi-frame image file.
     - Outputs an Excel file summarizing motility metrics.
     - Logs the process and computation time.
     """
@@ -2321,10 +2392,7 @@ def motility(MG_pro, I_shape, log, plot_path, ID="ID00000", group="blinded"):
         summary_df.loc[stack, "tor"] = (hist[0]+hist[3])/(hist[0]+hist[3]+hist[2])
 
     TIFF_path = os.path.join(plot_path, f"MG delta t_i - t_i+1"+".tif")
-    tifffile.imwrite(TIFF_path, MG_pro_delta_t, 
-                        resolution=(MG_pro_delta_t[0].shape[-2], MG_pro_delta_t[0].shape[-1]),
-                        metadata={'spacing': 1, 'unit': 'um', 'axes': 'ZYX'},
-                        imagej=True, bigtiff=False)
+    write_image_stack(TIFF_path, MG_pro_delta_t)
 
     summary_df.to_excel(Path(plot_path,"motility_analysis.xlsx"))
     log.log(f"motility evaluation saved in {Path(plot_path,'motility_analysis.xlsx')}")
@@ -2352,7 +2420,7 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
     Process a single 4D or 5D multiphoton imaging stack and extract microglial
     motility metrics. This is the main entry point of the MotilA pipeline.
 
-    The function loads a TIFF stack, optionally performs 2D or 3D registration,
+    The function loads an OMIO-supported image stack, optionally performs 2D or 3D registration,
     applies spectral unmixing and contrast corrections, generates z-projections,
     segments microglial structures, and computes motility metrics such as gain,
     loss and stability. Outputs are written to a structured results directory.
@@ -2360,7 +2428,8 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
     Parameters
     -----------
     fname : str or Path
-        Path to the input TIFF file.
+        Path to the input image file. Supported formats are TIFF/OME-TIFF,
+        CZI, Thorlabs RAW and LSM.
     MG_channel : int
         Index of the microglia fluorescence channel.
     N_channel : int
@@ -2464,14 +2533,16 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
             
             #os.remove(os.path.join(plot_path, file))
     
-    # if fname is a zarr file, the I_shape is not known yet:
     if isinstance(fname, str):
         fname = Path(fname)  # convert string to Path if it's a string
-    if fname.suffix == ".tif":
-        I_shape = get_stack_dimensions(fname)
+    if _is_supported_image_file(fname):
+        image_stack, image_metadata = read_image_stack(fname)
+        I_shape = list(image_stack.shape)
+        log.log(f"Loaded image via OMIO with shape {I_shape} and axes {image_metadata.get('axes', 'N/A')}.")
     else:
-        log.log(f"Error: File {fname} is not a .tif file!")
-        raise ValueError(f"Error: File {fname} is not a .tif file!")
+        supported = ", ".join(SUPPORTED_IMAGE_EXTENSIONS)
+        log.log(f"Error: File {fname} is not a supported image file ({supported})!")
+        raise ValueError(f"Error: File {fname} is not a supported image file ({supported})!")
  
     # calculate and verify projection layers:
     projection_range, projection_layers = calc_projection_range(projection_center, projection_layers, I_shape, log)
@@ -2527,7 +2598,9 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
                                                        log=log, template_mode=template_mode,
                                                        two_channel=two_channel,
                                                        max_xy_shift_correction=max_xy_shift_correction,
-                                                       debug_output=debug_output)
+                                                       debug_output=debug_output,
+                                                       image_stack=image_stack,
+                                                       image_metadata=image_metadata)
         else:
             MG_sub, I_shape_new, Z = extract_and_register_subvolume(fname, I_shape, 
                                                        projection_layers, projection_range,
@@ -2535,7 +2608,9 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
                                                        log=log, template_mode=template_mode,
                                                        two_channel=two_channel,
                                                        max_xy_shift_correction=max_xy_shift_correction,
-                                                       debug_output=debug_output)
+                                                       debug_output=debug_output,
+                                                       image_stack=image_stack,
+                                                       image_metadata=image_metadata)
     
         # correct I_shape for the new shape after registration (if any):
         I_shape[-2] = I_shape_new[-2]
@@ -2544,11 +2619,13 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
         if two_channel:
             MG_sub, N_sub, Z = extract_subvolume(fname, I_shape=I_shape, projection_layers=projection_layers,
                                        projection_range=projection_range, log=log, two_channel=two_channel,
-                                       channel=MG_channel)
+                                       channel=MG_channel, image_stack=image_stack,
+                                       image_metadata=image_metadata)
         else:
             MG_sub, Z = extract_subvolume(fname, I_shape=I_shape, projection_layers=projection_layers,
                                        projection_range=projection_range, log=log, two_channel=two_channel,
-                                       channel=MG_channel)
+                                       channel=MG_channel, image_stack=image_stack,
+                                       image_metadata=image_metadata)
 
     # spectral unmixing:        
     if spectral_unmixing:
@@ -2777,9 +2854,9 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
     project_tag : str, optional
         Tag used to identify project folders (default is "TP000").
     reg_tif_file_folder : str, optional
-        Folder name containing registered TIFF files (default is "registered").
+        Folder name containing registered image files (default is "registered").
     reg_tif_file_tag : str, optional
-        Tag used to filter for registered TIFF files (default is "reg").
+        Tag used to filter for registered image files (default is "reg").
     metadata_file : str, optional
         Name of the metadata file to retrieve processing parameters (default is "metadata.xls").
     RESULTS_Path : str or Path, optional
@@ -2887,18 +2964,23 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
             else:
                 log.log(f"  '{reg_tif_file_folder}' folder found in {TP_folderlist[iTP]}.")
                 
-            # check whether one ore more tif files including the reg_tif_file_tag are present in the reg_file_folder:
-            reg_tif_file = glob.glob(Current_TP_Folder + reg_file_folder[0] + "/*" + reg_tif_file_tag + "*.tif")
+            # check whether one or more supported image files including the reg_tif_file_tag are present:
+            reg_tif_file = []
+            for extension in SUPPORTED_IMAGE_EXTENSIONS:
+                reg_tif_file.extend(
+                    glob.glob(Current_TP_Folder + reg_file_folder[0] + "/*" + reg_tif_file_tag + "*" + extension)
+                )
             if len(reg_tif_file)==0:
-                log.log(f"  WARNING: no tif file with tag '{reg_tif_file_tag}' found in '{reg_tif_file_folder}' folder -> skipping this folder.")
+                supported = ", ".join(SUPPORTED_IMAGE_EXTENSIONS)
+                log.log(f"  WARNING: no supported image file ({supported}) with tag '{reg_tif_file_tag}' found in '{reg_tif_file_folder}' folder -> skipping this folder.")
                 continue
             elif len(reg_tif_file)>1:
-                log.log(f"  AMBIGUITY WARNING: found more than 1 file with tag '{reg_tif_file_tag}' in '{reg_tif_file_folder}' folder -> skipping this folder.")
+                log.log(f"  AMBIGUITY WARNING: found more than 1 supported image file with tag '{reg_tif_file_tag}' in '{reg_tif_file_folder}' folder -> skipping this folder.")
                 for i in range(len(reg_tif_file)):
                     log.log(f"    {reg_tif_file[i]}")
                 continue
             else:
-                log.log(f"  {len(reg_tif_file)} tif file with tag '{reg_tif_file_tag}' found in '{reg_tif_file_folder}' folder in {TP_folderlist[iTP]} in {Current_ID}.")
+                log.log(f"  {len(reg_tif_file)} image file with tag '{reg_tif_file_tag}' found in '{reg_tif_file_folder}' folder in {TP_folderlist[iTP]} in {Current_ID}.")
                 reg_tif_file = Path(reg_tif_file[0])
                 
             
@@ -2943,7 +3025,7 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
             if spectral_unmixing_amplifyer==0:
                 spectral_unmixing_amplifyer=1
 
-            # main batch loop iterating the tif file in the reg_file_folder over found projection centers:
+            # main batch loop iterating the image file in the reg_file_folder over found projection centers:
             for curr_projection_center in projection_centers_use:
                 # curr_projection_center = projection_centers_use[0]
                 log.log(f"  processing projection center: {curr_projection_center}")
@@ -3200,7 +3282,7 @@ def batch_collect(PROJECT_Path, ID_list=[], project_tag="TP000", motility_folder
 # %% DEBUGGING/TESTING
 if __name__ == '__main__':
     # For local testing and usage examples, see:
-    # - example scripts in `example scripts/`
-    # - tutorial notebooks in `example notebooks/`
+    # - example_scripts in `example_scripts/`
+    # - tutorial notebooks in `example_notebooks/`
     pass
 # %% END

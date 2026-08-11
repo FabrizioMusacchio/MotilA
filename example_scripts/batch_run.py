@@ -5,7 +5,7 @@ This script demonstrates how to use the **MotilA** pipeline for batch-processing
 4D/5D image stacks of microglia motility across multiple experimental conditions.
 
 ## Overview
-- Scans and processes multiple registered 4D TIFF image stacks from multiple experimental folders.
+- Scans and processes multiple registered 4D image stacks from multiple experimental folders.
 - Applies preprocessing steps such as projection, registration, and spectral unmixing.
 - Performs image enhancements like histogram equalization and filtering.
 - Segments microglia, applies thresholding, and quantifies motility.
@@ -50,7 +50,7 @@ mt.hello_world()
 
 # define data input paths:
 #PROJECT_Path = "/Volumes/Media/Workspace/MotilA example files/single_file/"
-PROJECT_Path = "../example project/Data/"
+PROJECT_Path = "../example_project/Data/"
                                           # define the path to the project folder; can be absolute or relative to the
                                           # location of this script
 ID_list = ["ID240103_P17_1", "ID240321_P17_3"]
@@ -60,8 +60,8 @@ project_tag = "TP000"                     # define the tag of the project (folde
                                           # all folders in the ID-folders containing this tag will be processed; 
                                           # can be just a part of the tag (will be searched for in the folder name)
 reg_tif_file_folder = "registered"        # name of folder within the (found) project_tag-folder containing the 
-                                          # registered tif files; must be exact
-reg_tif_file_tag = "reg"                  # a Tif file containing this tag will be processed within the reg_tif_file_folder;
+                                          # registered image files; must be exact
+reg_tif_file_tag = "reg"                  # an image file containing this tag will be processed within the reg_tif_file_folder;
                                           # if multiple files containing this tag, folder will be skipped (!)
 RESULTS_foldername = f"../motility_analysis/" 
                                           # define the folder name (not the full path!) where the results will be saved
@@ -183,11 +183,11 @@ mt.batch_process_stacks(PROJECT_Path=PROJECT_Path,
 # %% BATCH COLLECTION OF RESULTS
 
 #PROJECT_Path = "/Volumes/Media/Workspace/MotilA example files/single_file/"
-PROJECT_Path = "../example project/Data/"
+PROJECT_Path = "../example_project/Data/"
                                           # define the path to the project folder; is the same as in the batch
                                           # processing step and can be omitted if already defined
 #RESULTS_Path = "/Volumes/Media/Workspace/MotilA example files/single_file/Analysis/MG_motility/"
-RESULTS_Path = "../example project/Analysis/MG_motility/"
+RESULTS_Path = "../example_project/Analysis/MG_motility/"
                                           # define the path to the results folder; in here, the combined results
                                           # of the cohort analysis will be saved; can be absolute or relative to the
                                           # location of this script
