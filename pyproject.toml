@@ -27,7 +27,8 @@ dependencies = [
     "ipywidgets",
     "ipykernel", 
     "ipympl",
-    "omio-microscopy"
+    "omio-microscopy",
+    "PyYAML"
 ]
 
            
@@ -42,6 +43,11 @@ Tracker = "https://github.com/fabriziomusacchio/motila/issues"
 dev = [
     "pytest",
     "pytest-cov",
+    "sphinx",
+    "sphinx-autodoc-typehints",
+    "sphinx-rtd-theme",
+    "myst-parser",
+    "sphinx-copybutton"
 ]
 
 [tool.pytest.ini_options]
