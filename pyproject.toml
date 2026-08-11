@@ -9,7 +9,7 @@ description = "MotilA: A pipeline for microglial motility analysis"
 authors = [{ name = "Fabrizio Musacchio", email = "fabrizio.musacchio@posteo.de" }]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 dependencies = [
     "numpy",
     "scipy",
