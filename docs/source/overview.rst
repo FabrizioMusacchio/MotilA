@@ -7,6 +7,13 @@ multiphoton imaging. While developed for microglia, the pipeline can in principl
 be applied to other cell types and imaging paradigms that share similar data
 characteristics.
 
+
+.. figure:: _static/figures/MotilA_logo_transparent.png
+   :alt: MotilA logo
+   :align: center
+   :figwidth: 70%
+
+
 MotilA supports both single-file and batch processing, making it suitable for
 small experiments and high-throughput analyses. The main entry points are
 
@@ -14,6 +21,7 @@ small experiments and high-throughput analyses. The main entry points are
 * :func:`motila.motila.batch_process_stacks` for batch processing of project
   folders, and
 * :func:`motila.motila.batch_collect` for aggregation of results across datasets.
+
 
 
 What does MotilA do?

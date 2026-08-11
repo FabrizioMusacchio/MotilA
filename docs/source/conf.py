@@ -85,3 +85,5 @@ html_theme_options = {
     "collapse_navigation": False,
     "sticky_navigation": True,
 }
+
+html_logo = "_static/figures/MotilA_logo_wide_transparent.png"
