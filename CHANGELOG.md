@@ -7,6 +7,50 @@ Each release is also archived on Zenodo for long-term preservation and citation 
 
 [![Zenodo Archive](https://img.shields.io/badge/Zenodo%20Archive-10.5281%2Fzenodo.15175053-blue)](https://doi.org/10.5281/zenodo.15175053)
 
+<!-- ---
+
+### 🚀 MotilA v1.1.4 - UNRELEASED -->
+
+---
+
+### 🚀 MotilA v1.1.3
+
+This release adds optional plain-text sidecar exports for tabular outputs while keeping Excel as the default format for full backward compatibility.
+
+#### Optional CSV and YAML table exports
+MotilA now supports optional plain-text sidecar exports for tabular outputs while keeping Excel as the default format for full backward compatibility.
+
+New parameter:
+
+* ``table_export_formats``
+
+By default, MotilA behaves as before:
+
+```python
+table_export_formats=("excel",)
+```
+
+Users who want additional open, plain-text table outputs can request CSV and YAML sidecars:
+
+```python
+table_export_formats=("excel", "csv", "yaml")
+```
+
+This affects table outputs written by:
+
+* ``process_stack``
+* ``batch_process_stacks``
+* ``batch_collect``
+
+The default ``.xlsx`` files are still written unless users explicitly omit ``"excel"``. CSV and YAML files use the same base filename as the corresponding Excel table.
+
+#### Documentation and tests
+
+* Added a shared internal DataFrame export helper for Excel/CSV/YAML output.
+* Added tests for optional CSV/YAML exports.
+* Updated parameter documentation and tutorial output notes.
+* Added ``PyYAML`` as an explicit dependency.
+
 --- 
 
 ### 🚀 MotilA v1.1.2

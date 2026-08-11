@@ -9,8 +9,7 @@ This roadmap summarizes planned improvements and future extensions derived from 
 
 
 ## Data formats and metadata handling
-* Transition all tabular outputs from **.xls** to **.csv** for long term sustainability and interoperability.
-* Transition `_processing_parameters.xlsx` to **.yml** format to improve open access, better human readability and easier parsing.
+* ✅ **[addressed in release v1.1.3]** Add optional plain-text sidecar exports for tabular outputs. Excel remains the default for backward compatibility, but MotilA can now also write CSV and YAML versions of result tables and `_processing_parameters`.
 * Migrating metadata files (currently .xls) to **.yml**  format to improve open access, better human readability and easier parsing. Migration must preserve backward compatibility.
 * ✅ **[addressed in release v1.1.1]** Standardizing repository example and user-script folder names to **avoid whitespace** and to use underscores for cross-platform stability (`example_scripts`, `example_project`, `example_notebooks`, `user_scripts`).
 

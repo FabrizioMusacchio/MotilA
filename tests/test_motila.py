@@ -18,6 +18,7 @@ from motila.motila import (
     plot_projected_stack_as_tif,
     plot_projected_stack,
     read_image_stack,
+    export_dataframe,
     get_stack_dimensions,
     extract_subvolume,
     extract_and_register_subvolume,
@@ -55,6 +56,7 @@ from skimage import exposure
 import pandas as pd
 from unittest.mock import MagicMock, patch
 import shutil
+import yaml
 
 # test test_hello_world:
 def test_hello_world(capsys):
@@ -342,6 +344,32 @@ def test_plot_projected_stack(tmp_path):
 
     # Logging check
     assert any("z-projection plotting" in msg for msg in log.messages)
+
+def test_export_dataframe_writes_optional_csv_and_yaml(tmp_path):
+    df = pd.DataFrame({
+        "name": ["cell_a", "cell_b"],
+        "value": [1.5, np.nan],
+        "shape": [(1, 2, 3), (4, 5, 6)],
+    })
+
+    written = export_dataframe(
+        df,
+        tmp_path / "table.xlsx",
+        table_export_formats=("excel", "csv", "yaml"),
+        index=False,
+    )
+
+    assert written["excel"].exists()
+    assert written["csv"].exists()
+    assert written["yaml"].exists()
+    assert pd.read_csv(written["csv"]).shape == df.shape
+
+    with open(written["yaml"], encoding="utf-8") as yaml_file:
+        yaml_records = yaml.safe_load(yaml_file)
+
+    assert yaml_records[0]["name"] == "cell_a"
+    assert yaml_records[0]["shape"] == [1, 2, 3]
+    assert yaml_records[1]["value"] is None
 
 
 # get_stack_dimensions:
@@ -2064,16 +2092,23 @@ def test_batch_collect(setup_batch_collect_test_data):
         project_tag="TP000",
         motility_folder="motility_analysis",
         RESULTS_Path="test_batch_results",
-        log=log
+        log=log,
+        table_export_formats=("excel", "csv", "yaml")
     )
 
     # Check if summary file was created
     assert os.path.exists("test_batch_results/all_motility.xlsx")
+    assert os.path.exists("test_batch_results/all_motility.csv")
+    assert os.path.exists("test_batch_results/all_motility.yaml")
     assert os.path.exists("test_batch_results/average_motility.xlsx")
+    assert os.path.exists("test_batch_results/average_motility.csv")
+    assert os.path.exists("test_batch_results/average_motility.yaml")
 
     df = pd.read_excel("test_batch_results/all_motility.xlsx")
     assert df.shape[0] == 2  # One row per ID
+    assert pd.read_csv("test_batch_results/all_motility.csv").shape[0] == 2
+    with open("test_batch_results/all_motility.yaml", encoding="utf-8") as yaml_file:
+        assert len(yaml.safe_load(yaml_file)) == 2
 
     # Optional: check logger messages
     assert "Collected data saved in test_batch_results" in log.messages[-1]
-

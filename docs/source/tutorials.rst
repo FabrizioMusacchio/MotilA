@@ -524,6 +524,12 @@ brightness measures allow you to assess bleaching and signal stability over
 time. The cell pixel area is expected to remain relatively stable if the
 microglial cells do not leave the field of view or disappear.
 
+Excel remains MotilA's default table format for backward compatibility. If you
+also need plain-text outputs, set ``table_export_formats=("excel", "csv",
+"yaml")`` in :func:`motila.process_stack`, :func:`motila.batch_process_stacks`
+or :func:`motila.batch_collect`. MotilA then writes matching ``.csv`` and
+``.yaml`` sidecar files next to the default ``.xlsx`` tables.
+
 Batch processing generates cohort-level summary files:
 
 * ``all_motility.xlsx``

@@ -29,7 +29,7 @@ Input paths
      - Experimental group of the animal
    * - ``fname``
      - string
-     - Full file path to the TIFF image stack
+     - Full file path to the image stack
 
 Results output settings
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,6 +47,9 @@ Results output settings
    * - ``clear_previous_results``
      - bool
      - If ``True``, remove any existing results in the target folder before writing new output
+   * - ``table_export_formats``
+     - ``"excel"`` or list of ``"excel"``, ``"csv"``, ``"yaml"``
+     - Table export formats. Defaults to ``"excel"`` for backward compatibility. Add ``"csv"`` and/or ``"yaml"`` to write plain-text sidecar files next to the default Excel files.
 
 
 Input/output parameters for batch processing
@@ -80,6 +83,9 @@ Input/output parameters for batch processing
    * - ``metadata_file``
      - string
      - File name of the Excel metadata file inside each project_tag folder
+   * - ``table_export_formats``
+     - ``"excel"`` or list of ``"excel"``, ``"csv"``, ``"yaml"``
+     - Table export formats passed to all processed stacks. Defaults to ``"excel"``; optional CSV/YAML exports are written as sidecars.
 
 Expected project folder structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -452,7 +458,11 @@ Input/output parameters for batch collection
    * - ``motility_folder``
      - string
      - Name of the folder containing motility results within each project_tag folder
+   * - ``table_export_formats``
+     - ``"excel"`` or list of ``"excel"``, ``"csv"``, ``"yaml"``
+     - Export formats for aggregated result tables. Defaults to ``"excel"`` and can optionally add CSV/YAML sidecars.
 
 The batch collection function expects the same folder hierarchy as batch
 processing and aggregates per-dataset results into cohort-level Excel
-files.
+files. If ``table_export_formats`` includes ``"csv"`` or ``"yaml"``, matching
+plain-text sidecar files are written with the same base names.

@@ -50,6 +50,7 @@ import skimage.morphology
 
 import zarr
 from numcodecs import Blosc
+import yaml
 
 from datetime import datetime
 import time
@@ -60,6 +61,7 @@ warnings.filterwarnings("ignore")
 # %% ESSENTIAL FUNCTIONS
 
 SUPPORTED_IMAGE_EXTENSIONS = (".tif", ".tiff", ".czi", ".raw", ".lsm")
+DEFAULT_TABLE_EXPORT_FORMATS = ("excel",)
 
 
 def _is_supported_image_file(fname):
@@ -182,6 +184,96 @@ def write_image_stack(fname, image, metadata=None):
             fname.unlink()
         written_path.replace(fname)
     return fname
+
+
+def _normalize_table_export_formats(table_export_formats):
+    """Normalize table export format settings while keeping Excel as the default."""
+    if table_export_formats is None:
+        table_export_formats = DEFAULT_TABLE_EXPORT_FORMATS
+    if isinstance(table_export_formats, str):
+        table_export_formats = (table_export_formats,)
+
+    aliases = {
+        "xls": "excel",
+        "xlsx": "excel",
+        "excel": "excel",
+        "csv": "csv",
+        "yml": "yaml",
+        "yaml": "yaml",
+    }
+    normalized = []
+    for export_format in table_export_formats:
+        key = str(export_format).lower()
+        if key not in aliases:
+            valid_formats = ", ".join(sorted(set(aliases.values())))
+            raise ValueError(
+                f"Unsupported table export format '{export_format}'. "
+                f"Supported formats are: {valid_formats}."
+            )
+        mapped = aliases[key]
+        if mapped not in normalized:
+            normalized.append(mapped)
+    return tuple(normalized)
+
+
+def _normalize_table_export_value(value):
+    """Convert NumPy, pandas, and Path values to YAML-safe Python values."""
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, np.ndarray):
+        return [_normalize_table_export_value(item) for item in value.tolist()]
+    if isinstance(value, (list, tuple)):
+        return [_normalize_table_export_value(item) for item in value]
+    if isinstance(value, dict):
+        return {
+            str(key): _normalize_table_export_value(val)
+            for key, val in value.items()
+        }
+    if pd.isna(value):
+        return None
+    return value
+
+
+def export_dataframe(df, excel_path, table_export_formats=None, index=True):
+    """
+    Export a DataFrame to Excel and optionally sidecar CSV/YAML files.
+
+    Excel remains the default and the canonical path. Optional CSV and YAML
+    exports use the same base filename with ``.csv`` and ``.yaml`` suffixes.
+    """
+    export_formats = _normalize_table_export_formats(table_export_formats)
+    excel_path = Path(excel_path)
+    written_paths = {}
+
+    if "excel" in export_formats:
+        df.to_excel(excel_path, index=index)
+        written_paths["excel"] = excel_path
+    if "csv" in export_formats:
+        csv_path = excel_path.with_suffix(".csv")
+        df.to_csv(csv_path, index=index)
+        written_paths["csv"] = csv_path
+    if "yaml" in export_formats:
+        yaml_path = excel_path.with_suffix(".yaml")
+        yaml_df = df.reset_index() if index else df
+        yaml_records = [
+            {
+                str(key): _normalize_table_export_value(value)
+                for key, value in row.items()
+            }
+            for row in yaml_df.to_dict(orient="records")
+        ]
+        with open(yaml_path, "w", encoding="utf-8") as yaml_file:
+            yaml.safe_dump(
+                yaml_records,
+                yaml_file,
+                sort_keys=False,
+                allow_unicode=True,
+            )
+        written_paths["yaml"] = yaml_path
+
+    return written_paths
 
 def hello_world():
     """
@@ -1533,7 +1625,8 @@ def compare_histograms(MG_sub_pre, MG_sub_post, log, plot_path, I_shape, xlim=(0
     _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="histogram comparison ")
     return
 
-def plot_intensities(MG_pro, log, plot_path, I_shape):
+def plot_intensities(MG_pro, log, plot_path, I_shape,
+                     table_export_formats=DEFAULT_TABLE_EXPORT_FORMATS):
     """
     Plots and saves the normalized average brightness per projected stack.
 
@@ -1557,7 +1650,7 @@ def plot_intensities(MG_pro, log, plot_path, I_shape):
     ------
     - The function calculates the average intensity for each projected stack.
     - Normalizes intensity values relative to the first stack.
-    - Saves a bar plot of the normalized brightness and an Excel file with values.
+    - Saves a bar plot and table file(s) with the normalized brightness values.
     - Includes grid lines for easier comparison.
     - Logs execution time for performance monitoring.
     """
@@ -1618,7 +1711,11 @@ def plot_intensities(MG_pro, log, plot_path, I_shape):
     cols = df_out.columns.tolist()
     cols = cols[-1:] + cols[:-1]
     df_out = df_out[cols]
-    df_out.to_excel(os.path.join(plot_path,"Normalized average brightness of each stack.xlsx"))
+    export_dataframe(
+        df_out,
+        os.path.join(plot_path, "Normalized average brightness of each stack.xlsx"),
+        table_export_formats=table_export_formats,
+    )
 
     _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="brightness comparison ")
     return intensity_means
@@ -1941,7 +2038,9 @@ def binarize_2D_images(MG_pro, I_shape, log, plot_path, threshold_method="otsu",
     _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="binarization ")
     return MG_pro_bin
 
-def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100, stats_plots=False):
+def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100,
+                       stats_plots=False,
+                       table_export_formats=DEFAULT_TABLE_EXPORT_FORMATS):
     """
     Removes small microglial regions based on pixel connectivity and area threshold in segmented 2D images.
 
@@ -2106,12 +2205,17 @@ def remove_small_blobs(MG_pro, I_shape, log, plot_path, pixel_threshold=100, sta
         pixel_areas_df = pd.DataFrame(props_areas[props_areas > pixel_threshold], columns=["pixels per segment"])
         pixel_areas_df["sum of segmented pixels"] = pixel_areas_df["pixels per segment"].sum()
         pixel_areas_df["sum of all FOV pixels"] = MG_pro_bin_area_thresholded[stack].shape[0]*MG_pro_bin_area_thresholded[stack].shape[1]
-        pixel_areas_df.to_excel(os.path.join(plot_path, f"pixel areas of segmented projection, stack {stack}.xlsx"))
+        export_dataframe(
+            pixel_areas_df,
+            os.path.join(plot_path, f"pixel areas of segmented projection, stack {stack}.xlsx"),
+            table_export_formats=table_export_formats,
+        )
 
     _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="connectivity measurement ")
     return MG_pro_bin_area_thresholded, MG_pro_bin_area_sum
 
-def plot_pixel_areas(MG_areas, log, plot_path, I_shape):
+def plot_pixel_areas(MG_areas, log, plot_path, I_shape,
+                     table_export_formats=DEFAULT_TABLE_EXPORT_FORMATS):
     """
     Plots and saves the detected pixel areas per projected stack.
 
@@ -2135,7 +2239,7 @@ def plot_pixel_areas(MG_areas, log, plot_path, I_shape):
     ------
     - Normalizes pixel areas relative to stack 0.
     - Saves a bar plot representing relative pixel areas per stack.
-    - Outputs an Excel file with absolute and relative pixel areas, including total field-of-view (FOV) area.
+    - Outputs table file(s) with absolute and relative pixel areas, including total field-of-view (FOV) area.
     - Logs the process and computation time.
     """
     Process_t0 = time.time()
@@ -2200,14 +2304,19 @@ def plot_pixel_areas(MG_areas, log, plot_path, I_shape):
         cols = df_out.columns.tolist()
         cols = cols[-1:] + cols[:-1]
         df_out = df_out[cols]
-        df_out.to_excel(os.path.join(plot_path,"pixel area sums.xlsx"))
+        export_dataframe(
+            df_out,
+            os.path.join(plot_path, "pixel area sums.xlsx"),
+            table_export_formats=table_export_formats,
+        )
         
     else:
         log.log("Warning: MG_areas[0] is zero, skipping relative area plot to avoid division by zero.")
 
     _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="pixel cell area plotting ")
 
-def motility(MG_pro, I_shape, log, plot_path, ID="ID00000", group="blinded"):
+def motility(MG_pro, I_shape, log, plot_path, ID="ID00000", group="blinded",
+             table_export_formats=DEFAULT_TABLE_EXPORT_FORMATS):
     """
     Computes and visualizes microglial motility by analyzing changes in segmented pixel regions over time.
     
@@ -2244,7 +2353,7 @@ def motility(MG_pro, I_shape, log, plot_path, ID="ID00000", group="blinded"):
     - Computes changes in segmented pixels between consecutive time points.
     - Visualizes differences in motility with colormap images and histograms.
     - Saves computed motility differences as a multi-frame image file.
-    - Outputs an Excel file summarizing motility metrics.
+    - Outputs table file(s) summarizing motility metrics.
     - Logs the process and computation time.
     """
     Process_t0 = time.time()
@@ -2394,7 +2503,11 @@ def motility(MG_pro, I_shape, log, plot_path, ID="ID00000", group="blinded"):
     TIFF_path = os.path.join(plot_path, f"MG delta t_i - t_i+1"+".tif")
     write_image_stack(TIFF_path, MG_pro_delta_t)
 
-    summary_df.to_excel(Path(plot_path,"motility_analysis.xlsx"))
+    export_dataframe(
+        summary_df,
+        Path(plot_path, "motility_analysis.xlsx"),
+        table_export_formats=table_export_formats,
+    )
     log.log(f"motility evaluation saved in {Path(plot_path,'motility_analysis.xlsx')}")
 
     _ = log.logt(Process_t0, verbose=True, spaces=2, unit="sec", process="motility ")
@@ -2415,7 +2528,8 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
                   median_filter_slices = "square", median_filter_window_slices=3,
                   median_filter_projections = "square", median_filter_window_projections=3, 
                   clear_previous_results=False, spectral_unmixing_median_filter_window=3,
-                  debug_output=False, stats_plots=False):
+                  debug_output=False, stats_plots=False,
+                  table_export_formats=DEFAULT_TABLE_EXPORT_FORMATS):
     """
     Process a single 4D or 5D multiphoton imaging stack and extract microglial
     motility metrics. This is the main entry point of the MotilA pipeline.
@@ -2496,6 +2610,10 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
         Whether to enable debug output for memory usage and processing steps.
     stats_plots : bool
         Whether to generate additional statistics plots.
+    table_export_formats : str or iterable of str, optional
+        Table export formats. Defaults to ``("excel",)`` for backward
+        compatibility. Add ``"csv"`` and/or ``"yaml"`` to write sidecar
+        plain-text exports next to the default Excel files.
 
     Returns
     -------
@@ -2583,10 +2701,16 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
         "histogram_ref_stack": histogram_ref_stack,
         "spectral_unmixing_amplifyer": spectral_unmixing_amplifyer,
         "blob_pixel_threshold": blob_pixel_threshold,
-        "stats_plots": stats_plots}
+        "stats_plots": stats_plots,
+        "table_export_formats": _normalize_table_export_formats(table_export_formats)}
     parameters_list = [{"Parameter": key, "Value": value} for key, value in parameters.items()]
     processing_parameters_df = pd.DataFrame(data=parameters_list)
-    processing_parameters_df.to_excel(excel_file_path, index=False)
+    export_dataframe(
+        processing_parameters_df,
+        excel_file_path,
+        table_export_formats=table_export_formats,
+        index=False,
+    )
         
 
     # extract sub-volume with optional intra-sub-stack registration:
@@ -2781,9 +2905,19 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
         I_shape_reg = I_shape.copy()
     
     # calculate the mean intensity of each stack and plot it:
-    intensity_means = plot_intensities(MG_projection_reg, log, plot_path, I_shape_reg)
-    pd.DataFrame(data=100*intensity_means/intensity_means[0],
-                 columns=["relative brightness drop"]).to_excel(os.path.join(plot_path,"relative brightness drops.xlsx"))
+    intensity_means = plot_intensities(
+        MG_projection_reg,
+        log,
+        plot_path,
+        I_shape_reg,
+        table_export_formats=table_export_formats,
+    )
+    export_dataframe(
+        pd.DataFrame(data=100*intensity_means/intensity_means[0],
+                     columns=["relative brightness drop"]),
+        os.path.join(plot_path, "relative brightness drops.xlsx"),
+        table_export_formats=table_export_formats,
+    )
  
     # remove some further noise:
     if gaussian_sigma_proj>0:
@@ -2808,12 +2942,27 @@ def process_stack(fname, MG_channel, N_channel, two_channel, projection_center, 
     MG_binarized_projection, MG_binarized_projection_areas = remove_small_blobs(MG_binarized_projection, 
                                                 I_shape=I_shape_reg, log=log, plot_path=plot_path, 
                                                 pixel_threshold=blob_pixel_threshold,
-                                                stats_plots=stats_plots)
-    plot_pixel_areas(MG_areas=MG_binarized_projection_areas, log=log, plot_path=plot_path, I_shape=I_shape_reg)
+                                                stats_plots=stats_plots,
+                                                table_export_formats=table_export_formats)
+    plot_pixel_areas(
+        MG_areas=MG_binarized_projection_areas,
+        log=log,
+        plot_path=plot_path,
+        I_shape=I_shape_reg,
+        table_export_formats=table_export_formats,
+    )
 
     if debug_output: print_ram_usage()
 
-    _, _ = motility(MG_binarized_projection, I_shape=I_shape_reg, log=log, plot_path=plot_path, ID=ID, group=group)
+    _, _ = motility(
+        MG_binarized_projection,
+        I_shape=I_shape_reg,
+        log=log,
+        plot_path=plot_path,
+        ID=ID,
+        group=group,
+        table_export_formats=table_export_formats,
+    )
     
     _ = log.logt(Total_Process_t0, verbose=True, spaces=2, unit="sec", process="total processing time")
     if debug_output: print_ram_usage()
@@ -2833,7 +2982,8 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
                   median_filter_slices = "square", median_filter_window_slices=3,
                   median_filter_projections = "square", median_filter_window_projections=3, 
                   clear_previous_results=False, spectral_unmixing_median_filter_window=3,
-                  debug_output=False, stats_plots=False):
+                  debug_output=False, stats_plots=False,
+                  table_export_formats=DEFAULT_TABLE_EXPORT_FORMATS):
     """
     Batch-processing wrapper that applies the MotilA pipeline to multiple 4D/5D
     multiphoton imaging stacks.
@@ -2921,6 +3071,10 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
         Whether to print debug information, including RAM usage (default is False).
     stats_plots : bool, optional
         Whether to generate additional statistics plots (default is False).
+    table_export_formats : str or iterable of str, optional
+        Table export formats passed to :func:`process_stack`. Defaults to
+        ``("excel",)``. Add ``"csv"`` and/or ``"yaml"`` for sidecar plain-text
+        exports next to the default Excel files.
 
     Returns
     --------
@@ -3066,14 +3220,16 @@ def batch_process_stacks(PROJECT_Path, ID_list=[], project_tag="TP000", reg_tif_
                               template_mode=template_mode,
                               usepystackreg=usepystackreg,
                               debug_output=debug_output,
-                              stats_plots=stats_plots)
+                              stats_plots=stats_plots,
+                              table_export_formats=table_export_formats)
         log.log("\n============================================================\n")
             
     _ = log.logt(Total_batch_Process_t0, verbose=True, spaces=0, unit="sec", process="total batch ")
     if debug_output: print_ram_usage()
 
 def batch_collect(PROJECT_Path, ID_list=[], project_tag="TP000", motility_folder="motility_analysis",
-                  RESULTS_Path="batch_results", log=""):
+                  RESULTS_Path="batch_results", log="",
+                  table_export_formats=DEFAULT_TABLE_EXPORT_FORMATS):
     """
     Collect motility outputs from multiple processed stacks and consolidate them
     into combined tables.
@@ -3095,11 +3251,16 @@ def batch_collect(PROJECT_Path, ID_list=[], project_tag="TP000", motility_folder
         Folder name containing motility analysis results (default is "motility_analysis").
     RESULTS_Path : str or Path, optional
         Directory where the consolidated results will be saved (default is "batch_results").
+    table_export_formats : str or iterable of str, optional
+        Table export formats. Defaults to ``("excel",)`` for backward
+        compatibility. Add ``"csv"`` and/or ``"yaml"`` to write sidecar
+        plain-text exports next to the default Excel files.
 
     Returns
     --------
     None
-        Saves three DataFrames as Excel files in the `RESULTS_Path` directory.
+        Saves consolidated DataFrames as Excel files and optional CSV/YAML
+        sidecar files in the `RESULTS_Path` directory.
 
     Notes
     ------
@@ -3223,15 +3384,30 @@ def batch_collect(PROJECT_Path, ID_list=[], project_tag="TP000", motility_folder
     # merge and save collected data:
     if motility_data:
         motility_df = pd.concat(motility_data, ignore_index=True)
-        motility_df.to_excel(RESULTS_Path / "all_motility.xlsx", index=False)
+        export_dataframe(
+            motility_df,
+            RESULTS_Path / "all_motility.xlsx",
+            table_export_formats=table_export_formats,
+            index=False,
+        )
 
     if brightness_data:
         brightness_df = pd.concat(brightness_data, ignore_index=True)
-        brightness_df.to_excel(RESULTS_Path / "all_brightness.xlsx", index=False)
+        export_dataframe(
+            brightness_df,
+            RESULTS_Path / "all_brightness.xlsx",
+            table_export_formats=table_export_formats,
+            index=False,
+        )
 
     if pixel_area_data:
         pixel_area_df = pd.concat(pixel_area_data, ignore_index=True)
-        pixel_area_df.to_excel(RESULTS_Path / "all_pixel_areas.xlsx", index=False)
+        export_dataframe(
+            pixel_area_df,
+            RESULTS_Path / "all_pixel_areas.xlsx",
+            table_export_formats=table_export_formats,
+            index=False,
+        )
         
     # average Stable, Gain, Loss, rel Stable, rel Gain, rel Loss, and tor over delta_t 
     # for each projection center, project tag, and ID:
@@ -3274,7 +3450,11 @@ def batch_collect(PROJECT_Path, ID_list=[], project_tag="TP000", motility_folder
                 # update the DataFrame:
                 motility_avrg_df = pd.concat([motility_avrg_df, current_avrg], ignore_index=True)
                 
-    motility_avrg_df.to_excel(RESULTS_Path / "average_motility.xlsx")
+    export_dataframe(
+        motility_avrg_df,
+        RESULTS_Path / "average_motility.xlsx",
+        table_export_formats=table_export_formats,
+    )
 
     log.log(f"Collected data saved in {RESULTS_Path}")
 
