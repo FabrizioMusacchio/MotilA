@@ -12,6 +12,10 @@ Each release is also archived on Zenodo for long-term preservation and citation 
 
 ### 🚀 MotilA v1.1.1
 
+August 11, 2026
+
+This release introduces support for additional input formats and axis configurations via OMIO, along with several other improvements and bug fixes.
+
 #### Flexible image I/O via OMIO
 MotilA now uses **OMIO** for image reading and stack-style TIFF output writing. Input stacks are normalized to OME-compliant ``TZCYX`` order before MotilA's core processing begins, which relaxes the previous requirement that TIFF files already arrive in MotilA's expected axis order.
 
