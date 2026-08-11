@@ -9,6 +9,10 @@
 
 ![MotilA logo](figures/MotilA_logo_transparent.png)
 
+<p align="center">
+  <img src="figures/MotilA_logo_transparent.png" width="60%" />
+</p>
+
 ## What does MotilA do?
 *MotilA* automates the processing and analysis of fluorescence microscopy data, particularly for microglial process dynamics. It performs:
 
