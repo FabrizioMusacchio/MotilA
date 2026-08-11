@@ -1,4 +1,4 @@
-Contributing and Community Guidelines
+Contributing and community guidelines
 =====================================
 
 MotilA is an open-source project and improves through contributions from its

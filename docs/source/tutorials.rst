@@ -1,4 +1,4 @@
-Tutorials and Example Datasets
+Tutorials and example datasets
 ==============================
 
 MotilA provides Jupyter notebooks and Python scripts that

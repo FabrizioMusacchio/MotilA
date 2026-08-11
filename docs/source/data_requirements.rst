@@ -1,4 +1,4 @@
-Data Prerequisites and Project Structure
+Data prerequisites and project structure
 ========================================
 
 MotilA operates on time-lapse multiphoton imaging data read through

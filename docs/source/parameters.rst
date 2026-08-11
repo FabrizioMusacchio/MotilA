@@ -1,4 +1,4 @@
-Parameters Overview
+Parameters overview
 ===================
 
 This page provides an overview of all parameters used in single-file

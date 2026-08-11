@@ -10,10 +10,9 @@ Each release is also archived on Zenodo for long-term preservation and citation 
 
 --- 
 
-### 🔜 MotilA v1.1.1 - UNRELEASED
+### 🚀 MotilA v1.1.1
 
 #### Flexible image I/O via OMIO
-
 MotilA now uses **OMIO** for image reading and stack-style TIFF output writing. Input stacks are normalized to OME-compliant ``TZCYX`` order before MotilA's core processing begins, which relaxes the previous requirement that TIFF files already arrive in MotilA's expected axis order.
 
 Supported pipeline input formats now include:
@@ -34,7 +33,6 @@ The core motility-processing logic remains unchanged: MotilA still extracts subv
 * ``batch_process_stacks`` now searches the registered-image folder for all supported OMIO image extensions instead of only ``.tif`` files.
 
 #### Repository path cleanup
-
 The example and internal script folders were renamed to remove whitespace:
 
 * ``example scripts`` → ``example_scripts``
@@ -45,7 +43,6 @@ The example and internal script folders were renamed to remove whitespace:
 All affected scripts, notebooks, README links, and Read the Docs pages were updated accordingly.
 
 #### Tests and documentation
-
 * Added tests for OMIO-based axis normalization from ``TZYX`` to ``TZCYX``.
 * Updated tests for the new normalized shape semantics.
 * Updated the RTD data requirements, tutorials, overview, and API reference for OMIO-supported formats.
@@ -54,7 +51,7 @@ All affected scripts, notebooks, README links, and Read the Docs pages were upda
 
 ---
 
-### 🚀 MotilA v1.1.0 Release Notes
+### 🚀 MotilA v1.1.0 Release notes
 
 #### 🚀 Major improvements: installation, API structure, CI, code coverage, documentation, and roadmap
 This release introduces several substantial improvements that modernize the installation workflow, strengthen the package structure, add full Read the Docs documentation, ensure consistent behavior across environments, notebooks, and CI testing, and formally introduce a project-level roadmap for future development.  In addition, citation metadata has been consolidated. The previously included `.zenodo.json` file has been removed to avoid duplication and version mismatches. MotilA now uses `CITATION.cff` as the single authoritative source of citation information.
@@ -231,7 +228,7 @@ Thank you for using MotilA!
 
 ---
 
-### 🚀 MotilA v1.0.7 Release Notes
+### 🚀 MotilA v1.0.7 Release notes
 
 #### 🐞 Critical bugfix: PyStackReg support in batch processing
 This release fixes a critical issue that prevented PyStackReg from being used in batch processing, along with a minor metadata filtering correction.
@@ -256,7 +253,7 @@ Thank you for using MotilA! If you encounter any issues, please open
 
 ---
 
-### 🚀 MotilA v1.0.6 Release Notes
+### 🚀 MotilA v1.0.6 Release notes
 
 #### 🐞 Bugfix: skip processing for invalid projection ranges
 
@@ -278,7 +275,7 @@ Thank you for using MotilA! If you encounter any issues, please open an issue
 
 ---
 
-### 🚀 MotilA v1.0.5 Release Notes
+### 🚀 MotilA v1.0.5 Release notes
 
 #### 🐞 Bugfix: projection range and layer count consistency
 
@@ -300,7 +297,7 @@ Thank you for using MotilA! If you encounter any issues, please open
 
 ---
 
-### 🚀 MotilA v1.0.4 Release Notes
+### 🚀 MotilA v1.0.4 Release notes
 
 #### 🐞 Bugfix & 🚀 New feature: registration improvements
 
@@ -331,7 +328,7 @@ The following new parameter is available in both single-file and batch processin
 
 ---
 
-### 🚀 MotilA v1.0.3 Release Notes
+### 🚀 MotilA v1.0.3 Release notes
 
 #### 🐞 Bugfix: Zarr v3+ compatibility
 
@@ -358,7 +355,7 @@ If you encounter any further problems, please open an issue on GitHub.
 
 ---
 
-### 🚀 MotilA v1.0.2 Release Notes
+### 🚀 MotilA v1.0.2 Release notes
 
 #### 🐞 Bugfix & improvement: projection range calculation
 
