@@ -80,6 +80,14 @@ fine-tuning already roughly aligned stacks. Therefore, it is recommended not to
 use MotilA's registration functions as the primary registration step for
 datasets with significant drift or misalignment.
 
+.. tip::
+  
+    For datasets with substantial drift, consider using dedicated registration
+    software or plugins (for example in ImageJ/Fiji or
+    `ZenReg <https://zenreg.readthedocs.io/en/latest/index.html>`_) before running 
+    MotilA. This ensures that the stacks are well-aligned and suitable for accurate 
+    motility analysis.
+
 
 Project folder structure for batch processing
 ---------------------------------------------
