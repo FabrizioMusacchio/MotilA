@@ -51,6 +51,9 @@ The default ``.xlsx`` files are still written unless users explicitly omit ``"ex
 * Updated parameter documentation and tutorial output notes.
 * Added ``PyYAML`` as an explicit dependency.
 
+#### Logo
+MotilA now has an official logo, which is used in the documentation and README. The logo is also included in the repository under ``figures/`` for reuse in presentations and publications.
+
 --- 
 
 ### 🚀 MotilA v1.1.2
