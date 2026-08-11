@@ -222,7 +222,16 @@ microglia channel, enable spectral unmixing:
 Spectral unmixing is most effective when the bleed-through is relatively
 uniform and the second channel has good signal-to-noise ratio. If the overlap
 is highly non-linear or dominated by noise, unmixing may not improve the
-result.
+result. 
+
+.. tip::
+
+    The spectral unmixing method implemented in MotilA is 
+    rather simple: It just subtracts the second channel from the microglia channel 
+    after optional smoothing and amplification. For a more sophisticated approach, 
+    consider using dedicated spectral unmixing software or plugins, 
+    for example in ImageJ/Fiji or `Spectral Unmixing <https://spectral-unmixing.readthedocs.io>`_) 
+    before running MotilA.
 
 Example parameter values
 ^^^^^^^^^^^^^^^^^^^^^^^^
