@@ -163,6 +163,4 @@ mt.process_stack(fname=fname,
                 median_filter_window_projections=median_filter_window_projections,
                 clear_previous_results=clear_previous_results,
                 spectral_unmixing_median_filter_window=spectral_unmixing_median_filter_window)
-
-
 # %% END
