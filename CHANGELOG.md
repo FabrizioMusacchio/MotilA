@@ -7,9 +7,41 @@ Each release is also archived on Zenodo for long-term preservation and citation 
 
 [![Zenodo Archive](https://img.shields.io/badge/Zenodo%20Archive-10.5281%2Fzenodo.15175053-blue)](https://doi.org/10.5281/zenodo.15175053)
 
-<!-- ---
+---
 
-### 🚀 MotilA v1.1.4 - UNRELEASED -->
+### 🚀 MotilA v1.2.0 - UNRELEASED
+
+This upcoming release starts MotilA's internal modularization while preserving
+the existing public API and processing behavior.
+
+#### Internal package modularization
+MotilA's former monolithic `motila.py` implementation has been split into
+focused modules:
+
+* `motila.io` for OMIO-backed image I/O.
+* `motila.export` for Excel/CSV/YAML table exports.
+* `motila.projection` for z-projections, projection plotting, and intensity
+  output helpers.
+* `motila.preprocessing` for stack inspection, subvolume extraction,
+  registration, spectral unmixing, contrast normalization, and filtering.
+* `motila.segmentation` for binarization, connected-component filtering, and
+  pixel-area outputs.
+* `motila.motility` for frame-to-frame motility metric calculation.
+* `motila.pipeline` for the single-stack `process_stack` workflow.
+* `motila.batch` for the current batch processing and collection functions.
+
+The historical `motila.motila` import path remains available as a compatibility
+and distributor layer. Existing scripts can continue importing and calling
+`process_stack`, `batch_process_stacks`, `batch_collect`, and lower-level helper
+functions from `motila.motila`.
+
+#### Development groundwork
+
+* Preserved existing function signatures and docstrings during the split.
+* Kept the current Zarr-backed intermediate processing unchanged.
+* Added module-level docstring headers and `# %%` cell sections to match the
+  project coding style.
+* Verified the modularized package with the existing test suite and RTD build.
 
 ---
 
