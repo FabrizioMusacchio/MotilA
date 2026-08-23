@@ -11,8 +11,9 @@ Each release is also archived on Zenodo for long-term preservation and citation 
 
 ### 🚀 MotilA v1.2.0 - UNRELEASED
 
-This upcoming release starts MotilA's internal modularization while preserving
-the existing public API and processing behavior.
+This upcoming release is a major internal refactor of the MotilA package, where we have modularized MotilA's monolithic codebase into focused submodules in order to improve maintainability and readability and to ensure future extensibility. We also exchanged the batch processing and collection functions with a more flexible subject-based discovery workflow that supports arbitrary folder-tag levels, image glob patterns, and exclusion filters. The new batch processor also supports skipping already processed outputs and continues processing after per-file errors. It also generates persistent root-level run reports and timestamped error reports for each batch run so that users can easily track the processing status of each file and subject. 
+
+Since the ``batch_process_stacks`` and ``batch_collect`` functions have been redesigned, the previous pre-v1.2.0 implementations are still available as ``batch_process_stacks_old`` and ``batch_collect_old`` for backward compatibility, but they are now marked as deprecated. **We recommend upgrading to MotilA v1.2.0 as soon as it is released** and **updating batch scripts to the new ``processing_options`` and ``tag_folder_levels`` style.**
 
 #### Internal package modularization
 MotilA's former monolithic `motila.py` implementation has been split into
@@ -20,12 +21,9 @@ focused modules:
 
 * `motila.io` for OMIO-backed image I/O.
 * `motila.export` for Excel/CSV/YAML table exports.
-* `motila.projection` for z-projections, projection plotting, and intensity
-  output helpers.
-* `motila.preprocessing` for stack inspection, subvolume extraction,
-  registration, spectral unmixing, contrast normalization, and filtering.
-* `motila.segmentation` for binarization, connected-component filtering, and
-  pixel-area outputs.
+* `motila.projection` for z-projections, projection plotting, and intensity output helpers.
+* `motila.preprocessing` for stack inspection, subvolume extraction, registration, spectral unmixing, contrast normalization, and filtering.
+* `motila.segmentation` for binarization, connected-component filtering, and pixel-area outputs.
 * `motila.motility` for frame-to-frame motility metric calculation.
 * `motila.pipeline` for the single-stack `process_stack` workflow.
 * `motila.batch` for the current batch processing and collection functions.
@@ -42,6 +40,37 @@ functions from `motila.motila`.
 * Added module-level docstring headers and `# %%` cell sections to match the
   project coding style.
 * Verified the modularized package with the existing test suite and RTD build.
+
+#### Flexible BIDS-like batch processing
+The batch processor has been redesigned for flexible subject-based project
+trees. The new `batch_process_stacks` discovers image files below subject
+folders, supports arbitrary folder-tag levels, filters by image glob patterns,
+excludes preview/auxiliary files by name, skips already processed outputs when
+requested, and continues processing after per-file errors.
+
+New batch features:
+
+* Flexible subject discovery via `subject_ids` or `subject_prefix`.
+* Flexible `tag_folder_levels`, for example `[("DC000_FOV", "DA000_FOV"), ("TL_000",)]`.
+* Default image patterns for TIFF/OME-TIFF, CZI, LSM and RAW files.
+* `exclude_name_contains` filtering for files and matched tag folders.
+* `skip_processed=True` to avoid reprocessing existing MotilA outputs.
+* Persistent root-level run reports: `motila_batch_run_report.yaml` and `motila_batch_run_report.txt`.
+* Timestamped root-level and per-file error reports.
+* Structured result dataclasses with `processed`, `skipped`, `failed` and `discovered` records.
+* Optional helper for creating Thorlabs RAW YAML sidecar templates from MotilA batch error reports.
+* `batch_collect` now uses the same flexible discovery settings as `batch_process_stacks`, including subject selection, tag-folder levels, image patterns and exclusion filters.
+
+**Upgrade note:**
+
+* The new flexible processor now uses the public name `batch_process_stacks`.
+* The previous pre-v1.2.0 implementation is still available as
+  `batch_process_stacks_old` and is marked as deprecated.
+* The new flexible collector now uses the public name `batch_collect`.
+* The previous pre-v1.2.0 collection implementation is still available as
+  `batch_collect_old` and is marked as deprecated.
+* Updating batch scripts to the new `processing_options` and
+  `tag_folder_levels` style is recommended.
 
 ---
 
