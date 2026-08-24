@@ -307,38 +307,39 @@ After defining the necessary parameters, run the pipeline:
 
 .. code-block:: python
 
-   mt.process_stack(fname=fname,
-                    MG_channel=MG_channel,
-                    N_channel=N_channel,
-                    two_channel=two_channel,
-                    projection_layers=projection_layers,
-                    projection_center=projection_center,
-                    histogram_ref_stack=histogram_ref_stack,
-                    log=log,
-                    blob_pixel_threshold=blob_pixel_threshold,
-                    regStack2d=regStack2d,
-                    regStack3d=regStack3d,
-                    template_mode=template_mode,
-                    spectral_unmixing=spectral_unmixing,
-                    hist_equalization=hist_equalization,
-                    hist_equalization_clip_limit=hist_equalization_clip_limit,
-                    hist_equalization_kernel_size=hist_equalization_kernel_size,
-                    hist_match=hist_match,
-                    RESULTS_Path=RESULTS_Path,
-                    ID=Current_ID,
-                    group=group,
-                    threshold_method=threshold_method,
-                    compare_all_threshold_methods=compare_all_threshold_methods,
-                    gaussian_sigma_proj=gaussian_sigma_proj,
-                    spectral_unmixing_amplifyer=spectral_unmixing_amplifyer,
-                    median_filter_slices=median_filter_slices,
-                    median_filter_window_slices=median_filter_window_slices,
-                    median_filter_projections=median_filter_projections,
-                    median_filter_window_projections=median_filter_window_projections,
-                    clear_previous_results=clear_previous_results,
-                    spectral_unmixing_median_filter_window=spectral_unmixing_median_filter_window,
-                    debug_output=debug_output,
-                    stats_plots=stats_plots)
+  mt.process_stack(
+    fname=fname,
+    MG_channel                   = MG_channel,
+    N_channel                    = N_channel,
+    two_channel                  = two_channel,
+    projection_layers            = projection_layers,
+    projection_center            = projection_center,
+    histogram_ref_stack          = histogram_ref_stack,
+    log                          = log,
+    blob_pixel_threshold         = blob_pixel_threshold,
+    regStack2d                   = regStack2d,
+    regStack3d                   = regStack3d,
+    template_mode                = template_mode,
+    spectral_unmixing            = spectral_unmixing,
+    hist_equalization            = hist_equalization,
+    hist_equalization_clip_limit = hist_equalization_clip_limit,
+    hist_equalization_kernel_size= hist_equalization_kernel_size,
+    hist_match                   = hist_match,
+    RESULTS_Path                 = RESULTS_Path,
+    ID                           = Current_ID,
+    group                        = group, 
+    threshold_method             = threshold_method,
+    compare_all_threshold_methods= compare_all_threshold_methods,
+    gaussian_sigma_proj          = gaussian_sigma_proj,
+    spectral_unmixing_amplifyer  = spectral_unmixing_amplifyer,
+    median_filter_slices         = median_filter_slices,
+    median_filter_window_slices  = median_filter_window_slices,
+    median_filter_projections    = median_filter_projections,
+    median_filter_window_projections= median_filter_window_projections,
+    clear_previous_results       = clear_previous_results,
+    spectral_unmixing_median_filter_window= spectral_unmixing_median_filter_window,
+    debug_output                 = debug_output,
+    stats_plots                  = stats_plots)
 
 For a compact overview of all parameters and their allowed values, see the
 :doc:`parameter reference <parameters>`.
@@ -373,7 +374,9 @@ Example batch configuration
 
 The following parameter set is taken from the tutorial script
 ``batch_run.py`` and demonstrates how to batch-process the included example
-datasets from the Zenodo record::
+datasets from the Zenodo record:
+
+.. code-block:: python
 
    PROJECT_ROOT = "../example_project/Data/"
 
@@ -470,21 +473,21 @@ The batch-processing call is:
 .. code-block:: python
 
    result = mt.batch_process_stacks(
-       project_root=PROJECT_ROOT,
-       subject_ids=subject_ids,
-       subject_prefix=subject_prefix,
-       tag_folder_levels=tag_folder_levels,
-       image_patterns=image_patterns,
-       exclude_name_contains=exclude_name_contains,
-       skip_processed=True,
-       results_folder_name="motility_analysis",
-       organize_by_image=True,
-       metadata_file="metadata.xls",
-       load_options={"preflight": False},
-       processing_options=processing_options,
-       save_options={"validate_outputs": True},
-       log=log,
-       verbose=True)
+       project_root           = PROJECT_ROOT,
+       subject_ids            = subject_ids,
+       subject_prefix         = subject_prefix,
+       tag_folder_levels      = tag_folder_levels,
+       image_patterns         = image_patterns,
+       exclude_name_contains  = exclude_name_contains,
+       skip_processed         = True,
+       results_folder_name    = "motility_analysis",
+       organize_by_image      = True,
+       metadata_file          = "metadata.xls",
+       load_options           = {"preflight": False},
+       processing_options     = processing_options,
+       save_options           = {"validate_outputs": True},
+       log                    = log,
+       verbose                = True)
 
 ``result`` contains the discovered, processed, skipped and failed files. MotilA
 also updates ``motila_batch_run_report.txt`` in ``PROJECT_ROOT`` after each run.
@@ -529,17 +532,17 @@ Aggregate results across multiple datasets with:
 .. code-block:: python
 
    collection_result = mt.batch_collect(
-       project_root=PROJECT_ROOT,
-       subject_ids=subject_ids,
-       subject_prefix="ID",
-       tag_folder_levels=tag_folder_levels,
-       image_patterns=None,
-       exclude_name_contains=("Preview",),
-       results_folder_name="motility_analysis",
-       organize_by_image=True,
-       RESULTS_Path=RESULTS_Path,
-       log=log,
-       verbose=True)
+       project_root           = PROJECT_ROOT,
+       subject_ids            = subject_ids,
+       subject_prefix         = "ID",
+       tag_folder_levels      = tag_folder_levels,
+       image_patterns         = None,
+       exclude_name_contains  = ("Preview",),
+       results_folder_name    = "motility_analysis",
+       organize_by_image      = True,
+       RESULTS_Path           = RESULTS_Path,
+       log                    = log,
+       verbose                = True)
 
 Assessing your results
 ----------------------
