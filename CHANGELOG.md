@@ -7,13 +7,17 @@ Each release is also archived on Zenodo for long-term preservation and citation 
 
 [![Zenodo Archive](https://img.shields.io/badge/Zenodo%20Archive-10.5281%2Fzenodo.15175053-blue)](https://doi.org/10.5281/zenodo.15175053)
 
+<!-- ---
+
+### 🔜 MotilA v1.2.1 - UNRELEASED -->
+
 ---
 
-### 🚀 MotilA v1.2.0 - UNRELEASED
+### 🚀 MotilA v1.2.0
 
-This upcoming release is a major internal refactor of the MotilA package, where we have modularized MotilA's monolithic codebase into focused submodules in order to improve maintainability and readability and to ensure future extensibility. We also exchanged the batch processing and collection functions with a more flexible subject-based discovery workflow that supports arbitrary folder-tag levels, image glob patterns, and exclusion filters. The new batch processor also supports skipping already processed outputs and continues processing after per-file errors. It also generates persistent root-level run reports and timestamped error reports for each batch run so that users can easily track the processing status of each file and subject. 
+This release is a major internal refactor of the MotilA package, where we have modularized MotilA's monolithic codebase into focused submodules in order to improve maintainability and readability and to ensure future extensibility. We also exchanged the batch processing and collection functions with a more flexible subject-based discovery workflow that supports arbitrary folder-tag levels, image glob patterns, and exclusion filters. The new batch processor also supports skipping already processed outputs and continues processing after per-file errors. It also generates persistent root-level run reports and timestamped error reports for each batch run so that users can easily track the processing status of each file and subject. 
 
-Since the ``batch_process_stacks`` and ``batch_collect`` functions have been redesigned, the previous pre-v1.2.0 implementations are still available as ``batch_process_stacks_old`` and ``batch_collect_old`` for backward compatibility, but they are now marked as deprecated. **We recommend upgrading to MotilA v1.2.0 as soon as it is released** and **updating batch scripts to the new ``processing_options`` and ``tag_folder_levels`` style.**
+Since the ``batch_process_stacks`` and ``batch_collect`` functions have been redesigned, the previous pre-v1.2.0 implementations are still available as ``batch_process_stacks_old`` and ``batch_collect_old`` for backward compatibility, but they are now marked as deprecated. **We recommend upgrading to MotilA v1.2.0** and **updating batch scripts to the new ``processing_options`` and ``tag_folder_levels`` style.**
 
 #### Internal package modularization
 MotilA's former monolithic `motila.py` implementation has been split into
