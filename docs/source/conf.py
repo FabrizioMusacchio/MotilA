@@ -86,4 +86,4 @@ html_theme_options = {
     "sticky_navigation": True,
 }
 
-html_logo = "_static/figures/MotilA_logo_wide_transparent.png"
+html_logo = "_static/figures/MotilA_logo_wide_transparent_black_black.png"
