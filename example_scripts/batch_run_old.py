@@ -209,7 +209,7 @@ log.log("Test project: "+str(PROJECT_Path))
 log.log(f"Mouse IDs: {ID_list}")
 log.log(f"Group: {project_tag}")
 
-mt.batch_collect(PROJECT_Path=PROJECT_Path, 
+mt.batch_collect_old(PROJECT_Path=PROJECT_Path,
                  ID_list=ID_list, 
                  project_tag=project_tag, 
                  motility_folder=motility_folder,

@@ -4,7 +4,11 @@ from .motila import (
     write_image_stack,
     process_stack,
     batch_process_stacks,
+    batch_process_stacks_old,
     batch_collect,
+    batch_collect_old,
+    discover_bids_like_batch_images,
+    batch_create_thorlabs_raw_yaml_templates,
 )
 from .utils import (
     tiff_axes_check_and_correct,
@@ -20,7 +24,11 @@ __all__ = [
     "write_image_stack",
     "process_stack",
     "batch_process_stacks",
+    "batch_process_stacks_old",
     "batch_collect",
+    "batch_collect_old",
+    "discover_bids_like_batch_images",
+    "batch_create_thorlabs_raw_yaml_templates",
     "tiff_axes_check_and_correct",
     "check_folder_exist_create",
     "filterfolder_by_string",

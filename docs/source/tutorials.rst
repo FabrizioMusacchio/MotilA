@@ -350,13 +350,17 @@ Batch processing uses the same parameters but operates on multiple datasets
 organized in a project folder. In addition, the following parameters control
 which datasets are processed and where the results are written:
 
-* ``PROJECT_Path`` specifies the root directory containing all ID folders.
-* ``ID_list`` selects which IDs inside ``PROJECT_Path`` are processed.
-* ``project_tag`` identifies project-specific subfolders within each ID.
-* ``reg_tif_file_folder`` and ``reg_tif_file_tag`` select the supported image
-  files that should be processed inside each project.
-* ``RESULTS_foldername`` defines where the motility results will be stored
-  within each project folder.
+* ``project_root`` specifies the root directory containing all subject folders.
+* ``subject_ids`` selects exact subjects, or ``subject_prefix`` discovers
+  matching subjects automatically.
+* ``tag_folder_levels`` describes the flexible folder levels below each
+  subject.
+* ``image_patterns`` selects supported image files by glob pattern; ``None``
+  uses MotilA's TIFF/OME-TIFF, CZI, LSM and RAW defaults.
+* ``exclude_name_contains`` filters unwanted files or folders such as previews.
+* ``results_folder_name`` defines where MotilA results are stored.
+* ``skip_processed`` skips files whose expected output already exists and
+  records them as already processed in the run report.
 * ``metadata_file`` (for example ``"metadata.xls"``) optionally overrides
   parameters such as channel indices or projection centers on a per-dataset
   basis.
@@ -371,14 +375,18 @@ The following parameter set is taken from the tutorial script
 ``batch_run.py`` and demonstrates how to batch-process the included example
 datasets from the Zenodo record::
 
-   PROJECT_Path = "../example_project/Data/"
-   ID_list = ["ID240103_P17_1", "ID240321_P17_3"]
+   PROJECT_ROOT = "../example_project/Data/"
 
-   project_tag = "TP000"
-   reg_tif_file_folder = "registered"
-   reg_tif_file_tag = "reg"
-   RESULTS_foldername = "../motility_analysis/"
-   metadata_file = "metadata.xls"
+   subject_ids = ["ID240103_P17_1", "ID240321_P17_3"]
+   subject_prefix = "ID"
+
+   tag_folder_levels = [
+       ("TP000",),
+       ("registered",)]
+
+   image_patterns = None
+   # image_patterns = ("*reg*.ome.tif", "*reg*.tif")
+   exclude_name_contains = ("Preview",)
 
    # projection settings
    projection_layers = 44
@@ -420,53 +428,69 @@ datasets from the Zenodo record::
    spectral_unmixing_median_filter_window = 3
 
    # housekeeping
-   clear_previous_results = True
    log = mt.logger_object()
 
+   processing_options = {
+       "MG_channel": MG_channel,
+       "N_channel": N_channel,
+       "two_channel": two_channel,
+       "projection_center": projection_center,
+       "projection_layers": projection_layers,
+       "histogram_ref_stack": histogram_ref_stack,
+       "log": log,
+       "blob_pixel_threshold": blob_pixel_threshold,
+       "regStack2d": regStack2d,
+       "regStack3d": regStack3d,
+       "template_mode": template_mode,
+       "spectral_unmixing": spectral_unmixing,
+       "hist_equalization": hist_equalization,
+       "hist_equalization_clip_limit": hist_equalization_clip_limit,
+       "hist_equalization_kernel_size": hist_equalization_kernel_size,
+       "hist_match": hist_match,
+       "max_xy_shift_correction": max_xy_shift_correction,
+       "threshold_method": threshold_method,
+       "compare_all_threshold_methods": compare_all_threshold_methods,
+       "gaussian_sigma_proj": gaussian_sigma_proj,
+       "spectral_unmixing_amplifyer": spectral_unmixing_amplifyer,
+       "median_filter_slices": median_filter_slices,
+       "median_filter_window_slices": median_filter_window_slices,
+       "median_filter_projections": median_filter_projections,
+       "median_filter_window_projections": median_filter_window_projections,
+       "clear_previous_results": False,
+       "spectral_unmixing_median_filter_window": spectral_unmixing_median_filter_window,
+       "debug_output": debug_output,
+       "stats_plots": stats_plots}
+
 These values provide a realistic starting point and can be adapted to new
-projects by changing the paths, ID list, and, if necessary, the preprocessing
-and segmentation settings.
+projects by changing the paths, subject selection, folder-tag levels and, if
+necessary, the preprocessing and segmentation settings.
 
 The batch-processing call is:
 
 .. code-block:: python
 
-   mt.batch_process_stacks(PROJECT_Path=PROJECT_Path,
-                           ID_list=ID_list,
-                           project_tag=project_tag,
-                           reg_tif_file_folder=reg_tif_file_folder,
-                           reg_tif_file_tag=reg_tif_file_tag,
-                           metadata_file=metadata_file,
-                           RESULTS_foldername=RESULTS_foldername,
-                           MG_channel=MG_channel,
-                           N_channel=N_channel,
-                           two_channel=two_channel,
-                           projection_center=projection_center,
-                           projection_layers=projection_layers,
-                           histogram_ref_stack=histogram_ref_stack,
-                           log=log,
-                           blob_pixel_threshold=blob_pixel_threshold,
-                           regStack2d=regStack2d,
-                           regStack3d=regStack3d,
-                           template_mode=template_mode,
-                           spectral_unmixing=spectral_unmixing,
-                           hist_equalization=hist_equalization,
-                           hist_equalization_clip_limit=hist_equalization_clip_limit,
-                           hist_equalization_kernel_size=hist_equalization_kernel_size,
-                           hist_match=hist_match,
-                           max_xy_shift_correction=max_xy_shift_correction,
-                           threshold_method=threshold_method,
-                           compare_all_threshold_methods=compare_all_threshold_methods,
-                           gaussian_sigma_proj=gaussian_sigma_proj,
-                           spectral_unmixing_amplifyer=spectral_unmixing_amplifyer,
-                           median_filter_slices=median_filter_slices,
-                           median_filter_window_slices=median_filter_window_slices,
-                           median_filter_projections=median_filter_projections,
-                           median_filter_window_projections=median_filter_window_projections,
-                           clear_previous_results=clear_previous_results,
-                           spectral_unmixing_median_filter_window=spectral_unmixing_median_filter_window,
-                           debug_output=debug_output,
-                           stats_plots=stats_plots)
+   result = mt.batch_process_stacks(
+       project_root=PROJECT_ROOT,
+       subject_ids=subject_ids,
+       subject_prefix=subject_prefix,
+       tag_folder_levels=tag_folder_levels,
+       image_patterns=image_patterns,
+       exclude_name_contains=exclude_name_contains,
+       skip_processed=True,
+       results_folder_name="motility_analysis",
+       organize_by_image=True,
+       metadata_file="metadata.xls",
+       load_options={"preflight": False},
+       processing_options=processing_options,
+       save_options={"validate_outputs": True},
+       log=log,
+       verbose=True)
+
+``result`` contains the discovered, processed, skipped and failed files. MotilA
+also updates ``motila_batch_run_report.txt`` in ``PROJECT_ROOT`` after each run.
+If errors occur, a timestamped ``motila_batch_error_report_*.txt`` is written in
+the project root and shorter per-file reports are written next to affected image
+files.
 
 Batch collection
 ~~~~~~~~~~~~~~~~
@@ -474,11 +498,13 @@ Batch collection
 After batch processing, the results from multiple datasets can be aggregated
 for cohort-level analysis. The key parameters are:
 
-* ``PROJECT_Path`` pointing to the same project root as in batch processing.
-* ``ID_list`` listing the IDs that should be included in the cohort.
-* ``project_tag`` selecting the experiment subfolders.
-* ``motility_folder`` specifying the folder inside each project where MotilA
-  wrote the per-dataset results.
+* ``project_root`` pointing to the same project root as in batch processing.
+* ``subject_ids`` or ``subject_prefix`` selecting the same subjects.
+* ``tag_folder_levels``, ``image_patterns`` and ``exclude_name_contains`` using
+  the same discovery settings as ``batch_process_stacks``.
+* ``results_folder_name`` specifying the folder where MotilA wrote the
+  per-dataset results.
+* ``organize_by_image`` matching the processing run.
 * ``RESULTS_Path`` defining the output directory for the aggregated cohort
   tables.
 
@@ -488,12 +514,13 @@ Example batch collection configuration
 The following configuration mirrors the settings used in the tutorial script
 ``batch_run.py`` for collecting results from the example_project::
 
-   PROJECT_Path = "../example_project/Data/"
+   PROJECT_ROOT = "../example_project/Data/"
    RESULTS_Path = "../example_project/Analysis/MG_motility/"
 
-   ID_list = ["ID240103_P17_1", "ID240321_P17_3"]
-   project_tag = "TP000"
-   motility_folder = "motility_analysis"
+   subject_ids = ["ID240103_P17_1", "ID240321_P17_3"]
+   tag_folder_levels = [
+       ("TP000",),
+       ("registered",)]
 
    log = mt.logger_object()
 
@@ -501,12 +528,18 @@ Aggregate results across multiple datasets with:
 
 .. code-block:: python
 
-   mt.batch_collect(PROJECT_Path=PROJECT_Path,
-                    ID_list=ID_list,
-                    project_tag=project_tag,
-                    motility_folder=motility_folder,
-                    RESULTS_Path=RESULTS_Path,
-                    log=log)
+   collection_result = mt.batch_collect(
+       project_root=PROJECT_ROOT,
+       subject_ids=subject_ids,
+       subject_prefix="ID",
+       tag_folder_levels=tag_folder_levels,
+       image_patterns=None,
+       exclude_name_contains=("Preview",),
+       results_folder_name="motility_analysis",
+       organize_by_image=True,
+       RESULTS_Path=RESULTS_Path,
+       log=log,
+       verbose=True)
 
 Assessing your results
 ----------------------

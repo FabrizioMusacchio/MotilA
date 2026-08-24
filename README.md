@@ -198,6 +198,37 @@ mt.process_stack(fname=fname,
 
 More complete examples, including batch processing and collection of cohort-level metrics, are explained in [online documentation](https://motila.readthedocs.io/en/latest/tutorials.html#example-usage).
 
+## Flexible batch processing
+
+MotilA v1.2.0 introduces a flexible BIDS-like batch processor. The project root
+contains subject folders, and `tag_folder_levels` describes how MotilA should
+walk the folder tree below each subject:
+
+```python
+result = mt.batch_process_stacks(
+    project_root=PROJECT_ROOT,
+    subject_ids=None,
+    subject_prefix="ID",
+    tag_folder_levels=[
+        ("DC000_FOV", "DA000_FOV"),
+        ("TL_000",)],
+    image_patterns=None,
+    exclude_name_contains=("Preview",),
+    skip_processed=True,
+    processing_options=processing_options)
+```
+
+`image_patterns=None` uses MotilA defaults for TIFF/OME-TIFF, CZI, LSM and RAW
+files. Existing outputs are skipped, not treated as failures. Each run updates
+`motila_batch_run_report.txt` in the project root; failures are collected in a
+timestamped `motila_batch_error_report_*.txt` and do not stop the full batch by
+default.
+
+`mt.batch_collect(...)` uses the same discovery settings (`subject_ids`,
+`subject_prefix`, `tag_folder_levels`, `image_patterns`,
+`exclude_name_contains`) so cohort-level collection can follow the same folder
+logic as processing.
+
 
 ## Future developments
 Please refer to the [ROADMAP.md](ROADMAP.md) file for an overview of planned improvements and future extensions of *MotilA*.

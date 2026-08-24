@@ -12,7 +12,20 @@ ported to modular MotilA: August 2026
 # %% IMPORTS
 import warnings
 
-from .batch import batch_collect, batch_process_stacks
+from .batch import (
+    BatchErrorRecord,
+    BatchImageRecord,
+    BatchProcessedRecord,
+    BatchProcessingResult,
+    BatchRawYamlTemplateRecord,
+    BatchRawYamlTemplateResult,
+    BatchSkippedRecord,
+    batch_collect,
+    batch_collect_old,
+    batch_create_thorlabs_raw_yaml_templates,
+    batch_process_stacks,
+    batch_process_stacks_old,
+    discover_bids_like_batch_images)
 from .core import hello_world
 from .export import (
     DEFAULT_TABLE_EXPORT_FORMATS,
@@ -65,6 +78,13 @@ warnings.filterwarnings("ignore")
 __all__ = [
     "DEFAULT_TABLE_EXPORT_FORMATS",
     "SUPPORTED_IMAGE_EXTENSIONS",
+    "BatchErrorRecord",
+    "BatchImageRecord",
+    "BatchProcessedRecord",
+    "BatchProcessingResult",
+    "BatchRawYamlTemplateRecord",
+    "BatchRawYamlTemplateResult",
+    "BatchSkippedRecord",
     "_as_tzcyx",
     "_import_omio",
     "_is_supported_image_file",
@@ -73,11 +93,15 @@ __all__ = [
     "_prepare_omio_import_environment",
     "_purge_partial_imports",
     "batch_collect",
+    "batch_collect_old",
+    "batch_create_thorlabs_raw_yaml_templates",
     "batch_process_stacks",
+    "batch_process_stacks_old",
     "binarize_2D_images",
     "calc_projection_range",
     "circular_median_filtering_on_projections",
     "compare_histograms",
+    "discover_bids_like_batch_images",
     "export_dataframe",
     "extract_and_register_subvolume",
     "extract_subvolume",

@@ -62,61 +62,84 @@ Input/output parameters for batch processing
    * - Parameter
      - Values
      - Description
-   * - ``PROJECT_Path``
+   * - ``project_root``
+     - string or ``Path``
+     - Root directory that contains all subject folders
+   * - ``subject_ids``
+     - list of strings or ``None``
+     - Explicit subject folders to process. If ``None``, MotilA discovers folders whose names start with ``subject_prefix``.
+   * - ``subject_prefix``
      - string
-     - Path to the project directory that contains all ID subfolders
-   * - ``ID_list``
-     - list of strings
-     - List of identifiers; must exactly match the ID folder names in ``PROJECT_Path``
-   * - ``project_tag``
+     - Prefix used for automatic subject discovery when ``subject_ids=None``
+   * - ``tag_folder_levels``
+     - list of tag tuples
+     - Flexible folder-tag levels below each subject, for example ``[("TP",), ("registered",)]`` or ``[("DC000_FOV", "DA000_FOV"), ("TL_000",)]``
+   * - ``image_patterns``
+     - list of glob patterns or ``None``
+     - File patterns to process. ``None`` uses MotilA defaults for TIFF/OME-TIFF, CZI, LSM and RAW files.
+   * - ``exclude_name_contains``
+     - tuple of strings
+     - Exclude files or folders whose names contain one of these strings
+   * - ``skip_processed``
+     - bool
+     - If ``True``, skip files whose expected MotilA output already exists and record them as already processed
+   * - ``results_folder_name``
      - string
-     - Tag that identifies project-specific subfolders inside each ID folder
-   * - ``reg_tif_file_folder``
-     - string
-     - Name of the folder inside the project_tag folder that stores the registered image files
-   * - ``reg_tif_file_tag``
-     - string
-     - Substring used to select the supported image file to process inside ``reg_tif_file_folder``
-   * - ``RESULTS_foldername``
-     - string
-     - Name of the folder where MotilA writes the results inside each project_tag folder
+     - Name of the folder where MotilA writes per-image processing results
+   * - ``processing_options``
+     - dictionary
+     - Options forwarded to ``process_stack`` such as channels, projection settings, filtering and segmentation parameters
+   * - ``load_options``
+     - dictionary
+     - Optional preflight-load settings. Set ``{"preflight": True}`` to classify loading errors before running ``process_stack``.
+   * - ``save_options``
+     - dictionary
+     - Optional output validation/report settings, for example ``{"validate_outputs": True}``
    * - ``metadata_file``
-     - string
-     - File name of the Excel metadata file inside each project_tag folder
+     - string or ``None``
+     - Optional Excel metadata file in the output-scope folder that can override selected processing options
    * - ``table_export_formats``
      - ``"excel"`` or list of ``"excel"``, ``"csv"``, ``"yaml"``
-     - Table export formats passed to all processed stacks. Defaults to ``"excel"``; optional CSV/YAML exports are written as sidecars.
+     - Set inside ``processing_options``. Defaults to ``"excel"``; optional CSV/YAML exports are written as sidecars.
 
 Expected project folder structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The batch process expects a project folder structure as follows:
+The v1.2.0 batch process expects a flexible BIDS-like project folder structure:
 
 .. code-block::
 
-   PROJECT_Path
-   │
-   └───ID1
-   │   └───project_tag
-   │       └───reg_tif_file_folder
-   │           └───reg_tif_file_tag
-   │       └───RESULTS_foldername
-   │       └───metadata_file
-   │
-   └───ID2
-   │   └───project_tag
-   │       └───reg_tif_file_folder
-   │           └───reg_tif_file_tag
-   │       └───RESULTS_foldername
-   │       └───metadata_file
-   │
-   └───ID3
-       └───project_tag
-           ...
+   project_root
+   ├── ID000001
+   │   ├── TP000
+   │   │   ├── image_01.ome.tif
+   │   │   └── image_02.czi
+   │   └── TP001
+   │       └── registered
+   │           └── image_03.raw
+   └── ID000002
+       └── DC000_FOV01
+           └── TL_000
+               └── image_01.tif
 
 This hierarchy follows a `BIDS-inspired <https://bids-specification.readthedocs.io>`_ organization by subject ID and
 project-specific subfolders. It is not fully BIDS-compliant, but it
 supports automated batch processing and robust association of metadata.
+
+``tag_folder_levels`` tells MotilA how to walk the folder tree below each
+subject. For example, ``[("DC000_FOV", "DA000_FOV"), ("TL_000",)]`` first
+matches ``DC000_FOV*`` or ``DA000_FOV*`` folders and then searches for
+``TL_000*`` folders below them. Empty levels, ``None``, ``()`` and ``[]`` are
+ignored.
+
+The batch processor writes persistent reports in ``project_root``:
+
+* ``motila_batch_run_report.txt`` records the discovered files, current status,
+  output folders and run history.
+* ``motila_batch_run_report.yaml`` stores the same history in a machine-readable
+  format so later runs can append to it.
+* ``motila_batch_error_report_<timestamp>.txt`` is written only when failures
+  occur. Per-file error reports are also written next to affected image files.
 
 
 Metadata override file (metadata.xls)
@@ -443,26 +466,39 @@ Input/output parameters for batch collection
    * - Parameter
      - Values
      - Description
-   * - ``PROJECT_Path``
-     - string
-     - Path to the project folder that contains all ID subfolders
+   * - ``project_root``
+     - string or ``Path``
+     - Root directory that contains all subject folders
    * - ``RESULTS_Path``
      - string
      - Path to the folder where aggregated batch-collection results are saved
-   * - ``ID_list``
-     - list of strings
-     - List of IDs to include in the batch collection
-   * - ``project_tag``
+   * - ``subject_ids``
+     - list of strings or ``None``
+     - Explicit subject folders to collect. If ``None``, MotilA discovers folders whose names start with ``subject_prefix``.
+   * - ``subject_prefix``
      - string
-     - Tag that selects the project-specific subfolder inside each ID folder
-   * - ``motility_folder``
+     - Prefix used for automatic subject discovery when ``subject_ids=None``
+   * - ``tag_folder_levels``
+     - list of tag tuples
+     - Same folder-tag levels used for ``batch_process_stacks``
+   * - ``image_patterns``
+     - list of glob patterns or ``None``
+     - Same image filters used for ``batch_process_stacks``
+   * - ``exclude_name_contains``
+     - tuple of strings
+     - Exclude files or folders whose names contain one of these strings
+   * - ``results_folder_name``
      - string
-     - Name of the folder containing motility results within each project_tag folder
+     - Name of the MotilA results folder to collect from
+   * - ``organize_by_image``
+     - bool
+     - Must match the setting used during ``batch_process_stacks``
    * - ``table_export_formats``
      - ``"excel"`` or list of ``"excel"``, ``"csv"``, ``"yaml"``
      - Export formats for aggregated result tables. Defaults to ``"excel"`` and can optionally add CSV/YAML sidecars.
 
-The batch collection function expects the same folder hierarchy as batch
-processing and aggregates per-dataset results into cohort-level Excel
-files. If ``table_export_formats`` includes ``"csv"`` or ``"yaml"``, matching
+The batch collection function now uses the same discovery settings as
+``batch_process_stacks``. It derives MotilA output folders from the discovered
+input files and aggregates per-dataset results into cohort-level Excel files.
+If ``table_export_formats`` includes ``"csv"`` or ``"yaml"``, matching
 plain-text sidecar files are written with the same base names.

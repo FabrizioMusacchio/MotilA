@@ -43,7 +43,10 @@ from motila.motila import (
     motility,
     process_stack,
     batch_process_stacks,
-    batch_collect
+    batch_process_stacks_old,
+    batch_collect,
+    batch_collect_old,
+    discover_bids_like_batch_images
     )
 import numpy as np
 import tifffile
@@ -1888,7 +1891,7 @@ def test_process_stack_1_channel(mock_log, mock_functions, setup_test_tif_1_chan
     assert mock_log.summary_df.shape[0] > 0  # Ensure there is at least one row in the DataFrame
 
 
-# MAIN FUNCTION 2 batch_process_stacks:
+# MAIN FUNCTION 2 batch_process_stacks_old:
 class MockLogger_batch:
     def __init__(self):
         self.messages = []
@@ -1956,7 +1959,7 @@ def test_batch_process_stacks_no_error(mock_log_batch, setup_test_data):
     # Use the setup_test_data fixture to create test directories and files
     test_dir = setup_test_data
 
-    # Define parameters for the batch_process_stacks function
+    # Define parameters for the legacy batch_process_stacks_old function
     PROJECT_Path = test_dir + "/"
     ID_list = ["ID1", "ID2"]
     project_tag = "project_tag"
@@ -1994,8 +1997,8 @@ def test_batch_process_stacks_no_error(mock_log_batch, setup_test_data):
     debug_output = False
     stats_plots = False
 
-    # call the function and ensure no errors are raised:
-    batch_process_stacks(
+    # call the legacy function and ensure no errors are raised:
+    batch_process_stacks_old(
         PROJECT_Path=PROJECT_Path,
         ID_list=ID_list,
         project_tag=project_tag,
@@ -2038,6 +2041,204 @@ def test_batch_process_stacks_no_error(mock_log_batch, setup_test_data):
     # assert that the logger contains expected messages:
     assert "Batch processing of stacks..." in mock_log_batch.messages[0]
     assert "total batch" in mock_log_batch.messages[-1]
+
+def _batch_touch_image(path: Path):
+    """Create one placeholder image path for batch-discovery tests."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(b"placeholder")
+    return path
+
+def _batch_fake_process_stack(**kwargs):
+    """Create the minimal MotilA success marker expected by the batch tests."""
+
+    output_dir = Path(kwargs["RESULTS_Path"])
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "motility_analysis.xlsx").write_text("ok", encoding="utf-8")
+
+def _batch_no_output_process_stack(**kwargs):
+    """Simulate a process that finishes without writing expected output."""
+
+    Path(kwargs["RESULTS_Path"]).mkdir(parents=True, exist_ok=True)
+
+def _batch_failing_process_stack(**kwargs):
+    """Simulate a processing error."""
+
+    raise RuntimeError("synthetic processing failure")
+
+def test_bids_batch_discovery_with_subject_ids(tmp_path):
+    _batch_touch_image(tmp_path / "ID001" / "TP000" / "image_01.tif")
+    _batch_touch_image(tmp_path / "ID002" / "TP000" / "image_02.tif")
+    _batch_touch_image(tmp_path / "XX001" / "TP000" / "image_03.tif")
+
+    records = discover_bids_like_batch_images(
+        tmp_path,
+        subject_ids=("ID002",),
+        tag_folder_levels=[("TP",)])
+
+    assert [record.subject_id for record in records] == ["ID002"]
+    assert records[0].image_path.name == "image_02.tif"
+
+def test_bids_batch_discovery_with_subject_prefix(tmp_path):
+    _batch_touch_image(tmp_path / "ID001" / "TP000" / "image_01.tif")
+    _batch_touch_image(tmp_path / "ID002" / "TP000" / "image_02.tif")
+    _batch_touch_image(tmp_path / "CTRL001" / "TP000" / "image_03.tif")
+
+    records = discover_bids_like_batch_images(
+        tmp_path,
+        subject_ids=None,
+        subject_prefix="ID",
+        tag_folder_levels=[("TP",)])
+
+    assert [record.subject_id for record in records] == ["ID001", "ID002"]
+
+def test_bids_batch_discovery_with_multiple_tag_folder_levels(tmp_path):
+    _batch_touch_image(tmp_path / "ID001" / "DC000_FOV01" / "TL_000" / "image_01.raw")
+    _batch_touch_image(tmp_path / "ID001" / "DA000_FOV02" / "TL_000" / "image_02.czi")
+    _batch_touch_image(tmp_path / "ID001" / "XX000_FOV03" / "TL_000" / "image_03.tif")
+
+    records = discover_bids_like_batch_images(
+        tmp_path,
+        subject_ids=("ID001",),
+        tag_folder_levels=[("DC000_FOV", "DA000_FOV"), None, ("TL_000",)])
+
+    assert sorted(record.image_path.name for record in records) == ["image_01.raw", "image_02.czi"]
+    assert {record.tag_folders for record in records} == {
+        ("DC000_FOV01", "TL_000"),
+        ("DA000_FOV02", "TL_000")}
+
+def test_bids_batch_discovery_image_patterns(tmp_path):
+    _batch_touch_image(tmp_path / "ID001" / "TP000" / "image_01.tif")
+    _batch_touch_image(tmp_path / "ID001" / "TP000" / "image_02.czi")
+
+    records = discover_bids_like_batch_images(
+        tmp_path,
+        subject_ids=("ID001",),
+        tag_folder_levels=[("TP",)],
+        image_patterns=("*.czi",))
+
+    assert [record.image_path.name for record in records] == ["image_02.czi"]
+
+def test_bids_batch_discovery_exclude_name_contains_filters_files_and_folders(tmp_path):
+    _batch_touch_image(tmp_path / "ID001" / "TP000" / "image_01.tif")
+    _batch_touch_image(tmp_path / "ID001" / "TP000" / "Preview_image_02.tif")
+    _batch_touch_image(tmp_path / "ID001" / "Preview_TP001" / "image_03.tif")
+
+    records = discover_bids_like_batch_images(
+        tmp_path,
+        subject_ids=("ID001",),
+        tag_folder_levels=[("TP", "Preview_TP")],
+        exclude_name_contains=("Preview",))
+
+    assert [record.image_path.name for record in records] == ["image_01.tif"]
+
+def test_bids_batch_skip_processed(tmp_path):
+    image_path = _batch_touch_image(tmp_path / "ID001" / "TP000" / "image_01.tif")
+    output_dir = tmp_path / "ID001" / "TP000" / "motility_analysis" / "image_01" / "projection_center_5"
+    output_dir.mkdir(parents=True)
+    (output_dir / "motility_analysis.xlsx").write_text("done", encoding="utf-8")
+
+    result = batch_process_stacks(
+        tmp_path,
+        subject_ids=("ID001",),
+        tag_folder_levels=[("TP",)],
+        processing_options={"projection_center": 5},
+        process_function=_batch_failing_process_stack,
+        verbose=False)
+
+    assert result.discovered[0].image_path == image_path
+    assert len(result.processed) == 0
+    assert len(result.skipped) == 1
+    assert result.skipped[0].stage == "already_processed"
+
+def test_bids_batch_error_during_load(tmp_path):
+    _batch_touch_image(tmp_path / "ID001" / "TP000" / "image_01.raw")
+
+    def empty_reader(*args, **kwargs):
+        return None, None
+
+    result = batch_process_stacks(
+        tmp_path,
+        subject_ids=("ID001",),
+        tag_folder_levels=[("TP",)],
+        processing_options={"projection_center": 5},
+        load_options={"preflight": True, "reader": empty_reader},
+        process_function=_batch_fake_process_stack,
+        verbose=False)
+
+    assert len(result.failed) == 1
+    assert result.failed[0].stage == "load"
+    assert result.error_report_path is not None
+    assert result.error_report_path.exists()
+
+def test_bids_batch_error_during_processing(tmp_path):
+    _batch_touch_image(tmp_path / "ID001" / "TP000" / "image_01.tif")
+
+    result = batch_process_stacks(
+        tmp_path,
+        subject_ids=("ID001",),
+        tag_folder_levels=[("TP",)],
+        processing_options={"projection_center": 5},
+        process_function=_batch_failing_process_stack,
+        verbose=False)
+
+    assert len(result.failed) == 1
+    assert result.failed[0].stage == "process"
+
+def test_bids_batch_error_during_save_validation(tmp_path):
+    _batch_touch_image(tmp_path / "ID001" / "TP000" / "image_01.tif")
+
+    result = batch_process_stacks(
+        tmp_path,
+        subject_ids=("ID001",),
+        tag_folder_levels=[("TP",)],
+        processing_options={"projection_center": 5},
+        process_function=_batch_no_output_process_stack,
+        verbose=False)
+
+    assert len(result.failed) == 1
+    assert result.failed[0].stage == "save"
+
+def test_bids_batch_run_report_is_updated(tmp_path):
+    _batch_touch_image(tmp_path / "ID001" / "TP000" / "image_01.tif")
+
+    first = batch_process_stacks(
+        tmp_path,
+        subject_ids=("ID001",),
+        tag_folder_levels=[("TP",)],
+        processing_options={"projection_center": 5, "MG_channel": 2},
+        process_function=_batch_fake_process_stack,
+        verbose=False)
+    second = batch_process_stacks(
+        tmp_path,
+        subject_ids=("ID001",),
+        tag_folder_levels=[("TP",)],
+        processing_options={"projection_center": 5, "MG_channel": 2},
+        process_function=_batch_fake_process_stack,
+        verbose=False)
+
+    report_text = first.report_path.read_text(encoding="utf-8")
+    assert first.report_path == second.report_path
+    assert "image_01.tif [PROCESSED]" in report_text
+    assert "processed | MotilA process_stack | c=2" in report_text
+    assert "skipped/already processed" in second.report_path.read_text(encoding="utf-8")
+
+def test_bids_batch_error_report_creation(tmp_path):
+    image_path = _batch_touch_image(tmp_path / "ID001" / "TP000" / "image_01.tif")
+
+    result = batch_process_stacks(
+        tmp_path,
+        subject_ids=("ID001",),
+        tag_folder_levels=[("TP",)],
+        processing_options={"projection_center": 5},
+        process_function=_batch_failing_process_stack,
+        verbose=False)
+
+    assert result.error_report_path is not None
+    report_text = result.error_report_path.read_text(encoding="utf-8")
+    assert "MOTILA_BATCH_ERRORS" in report_text
+    assert str(image_path) in report_text
+    assert result.file_error_report_paths[0].exists()
 
 
 # MAIN FUNCTION 3 batch_collect
@@ -2082,11 +2283,11 @@ def setup_batch_collect_test_data():
     shutil.rmtree("test_batch_results", ignore_errors=True)
 
 # Actual test
-def test_batch_collect(setup_batch_collect_test_data):
+def test_batch_collect_old(setup_batch_collect_test_data):
     base_path, id_list = setup_batch_collect_test_data
     log = MockLogger_batch_collect()
 
-    batch_collect(
+    batch_collect_old(
         PROJECT_Path=base_path,
         ID_list=id_list,
         project_tag="TP000",
@@ -2112,3 +2313,50 @@ def test_batch_collect(setup_batch_collect_test_data):
 
     # Optional: check logger messages
     assert "Collected data saved in test_batch_results" in log.messages[-1]
+
+def test_batch_collect_uses_flexible_discovery(tmp_path):
+    image_path = _batch_touch_image(tmp_path / "ID001" / "TP000" / "registered" / "image_01.tif")
+    projection_dir = (
+        tmp_path / "ID001" / "TP000" / "motility_analysis" /
+        "image_01" / "projection_center_5")
+    projection_dir.mkdir(parents=True)
+
+    motility_df = pd.DataFrame({
+        "delta t": ["t0-t1"],
+        "Stable": [100],
+        "Gain": [50],
+        "Loss": [20],
+        "rel Stable": [0.5],
+        "rel Gain": [0.25],
+        "rel Loss": [0.1],
+        "tor": [0.7]})
+    brightness_df = pd.DataFrame({
+        "t_i": [0],
+        "Normalized (btw. 0 and 1) average brightness of each stack": [1.0]})
+    pixel_area_df = pd.DataFrame({
+        "t_i": [0],
+        "cell area in pixel total": [123]})
+    motility_df.to_excel(projection_dir / "motility_analysis.xlsx")
+    brightness_df.to_excel(projection_dir / "Normalized average brightness of each stack.xlsx")
+    pixel_area_df.to_excel(projection_dir / "pixel area sums.xlsx")
+
+    results_path = tmp_path / "batch_results"
+    result = batch_collect(
+        project_root=tmp_path,
+        subject_ids=("ID001",),
+        tag_folder_levels=[("TP",), ("registered",)],
+        results_folder_name="motility_analysis",
+        organize_by_image=True,
+        RESULTS_Path=results_path,
+        table_export_formats=("excel", "csv", "yaml"),
+        verbose=False)
+
+    assert result.discovered[0].image_path == image_path
+    assert len(result.collected) == 1
+    assert (results_path / "all_motility.xlsx").exists()
+    assert (results_path / "all_brightness.xlsx").exists()
+    assert (results_path / "all_pixel_areas.xlsx").exists()
+    assert (results_path / "average_motility.xlsx").exists()
+    collected_df = pd.read_excel(results_path / "all_motility.xlsx")
+    assert collected_df["source image"].iloc[0] == "ID001/TP000/registered/image_01.tif"
+    assert collected_df["projection center"].iloc[0] == "projection_center_5"

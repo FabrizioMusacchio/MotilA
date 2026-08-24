@@ -92,65 +92,72 @@ datasets with significant drift or misalignment.
 Project folder structure for batch processing
 ---------------------------------------------
 
-The batch processing functions of MotilA expect a structured project folder
-layout as follows:
+MotilA v1.2.0 uses a flexible BIDS-like folder discovery for batch processing.
+The project root should contain subject folders. Below each subject, users can
+define one or more folder-tag levels that match their project structure.
 
 .. code-block::
 
-   PROJECT_Path
-   │
-   └───ID1
-   │   └───project_tag
-   │       └───reg_tif_file_folder
-   │           └───reg_tif_file_tag
-   │       └───RESULTS_foldername
-   │       └───metadata_file
-   │
-   └───ID2
-   │   └───project_tag
-   │       └───reg_tif_file_folder
-   │           └───reg_tif_file_tag
-   │       └───RESULTS_foldername
-   │       └───metadata_file
-   │
-   └───ID3
-   │   └───project_tag ...
+   project_root
+   ├── ID000001
+   │   ├── TP000
+   │   │   ├── image_01.tif
+   │   │   └── image_02.ome.tif
+   │   ├── TP001
+   │   │   └── registered
+   │   │       └── image_03.czi
+   │   └── DC000_FOV01
+   │       └── TL_000
+   │           └── image_04.raw
+   └── ID000002
+       └── TP000
+           └── image_01.lsm
 
 Here:
 
-* ``PROJECT_Path``  
+* ``project_root``
   Base project folder.
 
-* ``ID1``, ``ID2``, …  
-  Animal or sample identifiers.
+* Subject folders
+  Animal or sample identifiers. If ``subject_ids`` is provided, only those
+  exact folders are processed. If ``subject_ids=None``, MotilA processes
+  folders whose names start with ``subject_prefix``.
 
-* ``project_tag``  
-  Project-specific subfolder (for example imaging session, condition or
-  time point). All folders in an ID folder whose name contains this tag
-  can be processed.
+* ``tag_folder_levels``
+  A list of folder-token levels below each subject. Each level may contain one
+  or multiple strings that are matched by containment. For example,
+  ``[("DC000_FOV", "DA000_FOV"), ("TL_000",)]`` matches either
+  ``DC000_FOV*`` or ``DA000_FOV*`` folders, then ``TL_000*`` folders below
+  them. Empty levels, ``None``, ``()`` and ``[]`` are skipped.
 
-* ``reg_tif_file_folder``  
-  Folder within the ``project_tag`` directory that contains the registered
-  image files.
+* ``image_patterns``
+  Glob pattern(s) used in the final matched folder. ``None`` uses MotilA's
+  default image patterns for TIFF/OME-TIFF, CZI, LSM and RAW files. Explicit
+  patterns such as ``("*reg*.tif", "*reg*.ome.tif")`` restrict processing.
 
-* ``reg_tif_file_tag``  
-  Substring used to identify the image file(s) to process within
-  ``reg_tif_file_folder``. MotilA searches across the supported OMIO image
-  extensions; if multiple files contain this tag, the folder is skipped.
+* ``exclude_name_contains``
+  Excludes files and tag folders whose names contain one of the provided
+  strings, for example previews or auxiliary microscope outputs.
 
-* ``RESULTS_foldername``  
-  Folder name where MotilA will save the results for each project. It can
-  be placed inside or relative to the ``project_tag`` folder (for example
-  ``../motility_analysis/``).
+* ``results_folder_name``
+  Folder name where MotilA writes per-image processing results. With
+  ``organize_by_image=True``, results are stored as
+  ``<scope>/<results_folder_name>/<image_stem>/projection_center_<n>/``.
 
 * ``metadata_file``  
-  Name of the Excel metadata file (for example ``metadata.xls``) in the
-  ``project_tag`` folder.
+  Optional Excel metadata file in the output-scope folder or image folder.
+  It can override selected processing options such as channel indices,
+  spectral unmixing and projection centers.
 
 The folder hierarchy follows a structured, `BIDS-inspired format <https://bids-specification.readthedocs.io>`_.
 It is not fully BIDS-compliant but provides a consistent organisation by
 subject ID and project-specific subfolders, which facilitates batch processing
 and metadata association.
+
+The batch processor never treats an already processed file as a failure when
+``skip_processed=True``. Instead, it records the file as already processed in
+``motila_batch_run_report.txt``. Processing errors are captured per file and do
+not stop the full batch unless ``continue_on_error=False`` is requested.
 
 
 Metadata file (metadata.xls – for batch processing only)
