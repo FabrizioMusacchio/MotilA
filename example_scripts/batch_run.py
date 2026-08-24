@@ -95,21 +95,21 @@ log.log(f"Project root: {PROJECT_ROOT}")
 log.log(f"Subject IDs: {subject_ids}")
 
 result = mt.batch_process_stacks(
-    project_root=PROJECT_ROOT,
-    subject_ids=subject_ids,
-    subject_prefix=subject_prefix,
-    tag_folder_levels=tag_folder_levels,
-    image_patterns=image_patterns,
-    exclude_name_contains=exclude_name_contains,
-    skip_processed=True,
-    results_folder_name="motility_analysis",
-    organize_by_image=True,
-    metadata_file="metadata.xls",
-    load_options=load_options,
-    processing_options={**processing_options, "log": log},
-    save_options=save_options,
-    log=log,
-    verbose=True)
+    project_root        = PROJECT_ROOT,
+    subject_ids         = subject_ids,
+    subject_prefix      = subject_prefix,
+    tag_folder_levels   = tag_folder_levels,
+    image_patterns      = image_patterns,
+    exclude_name_contains= exclude_name_contains,
+    skip_processed      = True,
+    results_folder_name = "motility_analysis",
+    organize_by_image   = True,
+    metadata_file       = "metadata.xls",
+    load_options        = load_options,
+    processing_options  = {**processing_options, "log": log},
+    save_options        = save_options,
+    log                 = log,
+    verbose             = True)
 
 print(f"Processed: {len(result.processed)}")
 print(f"Skipped:   {len(result.skipped)}")
@@ -120,20 +120,19 @@ print(f"Error report: {result.error_report_path}")
 RESULTS_PATH = Path("../example_project/Analysis/MG_motility/")
 
 collection_result = mt.batch_collect(
-    project_root=PROJECT_ROOT,
-    subject_ids=subject_ids,
-    subject_prefix=subject_prefix,
-    tag_folder_levels=tag_folder_levels,
-    image_patterns=image_patterns,
-    exclude_name_contains=exclude_name_contains,
-    results_folder_name="motility_analysis",
-    organize_by_image=True,
-    RESULTS_Path=RESULTS_PATH,
-    table_export_formats=("excel",),
-    log=log,
-    verbose=True)
+    project_root            = PROJECT_ROOT,
+    subject_ids             = subject_ids,
+    subject_prefix          = subject_prefix,
+    tag_folder_levels       = tag_folder_levels,
+    image_patterns          = image_patterns,
+    exclude_name_contains   = exclude_name_contains,
+    results_folder_name     = "motility_analysis",
+    organize_by_image       = True,
+    RESULTS_Path            = RESULTS_PATH,
+    table_export_formats    = ("excel",),
+    log                     = log,
+    verbose                 = True)
 
 print(f"Collected result folders: {len(collection_result.collected)}")
 print(f"Skipped during collection: {len(collection_result.skipped)}")
-
 # %% END
