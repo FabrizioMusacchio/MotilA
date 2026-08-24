@@ -1,0 +1,32 @@
+motila_batch_run_report_version: 1
+project_root: ../example_project/Data
+last_updated: 2026-08-24_11-59-51
+files:
+  ID240103_P17_1/TP000/registered/all stacks 4D reg.tif:
+    subject_id: ID240103_P17_1
+    tag_folders:
+    - TP000
+    - registered
+    input_path: ID240103_P17_1/TP000/registered/all stacks 4D reg.tif
+    runs:
+    - timestamp: 2026-08-24_11-59-51
+      status: already_processed
+      output_dir: ID240103_P17_1/TP000/motility_analysis/all_stacks_4D_reg/projection_center_28
+      projection_center: 28
+      reason: 'MotilA output already exists: ../example_project/Data/ID240103_P17_1/TP000/motility_analysis/all_stacks_4D_reg/projection_center_28'
+    latest_output_dir: ID240103_P17_1/TP000/motility_analysis/all_stacks_4D_reg/projection_center_28
+    latest_status: already_processed
+  ID240321_P17_3/TP000/registered/all stacks 4D reg.tif:
+    subject_id: ID240321_P17_3
+    tag_folders:
+    - TP000
+    - registered
+    input_path: ID240321_P17_3/TP000/registered/all stacks 4D reg.tif
+    runs:
+    - timestamp: 2026-08-24_11-59-51
+      status: already_processed
+      output_dir: ID240321_P17_3/TP000/motility_analysis/all_stacks_4D_reg/projection_center_28
+      projection_center: 28
+      reason: 'MotilA output already exists: ../example_project/Data/ID240321_P17_3/TP000/motility_analysis/all_stacks_4D_reg/projection_center_28'
+    latest_output_dir: ID240321_P17_3/TP000/motility_analysis/all_stacks_4D_reg/projection_center_28
+    latest_status: already_processed

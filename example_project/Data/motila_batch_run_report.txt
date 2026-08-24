@@ -1,0 +1,18 @@
+MotilA batch run report
+Project root: ../example_project/Data
+Last updated: 2026-08-24_11-59-51
+
+├─ ID240103_P17_1/
+│  └─ TP000/
+│     └─ registered/
+│        └─ all stacks 4D reg.tif [PROCESSED]
+│           output: ID240103_P17_1/TP000/motility_analysis/all_stacks_4D_reg/projection_center_28
+│           runs:
+│             - 2026-08-24_11-59-51 | skipped/already processed
+└─ ID240321_P17_3/
+   └─ TP000/
+      └─ registered/
+         └─ all stacks 4D reg.tif [PROCESSED]
+            output: ID240321_P17_3/TP000/motility_analysis/all_stacks_4D_reg/projection_center_28
+            runs:
+              - 2026-08-24_11-59-51 | skipped/already processed
