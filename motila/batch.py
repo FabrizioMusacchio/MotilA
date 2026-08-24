@@ -486,6 +486,7 @@ def _load_run_report(path: Path, project_root: Path) -> dict[str, Any]:
 def _write_run_report_yaml(path: Path, payload: dict[str, Any]) -> None:
     """Write the machine-readable run report."""
 
+    payload = _normalize_report_value(payload)
     try:
         import yaml
 
@@ -497,6 +498,24 @@ def _write_run_report_yaml(path: Path, payload: dict[str, Any]) -> None:
     except Exception:
         text = json.dumps(payload, indent=2, ensure_ascii=False)
     path.write_text(text, encoding="utf-8")
+
+
+def _normalize_report_value(value: Any):
+    """Convert NumPy, pandas and Path values to YAML/JSON-safe Python values."""
+
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, np.ndarray):
+        return [_normalize_report_value(item) for item in value.tolist()]
+    if isinstance(value, dict):
+        return {str(key): _normalize_report_value(val) for key, val in value.items()}
+    if isinstance(value, (list, tuple, set)):
+        return [_normalize_report_value(item) for item in value]
+    if pd.isna(value):
+        return None
+    return value
 
 
 def _run_status_label(run: dict[str, Any]) -> str:

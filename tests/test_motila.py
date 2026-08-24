@@ -2209,7 +2209,7 @@ def test_bids_batch_run_report_is_updated(tmp_path):
         tmp_path,
         subject_ids=("ID001",),
         tag_folder_levels=[("TP",)],
-        processing_options={"projection_center": 5, "MG_channel": 2},
+        processing_options={"projection_center": np.int64(5), "MG_channel": np.int64(2)},
         process_function=_batch_fake_process_stack,
         verbose=False)
     second = batch_process_stacks(
@@ -2225,6 +2225,11 @@ def test_bids_batch_run_report_is_updated(tmp_path):
     assert "image_01.tif [PROCESSED]" in report_text
     assert "processed | MotilA process_stack | c=2" in report_text
     assert "skipped/already processed" in second.report_path.read_text(encoding="utf-8")
+    with open(first.run_report_yaml_path, encoding="utf-8") as yaml_file:
+        run_report = yaml.safe_load(yaml_file)
+    run_entry = run_report["files"]["ID001/TP000/image_01.tif"]["runs"][0]
+    assert run_entry["projection_center"] == 5
+    assert run_entry["microglia_channel"] == 2
 
 def test_bids_batch_error_report_creation(tmp_path):
     image_path = _batch_touch_image(tmp_path / "ID001" / "TP000" / "image_01.tif")
