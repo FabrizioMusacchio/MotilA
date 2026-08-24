@@ -1,6 +1,12 @@
 """ MotilA example script for batch-processing
 ===============================================
 
+                              !! DEPRECATED !! 
+THE BATCH PROCESSING FUNCTION DESCRIBED IN THIS SCRIPT IS DEPRECATED 
+AND WILL BE REMOVED IN A FUTURE RELEASE. PLEASE USE THE NEW 
+`batch_process_stacks` AND `batch_collect` FUNCTIONS INSTEAD FROM
+MOTILA v1.2.0 ONWARDS. SEE THE MOTILA CHANGELOG FOR DETAILS.
+
 This script demonstrates how to use the **MotilA** pipeline for batch-processing multiple 
 4D/5D image stacks of microglia motility across multiple experimental conditions.
 
