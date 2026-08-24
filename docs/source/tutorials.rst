@@ -576,16 +576,16 @@ Batch processing generates cohort-level summary files:
 These files can be used to compare experimental groups, quantify effects of
 manipulations and create summary plots for publication.
 
-Summary
--------
+.. Summary
+.. -------
 
-MotilA provides a complete set of resources for learning and validating the
-pipeline:
+.. MotilA provides a complete set of resources for learning and validating the
+.. pipeline:
 
-* a publicly available Zenodo dataset,
-* Jupyter notebooks for interactive exploration,
-* Python scripts for automated workflows, and
-* a dedicated dataset and script for reproducing manuscript figures.
+.. * a publicly available Zenodo dataset,
+.. * Jupyter notebooks for interactive exploration,
+.. * Python scripts for automated workflows, and
+.. * a dedicated dataset and script for reproducing manuscript figures.
 
-Together, these materials offer a reproducible and practical starting point for
-using MotilA on real multiphoton imaging data.
+.. Together, these materials offer a reproducible and practical starting point for
+.. using MotilA on real multiphoton imaging data.
