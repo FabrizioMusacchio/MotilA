@@ -9,6 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import os
 from motila.motila import (
+    get_motila_version,
     hello_world,
     calc_projection_range,
     plot_2D_image,
@@ -65,7 +66,9 @@ import yaml
 def test_hello_world(capsys):
     hello_world()
     captured = capsys.readouterr()
-    assert "Hello, World! Welcome to MotilA!" in captured.out
+    assert (
+        f"Hello, World! Welcome to MotilA. You are using version {get_motila_version()}."
+        in captured.out)
 
 
 # calc_projection_range:

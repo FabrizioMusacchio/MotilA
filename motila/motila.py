@@ -26,7 +26,7 @@ from .batch import (
     batch_process_stacks,
     batch_process_stacks_old,
     discover_bids_like_batch_images)
-from .core import hello_world
+from .core import get_motila_version, hello_world
 from .export import (
     DEFAULT_TABLE_EXPORT_FORMATS,
     _normalize_table_export_formats,
@@ -107,6 +107,7 @@ __all__ = [
     "extract_subvolume",
     "gaussian_blurr_filtering_on_projections",
     "get_stack_dimensions",
+    "get_motila_version",
     "hello_world",
     "histogram_equalization",
     "histogram_equalization_on_projections",

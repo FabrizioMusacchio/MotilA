@@ -1,4 +1,5 @@
 from .motila import (
+    get_motila_version,
     hello_world,
     read_image_stack,
     write_image_stack,
@@ -20,6 +21,7 @@ from .utils import (
 
 __all__ = [
     "hello_world",
+    "get_motila_version",
     "read_image_stack",
     "write_image_stack",
     "process_stack",
